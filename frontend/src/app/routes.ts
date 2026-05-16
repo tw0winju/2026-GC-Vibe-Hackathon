@@ -16,6 +16,7 @@ export const ROUTES = {
   mypageEdit: "/mypage/edit",
   community: "/community",
   guide: "/guide",
+  guideDetail: "/guide/:slug",
   terms: "/terms",
   privacy: "/privacy",
 } as const;
