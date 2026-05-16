@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import swaggerUi from "swagger-ui-express";
 import { generateOpenApiDocument } from "./config/openapi.js";
 import authRouter from "./routes/auth.route.js";
+import oauthRouter, { oauthCallbackRouter } from "./routes/oauth.route.js";
 import projectPostRouter from "./routes/projectPost.route.js";
 import userRouter from "./routes/user.route.js";
 import {
@@ -32,6 +33,18 @@ app.get("/health", (_req, res) => {
 });
 
 // ── 라우터 등록 (Swagger보다 먼저) ────────────────────────
+
+// OAuth 브라우저 리다이렉트 방식 (프론트가 사용)
+// GET /oauth2/authorization/kakao → 카카오 인증 페이지로 redirect
+// GET /oauth2/authorization/google → 구글 인증 페이지로 redirect
+app.use("/oauth2", oauthRouter);
+
+// 카카오/구글이 인증 후 callback할 URL
+// GET /login/oauth2/code/kakao?code=...
+// GET /login/oauth2/code/google?code=...
+app.use("/login/oauth2/code", oauthCallbackRouter);
+
+// 기존 Auth API (POST 방식, 테스트/모바일 앱용)
 app.use("/api/auth", authRouter);
 app.use("/auth", authRouter);
 
@@ -70,4 +83,6 @@ app.use(errorHandler);
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
   console.log(`📚 API docs: http://localhost:${PORT}/api-docs`);
+  console.log(`🔐 Kakao Login: http://localhost:${PORT}/oauth2/authorization/kakao`);
+  console.log(`🔐 Google Login: http://localhost:${PORT}/oauth2/authorization/google`);
 });

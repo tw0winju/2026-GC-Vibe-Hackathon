@@ -29,6 +29,12 @@ const envSchema = z.object({
   GOOGLE_CLIENT_ID: z.string().min(1),
   GOOGLE_CLIENT_SECRET: z.string().min(1),
   GOOGLE_REDIRECT_URI: z.string().url(),
+
+  // OAuth 성공 후 프론트엔드로 토큰을 전달할 URL
+  // 예: http://localhost:5173/auth/callback
+  FRONTEND_CALLBACK_URL: z.string().url(),
+
+  // Storage
   SUPABASE_BUCKET_RESUME: z.string().default("resume-files"),
   SUPABASE_BUCKET_THUMBNAIL: z.string().default("thumbnails"),
   MAX_FILE_SIZE_PDF: z.coerce.number().default(10 * 1024 * 1024),
