@@ -12,7 +12,7 @@ function GuideIndexPage() {
       <main className="guide-page">
         <section className="guide-index-hero">
           <p>Resume Guide</p>
-          <h1>직무별 이력서 작성 가이드</h1>
+          <h1>직무별 포트폴리오 작성 가이드</h1>
           <span>지원 분야에 맞춰 강조해야 할 경험, 키워드, 프로젝트 설명 방식을 확인해보세요.</span>
         </section>
 

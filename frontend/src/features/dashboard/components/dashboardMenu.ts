@@ -1,6 +1,7 @@
 import {
   Heart,
   Home,
+  MessageSquareText,
   Pencil,
   Settings,
   ThumbsUp,
@@ -15,6 +16,7 @@ export const dashboardMenuGroups = [
     { label: "내가 작성한 글", icon: ThumbsUp, to: ROUTES.myActivity },
     { label: "작성한 피드백", icon: Pencil, to: ROUTES.writtenFeedbacks },
     { label: "좋아요", icon: Heart, to: ROUTES.likedPosts },
+    { label: "내 커뮤니티", icon: MessageSquareText, to: ROUTES.myCommunity },
   ],
   [
     { label: "내 프로필", icon: UserRound, to: ROUTES.mypageEdit },

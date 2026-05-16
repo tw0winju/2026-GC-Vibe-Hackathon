@@ -1,10 +1,14 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import SignupPage from "../features/auth/components/SignupPage";
+import CommunityDetailPage from "../features/community/components/CommunityDetailPage";
+import CommunityPage from "../features/community/components/CommunityPage";
+import CommunityWritePage from "../features/community/components/CommunityWritePage";
 import AccountSettingsPage from "../features/dashboard/components/AccountSettingsPage";
 import DashboardPage from "../features/dashboard/components/DashboardPage";
 import LikedPostsPage from "../features/dashboard/components/LikedPostsPage";
 import MyActivityPage from "../features/dashboard/components/MyActivityPage";
+import MyCommunityPage from "../features/dashboard/components/MyCommunityPage";
 import MyProjectsPage from "../features/dashboard/components/MyProjectsPage";
 import MyResumesPage from "../features/dashboard/components/MyResumesPage";
 import ProfileEditPage from "../features/dashboard/components/ProfileEditPage";
@@ -51,6 +55,10 @@ function AppRouter() {
       <Route path={ROUTES.projectFeedbackWrite} element={<ProjectFeedbackWritePage />} />
       <Route path={ROUTES.projectFeedbackDetail} element={<ProjectFeedbackDetailPage />} />
       <Route path={ROUTES.projectFeedbackEdit} element={<ProjectFeedbackEditPage />} />
+      <Route path={ROUTES.community} element={<CommunityPage />} />
+      <Route path={ROUTES.communityWrite} element={<CommunityWritePage />} />
+      <Route path={ROUTES.communityDetail} element={<CommunityDetailPage />} />
+      <Route path={ROUTES.communityEdit} element={<CommunityWritePage mode="edit" />} />
       <Route path={ROUTES.mypage} element={<DashboardPage />} />
       <Route path={ROUTES.mypageEdit} element={<ProfileEditPage />} />
       <Route path={ROUTES.myActivity} element={<MyActivityPage />} />
@@ -58,6 +66,7 @@ function AppRouter() {
       <Route path={ROUTES.likedPosts} element={<LikedPostsPage />} />
       <Route path={ROUTES.myProjects} element={<MyProjectsPage />} />
       <Route path={ROUTES.myResumes} element={<MyResumesPage />} />
+      <Route path={ROUTES.myCommunity} element={<MyCommunityPage />} />
       <Route path={ROUTES.accountSettings} element={<AccountSettingsPage />} />
       <Route path={ROUTES.notificationSettings} element={<Navigate to={ROUTES.accountSettings} replace />} />
       <Route path={ROUTES.guide} element={<GuideIndexPage />} />

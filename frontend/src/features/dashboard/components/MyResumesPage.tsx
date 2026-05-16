@@ -12,22 +12,23 @@ function MyResumesPage() {
       setItems(response.posts.map((post) => ({
         id: post.post_id,
         href: `/resume-feedbacks/${post.post_id}`,
-        category: "이력서",
+        category: "포트폴리오",
         title: post.title,
         description: post.description,
-        author: post.user.nickname,
+        author: post.user?.nickname ?? "나",
         date: formatDate(post.created_at),
+        comments: post.comments ?? 0,
         likes: post.likes,
-        tags: [post.position],
+        tags: post.position ? [post.position] : [],
       })));
     });
   }, []);
 
   return (
     <DashboardSectionPage
-      title="내 이력서"
-      description="등록한 이력서와 피드백 요청 내역을 확인할 수 있어요."
-      filters={["전체", "이력서"]}
+      title="내 포트폴리오"
+      description="등록한 포트폴리오와 피드백 요청 내역을 확인할 수 있어요."
+      filters={["전체", "포트폴리오"]}
       summaries={[]}
       items={items}
       sideTitle=""

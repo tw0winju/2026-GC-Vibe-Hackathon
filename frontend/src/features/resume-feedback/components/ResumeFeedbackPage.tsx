@@ -69,7 +69,7 @@ function ResumeFeedbackPage() {
         if (!mounted) return;
         setPosts([]);
         setTotal(0);
-        setErrorMessage(error instanceof Error ? error.message : "이력서 목록을 불러오지 못했습니다.");
+        setErrorMessage(error instanceof Error ? error.message : "포트폴리오 목록을 불러오지 못했습니다.");
       })
       .finally(() => {
         if (mounted) setIsLoading(false);
@@ -106,8 +106,8 @@ function ResumeFeedbackPage() {
   return (
     <AppLayout>
       <div className="resume-feedback-page">
-        <aside className="resume-sidebar" aria-label="이력서 피드백 메뉴">
-          <h2>이력서 피드백</h2>
+        <aside className="resume-sidebar" aria-label="포트폴리오 피드백 메뉴">
+          <h2>포트폴리오 피드백</h2>
           <Link className="resume-sidebar__write" to={ROUTES.resumeFeedbackWrite}>
             <Edit3 size={18} strokeWidth={2.2} />
             글 작성하기
@@ -136,8 +136,8 @@ function ResumeFeedbackPage() {
         <section className="resume-content">
           <div className="resume-content__heading">
             <div>
-              <h1>이력서 피드백</h1>
-              <p>전공, 직무, 경력에 맞는 피드백을 받고 더 나은 이력서를 완성해보세요.</p>
+              <h1>포트폴리오 피드백</h1>
+              <p>전공, 직무, 경력에 맞는 피드백을 받고 더 나은 포트폴리오를 완성해보세요.</p>
             </div>
           </div>
 
@@ -179,13 +179,13 @@ function ResumeFeedbackPage() {
           <Link className="resume-guide-banner" to={ROUTES.guide}>
             <Sparkles size={20} strokeWidth={2.3} />
             <div>
-              <strong>이력서 피드백 게시판 이용 가이드</strong>
+              <strong>포트폴리오 피드백 게시판 이용 가이드</strong>
               <span>피드백을 요청할 때 더 정확하고 유용한 피드백을 받을 수 있는 방법을 확인해보세요!</span>
             </div>
             <ChevronRight size={22} strokeWidth={2.1} />
           </Link>
 
-          <div className="resume-table" role="table" aria-label="이력서 피드백 게시글">
+          <div className="resume-table" role="table" aria-label="포트폴리오 피드백 게시글">
             <div className="resume-table__head" role="row">
               <span>제목</span>
               <span>직무</span>
@@ -275,7 +275,7 @@ function ResumeFeedbackPage() {
                   to={getResumeGuidePath(getResumeGuideByCategory(category)?.slug ?? "")}
                 >
                   <span>{category}</span>
-                  이력서 작성 가이드
+                  포트폴리오 작성 가이드
                   <ChevronRight size={17} />
                 </Link>
               ))}
@@ -283,7 +283,7 @@ function ResumeFeedbackPage() {
           </section>
 
           <section className="resume-side-card">
-            <h2>이력서 작성 팁</h2>
+            <h2>포트폴리오 작성 팁</h2>
             <div className="tip-list">
               {resumeTips.map(({ icon, title, description }) => {
                 const Icon = contentIconByKey[icon];

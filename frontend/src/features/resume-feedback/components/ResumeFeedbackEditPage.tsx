@@ -4,6 +4,7 @@ import { Navigate, useNavigate, useParams } from "react-router-dom";
 
 import { ROUTES } from "../../../app/routes";
 import AppLayout from "../../../components/layout/AppLayout";
+import { isCurrentUser } from "../../../lib/auth/session";
 import {
   getResumePost,
   getUploadUrl,
@@ -30,6 +31,7 @@ function ResumeFeedbackEditPage() {
   const [file, setFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [canEdit, setCanEdit] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
 
   const canSubmit = Boolean(title.trim() && position && description.trim() && (file || filePath));
@@ -45,6 +47,13 @@ function ResumeFeedbackEditPage() {
     getResumePost(postId)
       .then((post) => {
         if (!mounted) return;
+        const postOwnerId = post.user?.id ?? post.user?.user_id;
+        if (!isCurrentUser(postOwnerId)) {
+          setCanEdit(false);
+          setErrorMessage("본인이 작성한 글만 수정할 수 있습니다.");
+          return;
+        }
+
         setTitle(post.title);
         setPosition(post.position);
         setDescription(post.description);
@@ -70,7 +79,7 @@ function ResumeFeedbackEditPage() {
     const selectedFile = event.target.files?.[0];
     if (!selectedFile) return;
     if (selectedFile.type !== "application/pdf") {
-      setErrorMessage("백엔드 명세상 이력서 업로드는 PDF만 지원합니다.");
+      setErrorMessage("백엔드 명세상 포트폴리오 업로드는 PDF만 지원합니다.");
       return;
     }
     setFile(selectedFile);
@@ -105,7 +114,7 @@ function ResumeFeedbackEditPage() {
       });
       navigate(`/resume-feedbacks/${postId}`);
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : "이력서 피드백 글 수정에 실패했습니다.");
+      setErrorMessage(error instanceof Error ? error.message : "포트폴리오 피드백 글 수정에 실패했습니다.");
     } finally {
       setIsSubmitting(false);
     }
@@ -116,12 +125,14 @@ function ResumeFeedbackEditPage() {
       <div className="resume-write-page resume-write-page--edit">
         <main className="resume-write-content">
           <div className="resume-write-heading">
-            <h1>이력서 피드백 글 수정</h1>
+            <h1>포트폴리오 피드백 글 수정</h1>
             <p>기존 내용을 확인하고 필요한 부분만 수정하세요.</p>
           </div>
 
           {isLoading ? (
             <article className="resume-write-form">불러오는 중입니다.</article>
+          ) : !canEdit ? (
+            <article className="resume-write-form">{errorMessage}</article>
           ) : (
             <form className="resume-write-form" onSubmit={handleSubmit}>
               <section className="resume-form-section">
@@ -156,7 +167,7 @@ function ResumeFeedbackEditPage() {
               </section>
 
               <section className="resume-form-section">
-                <label htmlFor="resume-file">3. 이력서 첨부</label>
+                <label htmlFor="resume-file">3. 포트폴리오 첨부</label>
                 <p>{file ? "새 파일로 교체됩니다." : "새 파일을 선택하지 않으면 기존 첨부 파일을 유지합니다."}</p>
                 <label className="resume-file-dropzone" htmlFor="resume-file">
                   <Upload size={30} strokeWidth={2.1} />

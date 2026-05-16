@@ -2,7 +2,7 @@ export const resumeSidebarGuides = [
   {
     icon: "message",
     title: "피드백 요청 전에",
-    items: ["지원 직무를 명확히 적기", "궁금한 지점을 2~3개로 좁히기", "이력서 파일 최신본 첨부하기"],
+    items: ["지원 직무를 명확히 적기", "궁금한 지점을 2~3개로 좁히기", "포트폴리오 파일 최신본 첨부하기"],
   },
   {
     icon: "lightbulb",
@@ -29,8 +29,8 @@ export const resumeTips = [
   },
   {
     icon: "search",
-    title: "맞춤형 이력서를 작성하세요",
-    description: "지원하는 회사와 직무에 맞춰 이력서를 최적화해보세요.",
+    title: "맞춤형 포트폴리오를 작성하세요",
+    description: "지원하는 회사와 직무에 맞춰 포트폴리오를 최적화해보세요.",
   },
 ] as const;
 

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { getMyPosts } from "../../../lib/api/devfeedback";
 import type { DashboardSectionItem } from "./DashboardSectionPage";
 import DashboardSectionPage from "./DashboardSectionPage";
+import { getPostDetailPath, getPostTags, getPostTypeLabel } from "./dashboardPostUtils";
 
 function MyActivityPage() {
   const [items, setItems] = useState<DashboardSectionItem[]>([]);
@@ -11,14 +12,15 @@ function MyActivityPage() {
     getMyPosts({ page: 1, size: 50 }).then((response) => {
       setItems(response.posts.map((post) => ({
         id: post.post_id,
-        href: post.type === "project" ? `/project-feedbacks/${post.post_id}` : `/resume-feedbacks/${post.post_id}`,
-        category: post.type === "project" ? "프로젝트" : "이력서",
+        href: getPostDetailPath(post.type, post.post_id),
+        category: getPostTypeLabel(post.type),
         title: post.title,
         description: post.description,
-        author: post.user.nickname,
+        author: post.user?.nickname ?? "나",
         date: formatDate(post.created_at),
+        comments: post.comments ?? 0,
         likes: post.likes,
-        tags: [post.position],
+        tags: getPostTags(post),
       })));
     });
   }, []);
@@ -27,7 +29,7 @@ function MyActivityPage() {
     <DashboardSectionPage
       title="내가 작성한 글"
       description="내가 직접 작성한 게시글만 모아서 확인하세요."
-      filters={["전체", "이력서", "프로젝트"]}
+      filters={["전체", "포트폴리오", "프로젝트", "커뮤니티"]}
       summaries={[]}
       items={items}
       sideTitle=""

@@ -14,6 +14,7 @@ export const ProfileCountsSchema = z
   .object({
     resume_post: z.number().int(),
     project_post: z.number().int(),
+    community_post: z.number().int(),
     like: z.number().int(),
     comment: z.number().int(),
   })
@@ -64,7 +65,7 @@ export const PaginationQuerySchema = z.object({
 });
 
 export const UserListQuerySchema = PaginationQuerySchema.extend({
-  post_type: z.enum(['resume', 'project']).optional(),
+  post_type: z.enum(['resume', 'project', 'community']).optional(),
 });
 
 // ── 응답 스키마 (DB 컬럼명 likes에 맞춤) ──────────────────
@@ -75,8 +76,10 @@ export const UserPostItemSchema = z
     description: z.string(),
     thumbnail: z.string().nullable(),
     likes: z.number().int(),
+    comments: z.number().int(),
     position: z.enum(POSITIONS).nullable(),
-    type: z.enum(['resume', 'project']),
+    category: z.string().nullable(),
+    type: z.enum(['resume', 'project', 'community']),
     user: z
       .object({ user_id: z.number().int(), nickname: z.string() })
       .nullable(),
@@ -98,7 +101,8 @@ export const UserCommentItemSchema = z
     content: z.string(),
     post_id: z.number().int(),
     post_title: z.string(),
-    post_type: z.enum(['resume', 'project']),
+    post_type: z.enum(['resume', 'project', 'community']),
+    comments: z.number().int(),
     created_at: z.string(),
   })
   .openapi('UserCommentItem');

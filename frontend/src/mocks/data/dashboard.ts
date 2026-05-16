@@ -98,8 +98,8 @@ export const dashboardLikedPosts: DashboardLikedPost[] = [
 export const dashboardActivityItems: DashboardSectionItem[] = [
   {
     id: 1,
-    category: "이력서",
-    title: "백엔드 개발자 이력서 피드백 요청",
+    category: "포트폴리오",
+    title: "백엔드 개발자 포트폴리오 피드백 요청",
     description: "기술 스택과 프로젝트 경험을 중심으로 피드백을 받고 싶습니다.",
     author: "김개발",
     date: "1일 전",
@@ -120,8 +120,8 @@ export const dashboardActivityItems: DashboardSectionItem[] = [
   },
   {
     id: 3,
-    category: "이력서",
-    title: "데이터 분석가 이력서 피드백 부탁드립니다",
+    category: "포트폴리오",
+    title: "데이터 분석가 포트폴리오 피드백 부탁드립니다",
     description: "분석 프로젝트 경험을 어떤 순서로 정리하면 좋을지 피드백 받고 싶습니다.",
     author: "김개발",
     date: "5일 전",
@@ -133,22 +133,22 @@ export const dashboardActivityItems: DashboardSectionItem[] = [
 
 export const dashboardLikedSummaries: DashboardSectionSummary[] = [
   { label: "좋아요 글", value: 34 },
-  { label: "이력서 글", value: 19 },
+  { label: "포트폴리오 글", value: 19 },
   { label: "프로젝트 글", value: 15 },
 ];
 
 export const dashboardLikedItems: DashboardSectionItem[] = [
   {
     id: 1,
-    category: "이력서",
-    title: "신입 개발자 이력서 작성 가이드",
+    category: "포트폴리오",
+    title: "신입 개발자 포트폴리오 작성 가이드",
     description: "프로젝트 경험과 기술 스택을 어떻게 연결하면 좋은지 예시가 잘 정리되어 있어요.",
     author: "커리어코치",
     date: "2일 전",
     comments: 24,
     likes: 128,
     status: "저장됨",
-    tags: ["신입", "이력서"],
+    tags: ["신입", "포트폴리오"],
   },
   {
     id: 2,
@@ -164,7 +164,7 @@ export const dashboardLikedItems: DashboardSectionItem[] = [
   },
   {
     id: 3,
-    category: "이력서",
+    category: "포트폴리오",
     title: "프론트엔드 포트폴리오 구성 피드백 요청합니다",
     description: "화면 캡처보다 문제 해결 과정을 강조하는 구성이 인상적이에요.",
     author: "프론트엔드 개발자",
@@ -181,8 +181,8 @@ export const dashboardWrittenFeedbackHero = { label: "작성한 피드백", valu
 export const dashboardWrittenFeedbackItems: DashboardSectionItem[] = [
   {
     id: 1,
-    category: "이력서",
-    title: "데이터 분석가 이력서 피드백",
+    category: "포트폴리오",
+    title: "데이터 분석가 포트폴리오 피드백",
     description: "분석 프로젝트의 문제 정의, 사용 데이터, 결과 지표를 같은 흐름으로 묶어보면 좋겠습니다.",
     author: "데이터꿈나무",
     date: "오늘",
@@ -205,7 +205,7 @@ export const dashboardWrittenFeedbackItems: DashboardSectionItem[] = [
   },
   {
     id: 3,
-    category: "이력서",
+    category: "포트폴리오",
     title: "프론트엔드 포트폴리오 구성",
     description: "역할, 문제, 해결, 결과 순서로 카드 내용을 정리하면 읽는 사람이 빠르게 이해할 수 있어요.",
     author: "프론트엔드리",

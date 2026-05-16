@@ -4,6 +4,7 @@ import { Navigate, useNavigate, useParams } from "react-router-dom";
 
 import { ROUTES } from "../../../app/routes";
 import AppLayout from "../../../components/layout/AppLayout";
+import { isCurrentUser } from "../../../lib/auth/session";
 import {
   getProjectPost,
   getUploadUrl,
@@ -46,6 +47,7 @@ function ProjectFeedbackEditPage() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [canEdit, setCanEdit] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
 
   const canSubmit = Boolean(title.trim() && position && intro.trim() && features.trim() && stacks.length > 0);
@@ -62,6 +64,13 @@ function ProjectFeedbackEditPage() {
     getProjectPost(postId)
       .then((post) => {
         if (!mounted) return;
+        const postOwnerId = post.user?.id ?? post.user?.user_id;
+        if (!isCurrentUser(postOwnerId)) {
+          setCanEdit(false);
+          setErrorMessage("본인이 작성한 글만 수정할 수 있습니다.");
+          return;
+        }
+
         const parsedDescription = splitProjectDescription(post.description);
         setTitle(post.title);
         setPosition(post.position);
@@ -165,6 +174,8 @@ function ProjectFeedbackEditPage() {
 
           {isLoading ? (
             <article className="project-write-form">불러오는 중입니다.</article>
+          ) : !canEdit ? (
+            <article className="project-write-form">{errorMessage}</article>
           ) : (
             <form className="project-write-form" onSubmit={handleSubmit}>
               <section className="project-form-section">

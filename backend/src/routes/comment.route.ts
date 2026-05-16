@@ -116,6 +116,56 @@ projectCommentRouter.post(
   commentController.createProjectComment,
 );
 
+// ── 커뮤니티 댓글 라우터 (/community-posts/:post_id/comments) ─
+export const communityCommentRouter = Router({ mergeParams: true });
+
+registry.registerPath({
+  method: 'get',
+  path: '/community-posts/{post_id}/comments',
+  tags: ['Comment'],
+  summary: '커뮤니티 댓글 목록',
+  request: { params: CommentPostIdParamSchema },
+  responses: {
+    200: {
+      description: '루트 댓글 + replies 배열',
+      content: { 'application/json': { schema: CommentListResponseSchema } },
+    },
+    404: { description: '게시글 없음' },
+  },
+});
+
+registry.registerPath({
+  method: 'post',
+  path: '/community-posts/{post_id}/comments',
+  tags: ['Comment'],
+  summary: '커뮤니티 댓글/대댓글 작성',
+  security: [{ bearerAuth: [] }],
+  request: {
+    params: CommentPostIdParamSchema,
+    body: { content: { 'application/json': { schema: CreateCommentSchema } } },
+  },
+  responses: {
+    201: {
+      description: '작성된 댓글',
+      content: { 'application/json': { schema: CommentCreateResponseSchema } },
+    },
+    401: { description: '인증 필요' },
+    404: { description: '부모 댓글 없음 (대댓글 시)' },
+  },
+});
+
+communityCommentRouter.get(
+  '/',
+  validate({ params: CommentPostIdParamSchema }),
+  commentController.getCommunityComments,
+);
+communityCommentRouter.post(
+  '/',
+  authenticate,
+  validate({ params: CommentPostIdParamSchema, body: CreateCommentSchema }),
+  commentController.createCommunityComment,
+);
+
 // ── 공용 댓글 삭제 라우터 (/comments/:comment_id) ─────────
 export const commentRouter = Router();
 

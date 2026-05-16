@@ -8,7 +8,7 @@ function AppFooter() {
           <img src={gachonLogo} alt="가천대학교 Gachon University" />
           <p>2026 GC Vibe Hackathon</p>
         </div>
-        <p className="app-footer__copy">가천 개발자들의 도전을 응원합니다.</p>
+        <p className="app-footer__copy">가천대학교 인원들의 도전을 응원합니다.</p>
       </div>
     </footer>
   );

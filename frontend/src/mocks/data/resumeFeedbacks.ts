@@ -4,7 +4,7 @@ export const resumeFeedbackPosts: ResumeFeedbackPost[] = [
   {
     id: 1,
     user_id: 1,
-    title: "백엔드 개발자 신입 이력서 피드백 부탁드립니다!",
+    title: "백엔드 개발자 신입 포트폴리오 피드백 부탁드립니다!",
     description: "Java, Spring 기반의 백엔드 개발자를 목표로 하고 있습니다.",
     position: "백엔드",
     created_at: "1시간 전",
@@ -13,7 +13,7 @@ export const resumeFeedbackPosts: ResumeFeedbackPost[] = [
   {
     id: 2,
     user_id: 1,
-    title: "UI/UX 디자이너 포트폴리오 포함 이력서 피드백 요청드려요 :)",
+    title: "UI/UX 디자이너 포트폴리오 포함 포트폴리오 피드백 요청드려요 :)",
     description: "신입 UI/UX 디자이너 지원 예정입니다. 잘 부탁드려요!",
     position: "기획",
     created_at: "2시간 전",
@@ -22,7 +22,7 @@ export const resumeFeedbackPosts: ResumeFeedbackPost[] = [
   {
     id: 3,
     user_id: 1,
-    title: "AI/ML 엔지니어 이력서 첨삭 부탁드립니다",
+    title: "AI/ML 엔지니어 포트폴리오 첨삭 부탁드립니다",
     description: "석사 졸업 후 데이터 사이언티스트로 취업 준비 중입니다.",
     position: "AI/ML",
     created_at: "3시간 전",
@@ -31,7 +31,7 @@ export const resumeFeedbackPosts: ResumeFeedbackPost[] = [
   {
     id: 4,
     user_id: 1,
-    title: "웹 개발자 경력 이력서 피드백 요청드립니다!",
+    title: "웹 개발자 경력 포트폴리오 피드백 요청드립니다!",
     description: "3년차 프론트엔드 개발자입니다. 이직을 준비 중이에요.",
     position: "웹 개발",
     created_at: "4시간 전",
@@ -40,7 +40,7 @@ export const resumeFeedbackPosts: ResumeFeedbackPost[] = [
   {
     id: 5,
     user_id: 1,
-    title: "인프라 엔지니어 이력서 피드백 부탁드립니다",
+    title: "인프라 엔지니어 포트폴리오 피드백 부탁드립니다",
     description: "AWS, Kubernetes 기반의 인프라 운영 경험이 있습니다.",
     position: "인프라",
     created_at: "5시간 전",
@@ -49,7 +49,7 @@ export const resumeFeedbackPosts: ResumeFeedbackPost[] = [
   {
     id: 6,
     user_id: 1,
-    title: "보안 엔지니어 이력서 첨삭 부탁드려요!",
+    title: "보안 엔지니어 포트폴리오 첨삭 부탁드려요!",
     description: "보안 분석 및 취약점 진단 경험 위주로 작성했습니다.",
     position: "보안",
     created_at: "6시간 전",
@@ -58,7 +58,7 @@ export const resumeFeedbackPosts: ResumeFeedbackPost[] = [
   {
     id: 7,
     user_id: 1,
-    title: "네트워크 엔지니어 이력서 피드백 요청드립니다",
+    title: "네트워크 엔지니어 포트폴리오 피드백 요청드립니다",
     description: "네트워크 설계 및 운영 경력 4년차입니다.",
     position: "네트워크",
     created_at: "8시간 전",
@@ -67,7 +67,7 @@ export const resumeFeedbackPosts: ResumeFeedbackPost[] = [
   {
     id: 8,
     user_id: 1,
-    title: "앱 개발자 Android 이력서 피드백 부탁드립니다!",
+    title: "앱 개발자 Android 포트폴리오 피드백 부탁드립니다!",
     description: "Kotlin 기반 Android 앱 개발자입니다.",
     position: "앱 개발",
     created_at: "10시간 전",
@@ -76,7 +76,7 @@ export const resumeFeedbackPosts: ResumeFeedbackPost[] = [
   {
     id: 9,
     user_id: 1,
-    title: "제품 기획자 이력서 피드백 요청드려요",
+    title: "제품 기획자 포트폴리오 피드백 요청드려요",
     description: "서비스 기획 관련 경험을 중심으로 작성했습니다.",
     position: "기획",
     created_at: "12시간 전",
@@ -85,7 +85,7 @@ export const resumeFeedbackPosts: ResumeFeedbackPost[] = [
   {
     id: 10,
     user_id: 1,
-    title: "풀스택 개발자 이력서 피드백 부탁드립니다!",
+    title: "풀스택 개발자 포트폴리오 피드백 부탁드립니다!",
     description: "백엔드 + 프론트엔드 모두 경험이 있습니다.",
     position: "웹 개발",
     created_at: "13시간 전",
@@ -94,7 +94,7 @@ export const resumeFeedbackPosts: ResumeFeedbackPost[] = [
   {
     id: 11,
     user_id: 1,
-    title: "Node.js 백엔드 이력서에서 프로젝트 설명이 부족할까요?",
+    title: "Node.js 백엔드 포트폴리오에서 프로젝트 설명이 부족할까요?",
     description: "REST API와 인증 서버 경험을 어떻게 보여줄지 고민입니다.",
     position: "백엔드",
     created_at: "1일 전",
@@ -103,7 +103,7 @@ export const resumeFeedbackPosts: ResumeFeedbackPost[] = [
   {
     id: 12,
     user_id: 1,
-    title: "React 프론트엔드 신입 이력서 흐름 봐주세요",
+    title: "React 프론트엔드 신입 포트폴리오 흐름 봐주세요",
     description: "컴포넌트 설계 경험과 협업 경험을 강조하고 싶습니다.",
     position: "웹 개발",
     created_at: "1일 전",
@@ -112,7 +112,7 @@ export const resumeFeedbackPosts: ResumeFeedbackPost[] = [
   {
     id: 13,
     user_id: 1,
-    title: "iOS 개발자 포트폴리오 포함 이력서 검토 부탁드립니다",
+    title: "iOS 개발자 포트폴리오 포함 포트폴리오 검토 부탁드립니다",
     description: "SwiftUI 프로젝트와 앱스토어 배포 경험을 담았습니다.",
     position: "앱 개발",
     created_at: "1일 전",
@@ -121,7 +121,7 @@ export const resumeFeedbackPosts: ResumeFeedbackPost[] = [
   {
     id: 14,
     user_id: 1,
-    title: "MLOps 쪽으로 지원하려는 이력서입니다",
+    title: "MLOps 쪽으로 지원하려는 포트폴리오입니다",
     description: "모델 서빙과 파이프라인 구축 경험을 정리했습니다.",
     position: "데이터",
     created_at: "2일 전",
@@ -130,7 +130,7 @@ export const resumeFeedbackPosts: ResumeFeedbackPost[] = [
   {
     id: 15,
     user_id: 1,
-    title: "클라우드 운영 직무 이력서 키워드 피드백 구합니다",
+    title: "클라우드 운영 직무 포트폴리오 키워드 피드백 구합니다",
     description: "운영 자동화와 모니터링 경험을 더 잘 표현하고 싶어요.",
     position: "인프라",
     created_at: "2일 전",
@@ -139,7 +139,7 @@ export const resumeFeedbackPosts: ResumeFeedbackPost[] = [
   {
     id: 16,
     user_id: 1,
-    title: "침해대응 직무 이력서 첨삭 부탁드립니다",
+    title: "침해대응 직무 포트폴리오 첨삭 부탁드립니다",
     description: "관제 경험과 분석 리포트 작성 경험을 포함했습니다.",
     position: "보안",
     created_at: "2일 전",
@@ -148,7 +148,7 @@ export const resumeFeedbackPosts: ResumeFeedbackPost[] = [
   {
     id: 17,
     user_id: 1,
-    title: "네트워크 운영 신입 이력서 방향성이 맞을까요?",
+    title: "네트워크 운영 신입 포트폴리오 방향성이 맞을까요?",
     description: "자격증과 실습 프로젝트를 어떤 순서로 둘지 고민입니다.",
     position: "네트워크",
     created_at: "3일 전",
@@ -157,7 +157,7 @@ export const resumeFeedbackPosts: ResumeFeedbackPost[] = [
   {
     id: 18,
     user_id: 1,
-    title: "서비스 기획 인턴 지원 이력서 봐주세요",
+    title: "서비스 기획 인턴 지원 포트폴리오 봐주세요",
     description: "리서치와 요구사항 정의 경험을 중심으로 작성했습니다.",
     position: "기획",
     created_at: "3일 전",
@@ -175,7 +175,7 @@ export const resumeFeedbackPosts: ResumeFeedbackPost[] = [
   {
     id: 20,
     user_id: 1,
-    title: "Flutter 앱 개발 이력서 피드백 부탁드려요",
+    title: "Flutter 앱 개발 포트폴리오 피드백 부탁드려요",
     description: "크로스 플랫폼 개발 경험을 중심으로 정리했습니다.",
     position: "앱 개발",
     created_at: "4일 전",
@@ -184,7 +184,7 @@ export const resumeFeedbackPosts: ResumeFeedbackPost[] = [
   {
     id: 21,
     user_id: 1,
-    title: "데이터 분석가 지원 이력서 프로젝트 선정이 고민입니다",
+    title: "데이터 분석가 지원 포트폴리오 프로젝트 선정이 고민입니다",
     description: "대시보드와 분석 리포트 중 무엇을 강조할지 고민 중입니다.",
     position: "데이터",
     created_at: "5일 전",
@@ -193,7 +193,7 @@ export const resumeFeedbackPosts: ResumeFeedbackPost[] = [
   {
     id: 22,
     user_id: 1,
-    title: "DevOps 신입 이력서에 CI/CD 경험을 어떻게 쓰면 좋을까요?",
+    title: "DevOps 신입 포트폴리오에 CI/CD 경험을 어떻게 쓰면 좋을까요?",
     description: "GitHub Actions와 Docker 기반 배포 경험이 있습니다.",
     position: "인프라",
     created_at: "5일 전",
@@ -202,7 +202,7 @@ export const resumeFeedbackPosts: ResumeFeedbackPost[] = [
   {
     id: 23,
     user_id: 1,
-    title: "보안 컨설팅 직무 이력서 피드백 요청합니다",
+    title: "보안 컨설팅 직무 포트폴리오 피드백 요청합니다",
     description: "모의해킹 프로젝트와 보고서 경험을 정리했습니다.",
     position: "보안",
     created_at: "6일 전",

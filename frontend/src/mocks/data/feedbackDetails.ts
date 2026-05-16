@@ -1,6 +1,6 @@
 export const resumeFeedbackDetail = {
   request:
-    "안녕하세요! 백엔드 개발자로 취업을 준비하고 있는 4학년 학생입니다. 이력서에 부족한 부분이나 개선할 점이 있다면 피드백 부탁드립니다. 감사합니다!",
+    "안녕하세요! 백엔드 개발자로 취업을 준비하고 있는 4학년 학생입니다. 포트폴리오에 부족한 부분이나 개선할 점이 있다면 피드백 부탁드립니다. 감사합니다!",
 };
 
 export const resumeRelatedTagsByCategory: Record<string, string[]> = {

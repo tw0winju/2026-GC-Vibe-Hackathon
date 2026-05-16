@@ -9,8 +9,9 @@ import { getMe } from "../../lib/api/devfeedback";
 
 const navItems = [
   { label: "홈", to: ROUTES.homepage },
-  { label: "이력서 피드백", to: ROUTES.resumeFeedbacks },
+  { label: "포트폴리오 피드백", to: ROUTES.resumeFeedbacks },
   { label: "프로젝트 피드백", to: ROUTES.projectFeedbacks },
+  { label: "커뮤니티", to: ROUTES.community },
   { label: "가이드", to: ROUTES.guide },
   { label: "마이페이지", to: ROUTES.mypage },
 ];

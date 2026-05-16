@@ -15,3 +15,11 @@ export const POSITIONS = [
 ] as const;
 
 export type Position = (typeof POSITIONS)[number];
+
+export const COMMUNITY_CATEGORIES = [
+  "자유",
+  "프로젝트 팀 구하기",
+  "취업&진로",
+] as const;
+
+export type CommunityCategory = (typeof COMMUNITY_CATEGORIES)[number];

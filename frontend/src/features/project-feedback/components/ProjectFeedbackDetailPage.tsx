@@ -16,6 +16,7 @@ import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { ROUTES } from "../../../app/routes";
 import profileImage from "../../../assets/images/home/gg.png";
 import AppLayout from "../../../components/layout/AppLayout";
+import { isCurrentUser } from "../../../lib/auth/session";
 import {
   createProjectComment,
   deleteProjectPost,
@@ -143,6 +144,9 @@ function ProjectFeedbackDetailPage() {
     });
   };
 
+  const postOwnerId = post?.user?.id ?? post?.user?.user_id;
+  const canManagePost = isCurrentUser(postOwnerId);
+
   return (
     <AppLayout>
       <div className="project-detail-page">
@@ -154,10 +158,12 @@ function ProjectFeedbackDetailPage() {
 
           {post && !isLoading && !errorMessage && (
             <>
-              <div className="project-detail-actions" aria-label="작성자 작업">
-                <Link to={`/project-feedbacks/${post.id}/edit`}>수정</Link>
-                <button type="button" onClick={handleDelete}>삭제</button>
-              </div>
+              {canManagePost && (
+                <div className="project-detail-actions" aria-label="작성자 작업">
+                  <Link to={`/project-feedbacks/${post.id}/edit`}>수정</Link>
+                  <button type="button" onClick={handleDelete}>삭제</button>
+                </div>
+              )}
 
               <article className="project-detail-card">
                 <div className="project-detail-tags">

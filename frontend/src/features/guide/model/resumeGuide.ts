@@ -16,7 +16,7 @@ export const resumeGuides: ResumeGuide[] = [
   {
     slug: "web",
     category: "웹 개발",
-    title: "웹 개발자 이력서 작성 가이드",
+    title: "웹 개발자 포트폴리오 작성 가이드",
     summary: "프론트엔드, 풀스택, 웹 플랫폼 직무에서 화면 구현력과 제품 이해도를 함께 보여주는 방법입니다.",
     targetRoles: ["프론트엔드 개발자", "풀스택 개발자", "웹 플랫폼 엔지니어"],
     coreMessage: "사용자가 마주하는 문제를 UI, 상태관리, 성능, 협업 관점에서 어떻게 해결했는지 보여주세요.",
@@ -46,7 +46,7 @@ export const resumeGuides: ResumeGuide[] = [
   {
     slug: "app",
     category: "앱 개발",
-    title: "앱 개발자 이력서 작성 가이드",
+    title: "앱 개발자 포트폴리오 작성 가이드",
     summary: "Android, iOS, 크로스플랫폼 앱 개발 경험을 제품 완성도와 배포 경험 중심으로 정리합니다.",
     targetRoles: ["Android 개발자", "iOS 개발자", "Flutter 개발자", "React Native 개발자"],
     coreMessage: "앱 환경의 제약 속에서 안정적인 사용 경험을 만들기 위해 어떤 판단을 했는지 보여주세요.",
@@ -76,7 +76,7 @@ export const resumeGuides: ResumeGuide[] = [
   {
     slug: "backend",
     category: "백엔드",
-    title: "백엔드 개발자 이력서 작성 가이드",
+    title: "백엔드 개발자 포트폴리오 작성 가이드",
     summary: "API 설계, 데이터 모델링, 성능과 안정성 경험을 중심으로 백엔드 역량을 보여줍니다.",
     targetRoles: ["백엔드 개발자", "서버 개발자", "플랫폼 엔지니어"],
     coreMessage: "요구사항을 안정적인 API와 데이터 구조로 바꾸고, 장애 가능성을 줄인 경험을 보여주세요.",
@@ -95,7 +95,7 @@ export const resumeGuides: ResumeGuide[] = [
     checklist: [
       "API 명세나 ERD를 확인할 수 있는 자료가 있나요?",
       "성능이나 안정성을 개선한 근거가 있나요?",
-      "보안상 민감한 정보가 이력서나 GitHub에 노출되어 있지 않나요?",
+      "보안상 민감한 정보가 포트폴리오나 GitHub에 노출되어 있지 않나요?",
     ],
     mistakes: [
       "Spring 사용 경험만 있고 어떤 문제를 해결했는지 없는 경우",
@@ -106,7 +106,7 @@ export const resumeGuides: ResumeGuide[] = [
   {
     slug: "ai-ml",
     category: "AI/ML",
-    title: "AI/ML 이력서 작성 가이드",
+    title: "AI/ML 포트폴리오 작성 가이드",
     summary: "모델 정확도보다 문제 정의, 데이터 처리, 실험 설계, 재현 가능성을 함께 보여주는 방식입니다.",
     targetRoles: ["AI 엔지니어", "ML 엔지니어", "데이터 사이언티스트", "데이터 분석가"],
     coreMessage: "데이터로 어떤 문제를 정의했고, 실험을 통해 어떤 의사결정을 했는지 보여주세요.",
@@ -136,7 +136,7 @@ export const resumeGuides: ResumeGuide[] = [
   {
     slug: "data",
     category: "데이터",
-    title: "데이터 직무 이력서 작성 가이드",
+    title: "데이터 직무 포트폴리오 작성 가이드",
     summary: "데이터 분석, 지표 설계, 대시보드 경험을 문제 정의와 의사결정 기여 중심으로 정리합니다.",
     targetRoles: ["데이터 분석가", "BI 엔지니어", "데이터 사이언티스트"],
     coreMessage: "데이터를 통해 어떤 질문에 답했고, 그 결과가 어떤 판단이나 개선으로 이어졌는지 보여주세요.",
@@ -166,7 +166,7 @@ export const resumeGuides: ResumeGuide[] = [
   {
     slug: "infra",
     category: "인프라",
-    title: "인프라 엔지니어 이력서 작성 가이드",
+    title: "인프라 엔지니어 포트폴리오 작성 가이드",
     summary: "클라우드, 배포, 모니터링, 자동화 경험을 안정성과 운영 효율 관점으로 정리합니다.",
     targetRoles: ["인프라 엔지니어", "DevOps 엔지니어", "SRE", "클라우드 엔지니어"],
     coreMessage: "서비스가 안정적으로 배포되고 운영되도록 만든 자동화와 관측 가능성 경험을 보여주세요.",
@@ -196,7 +196,7 @@ export const resumeGuides: ResumeGuide[] = [
   {
     slug: "security",
     category: "보안",
-    title: "보안 엔지니어 이력서 작성 가이드",
+    title: "보안 엔지니어 포트폴리오 작성 가이드",
     summary: "취약점 분석, 대응, 리포팅 역량을 윤리적이고 검증 가능한 방식으로 정리합니다.",
     targetRoles: ["보안 엔지니어", "침해대응 분석가", "보안 컨설턴트", "모의해킹 엔지니어"],
     coreMessage: "위협을 발견하고 분석하며, 조직이 실제로 개선할 수 있는 결과로 바꾼 경험을 보여주세요.",
@@ -226,7 +226,7 @@ export const resumeGuides: ResumeGuide[] = [
   {
     slug: "network",
     category: "네트워크",
-    title: "네트워크 엔지니어 이력서 작성 가이드",
+    title: "네트워크 엔지니어 포트폴리오 작성 가이드",
     summary: "네트워크 설계, 운영, 장애 분석 경험을 구조와 원인 분석 중심으로 보여줍니다.",
     targetRoles: ["네트워크 엔지니어", "네트워크 운영 담당자", "IDC/인프라 운영 엔지니어"],
     coreMessage: "트래픽 흐름을 이해하고 장애를 분석하며 안정적인 연결성을 만든 경험을 보여주세요.",
@@ -256,7 +256,7 @@ export const resumeGuides: ResumeGuide[] = [
   {
     slug: "product",
     category: "기획",
-    title: "서비스 기획자 이력서 작성 가이드",
+    title: "서비스 기획자 포트폴리오 작성 가이드",
     summary: "문제 발견, 사용자 이해, 요구사항 정의, 우선순위 판단을 결과물 중심으로 정리합니다.",
     targetRoles: ["서비스 기획자", "PM", "PO", "프로덕트 매니저", "UX 기획자"],
     coreMessage: "사용자와 비즈니스 문제를 정의하고, 팀이 실행 가능한 요구사항으로 바꾼 경험을 보여주세요.",

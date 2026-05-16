@@ -1,4 +1,4 @@
-export type DashboardFeedbackType = "RESUME" | "PROJECT" | string;
+export type DashboardFeedbackType = "RESUME" | "PROJECT" | "COMMUNITY" | string;
 
 export type DashboardProfile = {
   name?: string;
@@ -16,6 +16,7 @@ export type DashboardProfile = {
 export type DashboardStats = {
   resumePostCount?: number;
   projectPostCount?: number;
+  communityPostCount?: number;
   likedPostCount?: number;
   commentCount?: number;
 };

@@ -13,6 +13,9 @@ const USER_PUBLIC_SELECT =
 // DB 컬럼명 'likes' 사용
 const POST_BASIC_SELECT =
   "id,title,description,thumbnail,likes,position,created_at,user:users(id,nickname)";
+const COMMUNITY_BASIC_SELECT =
+  "id,title,content,category,likes,created_at,user:users(id,nickname)";
+type UserPostType = "resume" | "project" | "community";
 
 // ── 내부 헬퍼 ─────────────────────────────────────────────
 function formatUser(row: Record<string, unknown>) {
@@ -53,14 +56,54 @@ function isMissingProfileColumnError(error: unknown) {
   );
 }
 
-function formatPostRow(p: any, type: "resume" | "project") {
+function getPostKey(type: UserPostType, postId: number) {
+  return `${type}:${postId}`;
+}
+
+async function getCommentCountMap(posts: Array<{ post_id: number; type: UserPostType }>) {
+  if (!posts.length) return new Map<string, number>();
+
+  const postTypes = [...new Set(posts.map((post) => post.type))];
+  const postIds = [...new Set(posts.map((post) => post.post_id))];
+  const wantedKeys = new Set(posts.map((post) => getPostKey(post.type, post.post_id)));
+
+  const { data, error } = await supabase
+    .from("comments")
+    .select("post_id,post_type")
+    .in("post_type", postTypes)
+    .in("post_id", postIds);
+
+  if (error) throw new AppError(500, "댓글 수 조회에 실패했습니다");
+
+  const countMap = new Map<string, number>();
+  for (const comment of data ?? []) {
+    const key = getPostKey(comment.post_type as UserPostType, comment.post_id);
+    if (!wantedKeys.has(key)) continue;
+    countMap.set(key, (countMap.get(key) ?? 0) + 1);
+  }
+
+  return countMap;
+}
+
+function withCommentCounts<T extends { post_id: number; type: UserPostType }>(
+  posts: T[],
+  countMap: Map<string, number>,
+) {
+  return posts.map((post) => ({
+    ...post,
+    comments: countMap.get(getPostKey(post.type, post.post_id)) ?? 0,
+  }));
+}
+
+function formatPostRow(p: any, type: UserPostType) {
   return {
     post_id: p.id,
     title: p.title,
-    description: p.description,
+    description: p.description ?? p.content ?? "",
     thumbnail: p.thumbnail ?? null,
     likes: p.likes ?? 0,
     position: p.position ?? null,
+    category: p.category ?? null,
     type,
     user: p.user ? { user_id: p.user.id, nickname: p.user.nickname } : null,
     created_at: p.created_at,
@@ -69,7 +112,7 @@ function formatPostRow(p: any, type: "resume" | "project") {
 
 // ── 카운트 4개 병렬 조회 ──────────────────────────────────
 async function getUserCounts(userId: number) {
-  const [resumeRes, projectRes, likeRes, commentRes] = await Promise.all([
+  const [resumeRes, projectRes, communityRes, likeRes, communityLikeRes, commentRes] = await Promise.all([
     supabase
       .from("resume_posts")
       .select("id", { count: "exact", head: true })
@@ -79,7 +122,15 @@ async function getUserCounts(userId: number) {
       .select("id", { count: "exact", head: true })
       .eq("user_id", userId),
     supabase
+      .from("community_posts")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId),
+    supabase
       .from("likes")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId),
+    supabase
+      .from("community_likes")
       .select("id", { count: "exact", head: true })
       .eq("user_id", userId),
     supabase
@@ -91,7 +142,8 @@ async function getUserCounts(userId: number) {
   return {
     resume_post: resumeRes.count ?? 0,
     project_post: projectRes.count ?? 0,
-    like: likeRes.count ?? 0,
+    community_post: communityRes.count ?? 0,
+    like: (likeRes.count ?? 0) + (communityLikeRes.count ?? 0),
     comment: commentRes.count ?? 0,
   };
 }
@@ -176,6 +228,7 @@ export const getMyPosts = async (userId: number, query: UserListQuery) => {
 
   const wantResume = !query.post_type || query.post_type === "resume";
   const wantProject = !query.post_type || query.post_type === "project";
+  const wantCommunity = !query.post_type || query.post_type === "community";
 
   const requests: Array<PromiseLike<any>> = [];
   if (wantResume) {
@@ -193,6 +246,16 @@ export const getMyPosts = async (userId: number, query: UserListQuery) => {
       supabase
         .from("project_posts")
         .select(POST_BASIC_SELECT, { count: "exact" })
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .range(from, to),
+    );
+  }
+  if (wantCommunity) {
+    requests.push(
+      supabase
+        .from("community_posts")
+        .select(COMMUNITY_BASIC_SELECT, { count: "exact" })
         .eq("user_id", userId)
         .order("created_at", { ascending: false })
         .range(from, to),
@@ -222,13 +285,22 @@ export const getMyPosts = async (userId: number, query: UserListQuery) => {
     );
     total += r.count ?? 0;
   }
+  if (wantCommunity) {
+    const r = results[idx++];
+    posts = posts.concat(
+      (r.data ?? []).map((p: any) => formatPostRow(p, "community")),
+    );
+    total += r.count ?? 0;
+  }
 
   posts.sort(
     (a, b) =>
       new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
   );
 
-  return { posts, total, page: query.page };
+  const commentCountMap = await getCommentCountMap(posts);
+
+  return { posts: withCommentCounts(posts, commentCountMap), total, page: query.page };
 };
 
 // ── GET /users/comments ───────────────────────────────────
@@ -258,30 +330,46 @@ export const getMyComments = async (
   const projectIds = comments
     .filter((comment: any) => comment.post_type === "project")
     .map((comment: any) => comment.post_id);
+  const communityIds = comments
+    .filter((comment: any) => comment.post_type === "community")
+    .map((comment: any) => comment.post_id);
 
-  const [resumeRes, projectRes] = await Promise.all([
+  const [resumeRes, projectRes, communityRes] = await Promise.all([
     resumeIds.length
       ? supabase.from("resume_posts").select("id,title").in("id", resumeIds)
       : Promise.resolve({ data: [], error: null }),
     projectIds.length
       ? supabase.from("project_posts").select("id,title").in("id", projectIds)
       : Promise.resolve({ data: [], error: null }),
+    communityIds.length
+      ? supabase.from("community_posts").select("id,title").in("id", communityIds)
+      : Promise.resolve({ data: [], error: null }),
   ]);
 
-  if (resumeRes.error || projectRes.error) {
+  if (resumeRes.error || projectRes.error || communityRes.error) {
     throw new AppError(500, "댓글 대상 게시글 조회에 실패했습니다");
   }
 
   const resumeTitleMap = new Map((resumeRes.data ?? []).map((post: any) => [post.id, post.title]));
   const projectTitleMap = new Map((projectRes.data ?? []).map((post: any) => [post.id, post.title]));
+  const communityTitleMap = new Map((communityRes.data ?? []).map((post: any) => [post.id, post.title]));
+  const commentCountMap = await getCommentCountMap(
+    comments.map((comment: any) => ({
+      post_id: comment.post_id,
+      type: comment.post_type as UserPostType,
+    })),
+  );
 
   return {
     comments: comments.map((comment: any) => ({
       ...comment,
+      comments: commentCountMap.get(getPostKey(comment.post_type as UserPostType, comment.post_id)) ?? 0,
       post_title:
         comment.post_type === "resume"
           ? resumeTitleMap.get(comment.post_id) ?? "삭제된 게시글"
-          : projectTitleMap.get(comment.post_id) ?? "삭제된 게시글",
+          : comment.post_type === "project"
+            ? projectTitleMap.get(comment.post_id) ?? "삭제된 게시글"
+            : communityTitleMap.get(comment.post_id) ?? "삭제된 게시글",
     })),
     total: count ?? 0,
     page: query.page,
@@ -296,6 +384,9 @@ export const getMyLikes = async (
   const from = (query.page - 1) * query.size;
   const to = from + query.size - 1;
 
+  const wantFeedbackLikes = !query.post_type || query.post_type === "resume" || query.post_type === "project";
+  const wantCommunityLikes = !query.post_type || query.post_type === "community";
+
   let likesRequest = supabase
     .from("likes")
     .select("post_id,post_type,created_at", { count: "exact" })
@@ -303,12 +394,37 @@ export const getMyLikes = async (
     .order("created_at", { ascending: false })
     .range(from, to);
 
-  if (query.post_type) {
+  if (query.post_type && query.post_type !== "community") {
     likesRequest = likesRequest.eq("post_type", query.post_type);
   }
 
-  const { data: likes, error: likesErr, count } = await likesRequest;
+  const feedbackLikesPromise = wantFeedbackLikes
+    ? likesRequest
+    : Promise.resolve({ data: [], error: null, count: 0 });
+  const communityLikesPromise = wantCommunityLikes
+    ? supabase
+        .from("community_likes")
+        .select("post_id,created_at", { count: "exact" })
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .range(from, to)
+    : Promise.resolve({ data: [], error: null, count: 0 });
+
+  const [
+    { data: feedbackLikes, error: likesErr, count: feedbackCount },
+    { data: communityLikes, error: communityLikesErr, count: communityCount },
+  ] = await Promise.all([feedbackLikesPromise, communityLikesPromise]);
   if (likesErr) throw new AppError(500, "좋아요 목록 조회에 실패했습니다");
+  if (communityLikesErr) throw new AppError(500, "커뮤니티 좋아요 목록 조회에 실패했습니다");
+
+  const likes = [
+    ...((feedbackLikes ?? []) as any[]),
+    ...((communityLikes ?? []) as any[]).map((like) => ({ ...like, post_type: "community" })),
+  ].sort(
+    (a, b) =>
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+  );
+  const count = (feedbackCount ?? 0) + (communityCount ?? 0);
 
   if (!likes || likes.length === 0) {
     return { posts: [], total: count ?? 0, page: query.page };
@@ -320,8 +436,11 @@ export const getMyLikes = async (
   const projectIds = likes
     .filter((l) => l.post_type === "project")
     .map((l) => l.post_id);
+  const communityIds = likes
+    .filter((l) => l.post_type === "community")
+    .map((l) => l.post_id);
 
-  const [resumeRes, projectRes] = await Promise.all([
+  const [resumeRes, projectRes, communityRes] = await Promise.all([
     resumeIds.length
       ? supabase
           .from("resume_posts")
@@ -334,9 +453,15 @@ export const getMyLikes = async (
           .select(POST_BASIC_SELECT)
           .in("id", projectIds)
       : Promise.resolve({ data: [], error: null }),
+    communityIds.length
+      ? supabase
+          .from("community_posts")
+          .select(COMMUNITY_BASIC_SELECT)
+          .in("id", communityIds)
+      : Promise.resolve({ data: [], error: null }),
   ]);
 
-  if (resumeRes.error || projectRes.error) {
+  if (resumeRes.error || projectRes.error || communityRes.error) {
     throw new AppError(500, "좋아요 게시글 상세 조회에 실패했습니다");
   }
 
@@ -346,19 +471,25 @@ export const getMyLikes = async (
   const projectMap = new Map(
     (projectRes.data ?? []).map((p: any) => [p.id, p]),
   );
+  const communityMap = new Map(
+    (communityRes.data ?? []).map((p: any) => [p.id, p]),
+  );
 
   const posts = likes
     .map((l) => {
-      const p =
-        l.post_type === "resume"
-          ? resumeMap.get(l.post_id)
-          : projectMap.get(l.post_id);
+      const p = l.post_type === "resume"
+        ? resumeMap.get(l.post_id)
+        : l.post_type === "project"
+          ? projectMap.get(l.post_id)
+          : communityMap.get(l.post_id);
       if (!p) return null;
-      return formatPostRow(p, l.post_type as "resume" | "project");
+      return formatPostRow(p, l.post_type as UserPostType);
     })
     .filter(Boolean);
 
-  return { posts, total: count ?? 0, page: query.page };
+  const commentCountMap = await getCommentCountMap(posts as Array<{ post_id: number; type: UserPostType }>);
+
+  return { posts: withCommentCounts(posts as Array<any>, commentCountMap), total: count ?? 0, page: query.page };
 };
 
 // ── GET /users/:user_id ───────────────────────────────────

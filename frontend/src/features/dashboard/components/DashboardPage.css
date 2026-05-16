@@ -212,10 +212,11 @@
 .dashboard-stats {
   display: grid;
   grid-column: 1 / -1;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(120px, 1fr));
   margin-top: 10px;
   border: 1px solid #e7eaf1;
   border-radius: 8px;
+  overflow: hidden;
 }
 
 .dashboard-stat {
@@ -446,6 +447,14 @@
   .dashboard-right-column {
     grid-column: 2;
   }
+
+  .dashboard-stats {
+    grid-template-columns: repeat(5, minmax(108px, 1fr));
+  }
+
+  .dashboard-stat span {
+    font-size: 12px;
+  }
 }
 
 @media (max-width: 920px) {
@@ -478,6 +487,26 @@
 
   .dashboard-right-column {
     grid-column: auto;
+  }
+
+  .dashboard-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dashboard-stat,
+  .dashboard-stat:last-child {
+    border-right: 1px solid #e7eaf1;
+    border-bottom: 1px solid #e7eaf1;
+  }
+
+  .dashboard-stat:nth-child(2n) {
+    border-right: 0;
+  }
+
+  .dashboard-stat:nth-last-child(-n + 1) {
+    grid-column: 1 / -1;
+    border-right: 0;
+    border-bottom: 0;
   }
 }
 

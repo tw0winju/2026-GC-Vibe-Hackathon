@@ -15,6 +15,7 @@ import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { ROUTES } from "../../../app/routes";
 import profileImage from "../../../assets/images/home/gg.png";
 import AppLayout from "../../../components/layout/AppLayout";
+import { isCurrentUser } from "../../../lib/auth/session";
 import {
   createResumeComment,
   deleteResumePost,
@@ -44,8 +45,8 @@ function isExampleFileUrl(fileUrl: string) {
 
 function ResumeSidebar() {
   return (
-    <aside className="resume-detail-sidebar" aria-label="이력서 피드백 메뉴">
-      <h2>이력서 피드백</h2>
+    <aside className="resume-detail-sidebar" aria-label="포트폴리오 피드백 메뉴">
+      <h2>포트폴리오 피드백</h2>
       <Link className="resume-detail-sidebar__write" to={ROUTES.resumeFeedbackWrite}>
         <Edit3 size={18} strokeWidth={2.2} />
         글 작성하기
@@ -105,7 +106,7 @@ function ResumeFeedbackDetailPage() {
 
         if (postResponse.file_url) {
           if (isExampleFileUrl(postResponse.file_url)) {
-            setFileMessage("샘플 게시글에는 실제 이력서 파일이 연결되어 있지 않습니다.");
+            setFileMessage("샘플 게시글에는 실제 포트폴리오 파일이 연결되어 있지 않습니다.");
             return;
           }
 
@@ -170,6 +171,9 @@ function ResumeFeedbackDetailPage() {
     });
   };
 
+  const postOwnerId = post?.user?.id ?? post?.user?.user_id;
+  const canManagePost = isCurrentUser(postOwnerId);
+
   return (
     <AppLayout>
       <div className="resume-detail-page">
@@ -181,14 +185,16 @@ function ResumeFeedbackDetailPage() {
 
           {post && !isLoading && !errorMessage && (
             <>
-              <div className="resume-detail-actions" aria-label="작성자 작업">
-                <Link to={`/resume-feedbacks/${post.id}/edit`}>수정</Link>
-                <button type="button" onClick={handleDelete}>삭제</button>
-              </div>
+              {canManagePost && (
+                <div className="resume-detail-actions" aria-label="작성자 작업">
+                  <Link to={`/resume-feedbacks/${post.id}/edit`}>수정</Link>
+                  <button type="button" onClick={handleDelete}>삭제</button>
+                </div>
+              )}
 
               <article className="resume-detail-card">
                 <div className="resume-detail-tags">
-                  <span>이력서</span>
+                  <span>포트폴리오</span>
                   <span>{post.position}</span>
                 </div>
 
@@ -224,7 +230,7 @@ function ResumeFeedbackDetailPage() {
                     <h2>첨부 파일</h2>
                     {fileHref ? (
                       <a className="resume-file-box" href={fileHref} target="_blank" rel="noreferrer">
-                        이력서 파일 열기
+                        포트폴리오 파일 열기
                       </a>
                     ) : (
                       <span className="resume-file-box is-disabled">

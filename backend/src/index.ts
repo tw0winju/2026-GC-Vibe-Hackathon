@@ -11,11 +11,13 @@ import userRouter from "./routes/user.route.js";
 import {
   resumeCommentRouter,
   projectCommentRouter,
+  communityCommentRouter,
   commentRouter,
 } from "./routes/comment.route.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 import storageRouter from "./routes/storage.route.js";
 import resumePostRouter from "./routes/resumePost.route.js";
+import communityPostRouter from "./routes/communityPost.route.js";
 import { env } from "./config/env.js";
 
 dotenv.config();
@@ -51,17 +53,22 @@ app.use("/auth", authRouter);
 app.use("/api/storage", storageRouter);
 app.use("/storage", storageRouter);
 
+// 댓글: 게시글 하위 라우터는 게시글 상세 라우터보다 먼저 등록
+app.use("/api/resume-posts/:post_id/comments", resumeCommentRouter);
+app.use("/resume-posts/:post_id/comments", resumeCommentRouter);
+app.use("/api/project-posts/:post_id/comments", projectCommentRouter);
+app.use("/project-posts/:post_id/comments", projectCommentRouter);
+app.use("/api/community-posts/:post_id/comments", communityCommentRouter);
+app.use("/community-posts/:post_id/comments", communityCommentRouter);
+
 app.use("/api/project-posts", projectPostRouter);
 app.use("/project-posts", projectPostRouter);
 
 app.use("/api/resume-posts", resumePostRouter);
 app.use("/resume-posts", resumePostRouter);
 
-// 댓글: 게시글 하위 라우터
-app.use("/api/resume-posts/:post_id/comments", resumeCommentRouter);
-app.use("/resume-posts/:post_id/comments", resumeCommentRouter);
-app.use("/api/project-posts/:post_id/comments", projectCommentRouter);
-app.use("/project-posts/:post_id/comments", projectCommentRouter);
+app.use("/api/community-posts", communityPostRouter);
+app.use("/community-posts", communityPostRouter);
 
 // 댓글 삭제 (공용)
 app.use("/api/comments", commentRouter);

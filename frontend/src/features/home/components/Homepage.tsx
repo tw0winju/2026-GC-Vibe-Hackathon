@@ -10,7 +10,7 @@ import { type FeedbackType, type MyFeedbackItem, type PopularFeedbackItem } from
 import "./Homepage.css";
 
 function getFeedbackTypeLabel(type?: FeedbackType) {
-  return type === "PROJECT" ? "프로젝트" : "이력서";
+  return type === "PROJECT" ? "프로젝트" : "포트폴리오";
 }
 
 function getFeedbackDetailPath(type: FeedbackType | undefined, id: number) {
@@ -110,14 +110,14 @@ function Homepage() {
               <strong>피드백 플랫폼</strong>
             </h1>
             <p>
-              이력서와 사이드 프로젝트를 더 좋게 만들고,
+              포트폴리오와 사이드 프로젝트를 더 좋게 만들고,
               <br />
               가천 IT 인재로서 한 단계 성장해보세요.
             </p>
             <div className="homepage-hero__actions">
               <Link className="homepage-primary-button" to={ROUTES.resumeFeedbackWrite}>
                 <Pencil size={18} />
-                이력서 피드백 작성하기
+                포트폴리오 피드백 작성하기
               </Link>
               <Link className="homepage-secondary-button" to={ROUTES.projectFeedbackWrite}>
                 <Code2 size={18} />
@@ -166,7 +166,7 @@ function Homepage() {
                 type="button"
                 onClick={() => setActiveFeedbackType("RESUME")}
               >
-                이력서 피드백
+                포트폴리오 피드백
               </button>
               <button
                 className={activeFeedbackType === "PROJECT" ? "is-active" : undefined}

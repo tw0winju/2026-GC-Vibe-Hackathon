@@ -32,32 +32,41 @@ function buildTree(rows: any[]) {
   return roots;
 }
 
-// ── GET /resume-posts/:post_id/comments ──────────────────
-export const getResumeComments = async (postId: number) => {
+type CommentPostType = 'resume' | 'project' | 'community';
+
+function isCommunityPostTypeConstraintError(error: unknown) {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    (error as { code?: string }).code === '23514'
+  );
+}
+
+async function getCommentsByPostType(postId: number, postType: CommentPostType) {
   const { data, error } = await supabase
     .from('comments')
     .select(COMMENT_SELECT)
-    .eq('post_type', 'resume')
+    .eq('post_type', postType)
     .eq('post_id', postId)
     .order('created_at', { ascending: true });
 
   if (error) throw new AppError(500, '댓글 조회에 실패했습니다');
   return { comments: buildTree(data ?? []) };
-};
+}
 
-// ── POST /resume-posts/:post_id/comments ─────────────────
-export const createResumeComment = async (
+async function createCommentByPostType(
   postId: number,
   userId: number,
   input: CreateCommentBody,
-) => {
-  // 대댓글인 경우 부모 댓글 존재 확인
+  postType: CommentPostType,
+) {
   if (input.comment_parent_id) {
     const { data: parent, error: parentErr } = await supabase
       .from('comments')
       .select('id')
       .eq('id', input.comment_parent_id)
-      .eq('post_type', 'resume')
+      .eq('post_type', postType)
       .eq('post_id', postId)
       .maybeSingle();
 
@@ -69,7 +78,7 @@ export const createResumeComment = async (
   const { data, error } = await supabase
     .from('comments')
     .insert({
-      post_type: 'resume',
+      post_type: postType,
       post_id: postId,
       user_id: userId,
       content: input.content,
@@ -78,21 +87,36 @@ export const createResumeComment = async (
     .select(`${COMMENT_SELECT}`)
     .single();
 
-  if (error || !data) throw new AppError(500, '댓글 작성에 실패했습니다');
+  if (error || !data) {
+    if (postType === 'community' && isCommunityPostTypeConstraintError(error)) {
+      throw new AppError(
+        500,
+        "DB comments.post_type 체크 제약에 community가 없습니다. 202605170003_allow_community_comments.sql을 적용해주세요.",
+      );
+    }
+
+    throw new AppError(500, '댓글 작성에 실패했습니다');
+  }
   return { ...data, comment_id: data.id };
+}
+
+// ── GET /resume-posts/:post_id/comments ──────────────────
+export const getResumeComments = async (postId: number) => {
+  return getCommentsByPostType(postId, 'resume');
+};
+
+// ── POST /resume-posts/:post_id/comments ─────────────────
+export const createResumeComment = async (
+  postId: number,
+  userId: number,
+  input: CreateCommentBody,
+) => {
+  return createCommentByPostType(postId, userId, input, 'resume');
 };
 
 // ── GET /project-posts/:post_id/comments ─────────────────
 export const getProjectComments = async (postId: number) => {
-  const { data, error } = await supabase
-    .from('comments')
-    .select(COMMENT_SELECT)
-    .eq('post_type', 'project')
-    .eq('post_id', postId)
-    .order('created_at', { ascending: true });
-
-  if (error) throw new AppError(500, '댓글 조회에 실패했습니다');
-  return { comments: buildTree(data ?? []) };
+  return getCommentsByPostType(postId, 'project');
 };
 
 // ── POST /project-posts/:post_id/comments ────────────────
@@ -101,34 +125,21 @@ export const createProjectComment = async (
   userId: number,
   input: CreateCommentBody,
 ) => {
-  if (input.comment_parent_id) {
-    const { data: parent, error: parentErr } = await supabase
-      .from('comments')
-      .select('id')
-      .eq('id', input.comment_parent_id)
-      .eq('post_type', 'project')
-      .eq('post_id', postId)
-      .maybeSingle();
+  return createCommentByPostType(postId, userId, input, 'project');
+};
 
-    if (parentErr || !parent) {
-      throw new AppError(404, '부모 댓글을 찾을 수 없습니다');
-    }
-  }
+// ── GET /community-posts/:post_id/comments ───────────────
+export const getCommunityComments = async (postId: number) => {
+  return getCommentsByPostType(postId, 'community');
+};
 
-  const { data, error } = await supabase
-    .from('comments')
-    .insert({
-      post_type: 'project',
-      post_id: postId,
-      user_id: userId,
-      content: input.content,
-      comment_parent_id: input.comment_parent_id ?? null,
-    })
-    .select(COMMENT_SELECT)
-    .single();
-
-  if (error || !data) throw new AppError(500, '댓글 작성에 실패했습니다');
-  return { ...data, comment_id: data.id };
+// ── POST /community-posts/:post_id/comments ──────────────
+export const createCommunityComment = async (
+  postId: number,
+  userId: number,
+  input: CreateCommentBody,
+) => {
+  return createCommentByPostType(postId, userId, input, 'community');
 };
 
 // ── DELETE /comments/:comment_id ─────────────────────────

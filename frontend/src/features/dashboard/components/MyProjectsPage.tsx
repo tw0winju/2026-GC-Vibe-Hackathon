@@ -15,10 +15,11 @@ function MyProjectsPage() {
         category: "프로젝트",
         title: post.title,
         description: post.description,
-        author: post.user.nickname,
+        author: post.user?.nickname ?? "나",
         date: formatDate(post.created_at),
+        comments: post.comments ?? 0,
         likes: post.likes,
-        tags: [post.position],
+        tags: post.position ? [post.position] : [],
       })));
     });
   }, []);

@@ -32,6 +32,21 @@ export const createProjectComment = async (req: Request, res: Response) => {
   res.status(201).json(result);
 };
 
+export const getCommunityComments = async (req: Request, res: Response) => {
+  const result = await commentService.getCommunityComments(Number(req.params.post_id));
+  res.json(result);
+};
+
+export const createCommunityComment = async (req: Request, res: Response) => {
+  if (!req.user) throw new AppError(401, '인증이 필요합니다');
+  const result = await commentService.createCommunityComment(
+    Number(req.params.post_id),
+    req.user.userId,
+    req.body,
+  );
+  res.status(201).json(result);
+};
+
 export const deleteComment = async (req: Request, res: Response) => {
   if (!req.user) throw new AppError(401, '인증이 필요합니다');
   const result = await commentService.deleteComment(

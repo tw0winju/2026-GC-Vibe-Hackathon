@@ -19,6 +19,7 @@ import AppLayout from "../../../components/layout/AppLayout";
 import {
   adaptFrontPostType,
   getMe,
+  getCommunityPosts,
   getMyLikes,
   getMyPosts,
   getProjectPosts,
@@ -30,14 +31,15 @@ import {
   type DashboardPost,
 } from "../api/dashboardApi";
 import { dashboardMenuGroups } from "./dashboardMenu";
+import { getPostDetailPath, getPostTypeLabel } from "./dashboardPostUtils";
 import "./DashboardPage.css";
 
 function getTypeLabel(type?: string) {
-  return type === "PROJECT" ? "프로젝트" : "이력서";
+  return getPostTypeLabel(type);
 }
 
 function getFeedbackDetailPath(type: string | undefined, id: number) {
-  return type === "PROJECT" ? `/project-feedbacks/${id}` : `/resume-feedbacks/${id}`;
+  return getPostDetailPath(type, id);
 }
 
 function ProfileValue({ icon: Icon, text }: { icon: typeof Mail; text?: string }) {
@@ -137,6 +139,7 @@ function DashboardPage() {
   const [stats, setStats] = useState({
     resumePostCount: 0,
     projectPostCount: 0,
+    communityPostCount: 0,
     likedPostCount: 0,
     commentCount: 0,
   });
@@ -152,8 +155,9 @@ function DashboardPage() {
       getMyLikes({ page: 1, size: 3 }),
       getResumePosts({ page: 1, size: 3, sort: "like" }),
       getProjectPosts({ page: 1, size: 2, sort: "like" }),
+      getCommunityPosts({ page: 1, size: 2, sort: "like" }),
     ])
-      .then(([me, myPosts, myLikes, resumePopular, projectPopular]) => {
+      .then(([me, myPosts, myLikes, resumePopular, projectPopular, communityPopular]) => {
         setProfile({
           name: me.nickname,
           bio: me.introduction ?? "",
@@ -167,6 +171,7 @@ function DashboardPage() {
         setStats({
           resumePostCount: me.counts.resume_post,
           projectPostCount: me.counts.project_post,
+          communityPostCount: me.counts.community_post,
           likedPostCount: me.counts.like,
           commentCount: me.counts.comment,
         });
@@ -182,7 +187,7 @@ function DashboardPage() {
           id: post.post_id,
           type: adaptFrontPostType(post.type),
           title: post.title,
-          position: post.position,
+          position: post.type === "community" ? post.category ?? "커뮤니티" : post.position ?? "피드백",
           created_at: formatDate(post.created_at),
         })));
         setPopularFeedbacks(
@@ -199,6 +204,13 @@ function DashboardPage() {
               type: "PROJECT" as const,
               title: post.title,
               position: post.position,
+              likes: post.likes,
+            })),
+            ...communityPopular.posts.map((post) => ({
+              id: post.id,
+              type: "COMMUNITY" as const,
+              title: post.title,
+              position: post.category,
               likes: post.likes,
             })),
           ]
@@ -265,8 +277,9 @@ function DashboardPage() {
             </div>
             <Link className="dashboard-edit-button" to={ROUTES.mypageEdit}>프로필 편집</Link>
             <div className="dashboard-stats">
-              <StatItem icon={ThumbsUp} label="이력서 게시글" value={stats.resumePostCount} />
+              <StatItem icon={ThumbsUp} label="포트폴리오 게시글" value={stats.resumePostCount} />
               <StatItem icon={Pencil} label="프로젝트 게시글" value={stats.projectPostCount} />
+              <StatItem icon={MessageCircle} label="커뮤니티 게시글" value={stats.communityPostCount} />
               <StatItem icon={Star} label="좋아요 누른 게시글" value={stats.likedPostCount} />
               <StatItem icon={Bookmark} label="작성한 댓글" value={stats.commentCount} />
             </div>

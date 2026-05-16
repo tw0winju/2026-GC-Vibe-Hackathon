@@ -41,7 +41,7 @@ const positions = RESUME_FEEDBACK_CATEGORIES.filter(
 const writingTips = [
   "구체적으로 작성할수록 더 정확한 피드백을 받을 수 있어요.",
   "특히 궁금한 부분이나 고민되는 부분을 상세히 적어주세요.",
-  "이력서의 전체적인 방향성도 함께 고민해보세요.",
+  "포트폴리오의 전체적인 방향성도 함께 고민해보세요.",
 ];
 
 function ResumeFeedbackWriteSidebar({ steps }: { steps: WritingStep[] }) {
@@ -49,8 +49,8 @@ function ResumeFeedbackWriteSidebar({ steps }: { steps: WritingStep[] }) {
   const progressValue = Math.round((completedCount / steps.length) * 100);
 
   return (
-    <aside className="resume-write-sidebar" aria-label="이력서 피드백 작성 안내">
-      <h2>이력서 피드백</h2>
+    <aside className="resume-write-sidebar" aria-label="포트폴리오 피드백 작성 안내">
+      <h2>포트폴리오 피드백</h2>
 
       <div className="resume-write-sidebar__progress" aria-label="작성 진행률">
         <div>
@@ -117,7 +117,7 @@ function ResumeFeedbackWritePage() {
         isDone: Boolean(position),
       },
       {
-        label: "이력서 첨부",
+        label: "포트폴리오 첨부",
         description: file ? `${file.name} 파일이 첨부됐어요.` : "검토받을 PDF 또는 DOCX 파일을 올려주세요.",
         isDone: Boolean(file),
       },
@@ -139,7 +139,7 @@ function ResumeFeedbackWritePage() {
     const selectedFile = event.target.files?.[0];
     if (!selectedFile) return;
     if (selectedFile.type !== "application/pdf") {
-      setErrorMessage("백엔드 명세상 이력서 업로드는 PDF만 지원합니다.");
+      setErrorMessage("백엔드 명세상 포트폴리오 업로드는 PDF만 지원합니다.");
       return;
     }
     setFile(selectedFile);
@@ -171,7 +171,7 @@ function ResumeFeedbackWritePage() {
       await createResumePost(payload);
       navigate(ROUTES.resumeFeedbacks);
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : "이력서 피드백 글 작성에 실패했습니다.");
+      setErrorMessage(error instanceof Error ? error.message : "포트폴리오 피드백 글 작성에 실패했습니다.");
     } finally {
       setIsSubmitting(false);
     }
@@ -184,8 +184,8 @@ function ResumeFeedbackWritePage() {
 
         <main className="resume-write-content">
           <div className="resume-write-heading">
-            <h1>이력서 피드백 글 작성</h1>
-            <p>이력서를 공유하고, 더 나은 방향으로 개선할 수 있도록 피드백을 받아보세요.</p>
+            <h1>포트폴리오 피드백 글 작성</h1>
+            <p>포트폴리오를 공유하고, 더 나은 방향으로 개선할 수 있도록 피드백을 받아보세요.</p>
           </div>
 
           <form className="resume-write-form" onSubmit={handleSubmit}>
@@ -195,7 +195,7 @@ function ResumeFeedbackWritePage() {
                 <input
                   id="resume-title"
                   maxLength={100}
-                  placeholder="제목을 입력해주세요. 예: 백엔드 신입 이력서 피드백 부탁드립니다!"
+                  placeholder="제목을 입력해주세요. 예: 백엔드 신입 포트폴리오 피드백 부탁드립니다!"
                   value={title}
                   onChange={(event) => setTitle(event.target.value)}
                 />
@@ -221,10 +221,10 @@ function ResumeFeedbackWritePage() {
             </section>
 
             <section className="resume-form-section">
-              <label htmlFor="resume-file">3. 이력서 첨부</label>
+              <label htmlFor="resume-file">3. 포트폴리오 첨부</label>
               <label className="resume-file-dropzone" htmlFor="resume-file">
                 <Upload size={30} strokeWidth={2.1} />
-                <strong>이력서 파일을 드래그하거나 클릭하여 첨부하세요</strong>
+                <strong>포트폴리오 파일을 드래그하거나 클릭하여 첨부하세요</strong>
                 <span>PDF 파일만 가능</span>
               </label>
               <input
@@ -289,18 +289,18 @@ function ResumeFeedbackWritePage() {
             <h2>좋은 요청 예시</h2>
             <div className="resume-example-card is-good">
               <strong>백엔드 개발자 신입입니다.</strong>
-              <p>이력서의 프로젝트 경험이 잘 어필되고 있는지, 기술 스택의 적정성, 문장 표현 개선이 필요한 부분을 중점적으로 봐주세요.</p>
+              <p>포트폴리오의 프로젝트 경험이 잘 어필되고 있는지, 기술 스택의 적정성, 문장 표현 개선이 필요한 부분을 중점적으로 봐주세요.</p>
             </div>
             <div className="resume-example-card is-bad">
               <strong>피해야 할 요청 예시</strong>
-              <p>이력서 피드백 부탁드려요. 잘 봐주세요.</p>
+              <p>포트폴리오 피드백 부탁드려요. 잘 봐주세요.</p>
             </div>
           </section>
 
           <section>
             <h2>주의사항</h2>
             <ul className="resume-caution-list">
-              <li>첨부된 이력서는 피드백 목적으로만 사용됩니다.</li>
+              <li>첨부된 포트폴리오는 피드백 목적으로만 사용됩니다.</li>
               <li>개인정보 및 민감한 정보는 포함하지 마세요.</li>
               <li>비방, 욕설, 광고 등 부적절한 내용은 삭제될 수 있습니다.</li>
             </ul>

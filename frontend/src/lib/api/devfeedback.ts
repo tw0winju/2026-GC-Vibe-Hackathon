@@ -11,9 +11,10 @@ export type Position =
   | "기획"
   | "데이터";
 
-export type PostType = "resume" | "project";
+export type PostType = "resume" | "project" | "community";
 export type ApiSort = "latest" | "like";
-export type FrontPostType = "RESUME" | "PROJECT";
+export type FrontPostType = "RESUME" | "PROJECT" | "COMMUNITY";
+export type CommunityCategory = "자유" | "프로젝트 팀 구하기" | "취업&진로";
 
 export const POSITIONS: Position[] = [
   "웹 개발",
@@ -49,6 +50,7 @@ export type MeResponse = {
   counts: {
     resume_post: number;
     project_post: number;
+    community_post: number;
     like: number;
     comment: number;
   };
@@ -84,18 +86,32 @@ export type ProjectPost = {
   comments?: CommentNode[];
 };
 
+export type CommunityPost = {
+  id: number;
+  title: string;
+  content: string;
+  category: CommunityCategory;
+  likes: number;
+  liked?: boolean;
+  created_at: string;
+  updated_at?: string;
+  user?: ApiUser;
+};
+
 export type UserListPost = {
   post_id: number;
   title: string;
   description: string;
   thumbnail?: string | null;
   likes: number;
-  position: Position;
+  comments?: number;
+  position: Position | null;
+  category?: CommunityCategory | null;
   type: PostType;
   user: {
     user_id: number;
     nickname: string;
-  };
+  } | null;
   created_at: string;
 };
 
@@ -110,6 +126,14 @@ export type ListPostsParams = {
   page?: number;
   size?: number;
   position?: Position;
+  sort?: ApiSort;
+  keyword?: string;
+};
+
+export type CommunityListParams = {
+  page?: number;
+  size?: number;
+  category?: CommunityCategory;
   sort?: ApiSort;
   keyword?: string;
 };
@@ -142,6 +166,7 @@ export type UserComment = {
   post_id: number;
   post_title?: string;
   post_type: PostType;
+  comments?: number;
   created_at: string;
 };
 
@@ -178,8 +203,15 @@ export type CreateProjectPostBody = {
   tag: string[];
 };
 
+export type CreateCommunityPostBody = {
+  title: string;
+  content: string;
+  category: CommunityCategory;
+};
+
 export type UpdateResumePostBody = Partial<CreateResumePostBody>;
 export type UpdateProjectPostBody = Partial<CreateProjectPostBody>;
+export type UpdateCommunityPostBody = Partial<CreateCommunityPostBody>;
 
 export type UpdateProfileBody = Partial<{
   nickname: string;
@@ -230,6 +262,14 @@ export function getProjectPost(postId: number) {
   return apiRequest<ProjectPost>(`/project-posts/${postId}`);
 }
 
+export function getCommunityPosts(params: CommunityListParams = {}) {
+  return apiRequest<PostsResponse<CommunityPost>>(`/community-posts?${toQuery(params)}`, { auth: false });
+}
+
+export function getCommunityPost(postId: number) {
+  return apiRequest<CommunityPost>(`/community-posts/${postId}`);
+}
+
 export function createResumePost(body: CreateResumePostBody) {
   return apiRequest<ResumePost>("/resume-posts", {
     method: "POST",
@@ -239,6 +279,13 @@ export function createResumePost(body: CreateResumePostBody) {
 
 export function createProjectPost(body: CreateProjectPostBody) {
   return apiRequest<ProjectPost>("/project-posts", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export function createCommunityPost(body: CreateCommunityPostBody) {
+  return apiRequest<CommunityPost>("/community-posts", {
     method: "POST",
     body: JSON.stringify(body),
   });
@@ -258,12 +305,23 @@ export function updateProjectPost(postId: number, body: UpdateProjectPostBody) {
   });
 }
 
+export function updateCommunityPost(postId: number, body: UpdateCommunityPostBody) {
+  return apiRequest<CommunityPost>(`/community-posts/${postId}`, {
+    method: "PUT",
+    body: JSON.stringify(body),
+  });
+}
+
 export function deleteResumePost(postId: number) {
   return apiRequest<Record<string, never>>(`/resume-posts/${postId}`, { method: "DELETE" });
 }
 
 export function deleteProjectPost(postId: number) {
   return apiRequest<Record<string, never>>(`/project-posts/${postId}`, { method: "DELETE" });
+}
+
+export function deleteCommunityPost(postId: number) {
+  return apiRequest<Record<string, never>>(`/community-posts/${postId}`, { method: "DELETE" });
 }
 
 export function toggleResumeLike(postId: number) {
@@ -274,12 +332,20 @@ export function toggleProjectLike(postId: number) {
   return apiRequest<{ likes: number; liked: boolean }>(`/project-posts/${postId}/like`, { method: "POST" });
 }
 
+export function toggleCommunityLike(postId: number) {
+  return apiRequest<{ likes: number; liked: boolean }>(`/community-posts/${postId}/like`, { method: "POST" });
+}
+
 export function getResumeComments(postId: number) {
   return apiRequest<CommentsResponse>(`/resume-posts/${postId}/comments`, { auth: false });
 }
 
 export function getProjectComments(postId: number) {
   return apiRequest<CommentsResponse>(`/project-posts/${postId}/comments`, { auth: false });
+}
+
+export function getCommunityComments(postId: number) {
+  return apiRequest<CommentsResponse>(`/community-posts/${postId}/comments`, { auth: false });
 }
 
 export function createResumeComment(postId: number, content: string, comment_parent_id?: number) {
@@ -291,6 +357,13 @@ export function createResumeComment(postId: number, content: string, comment_par
 
 export function createProjectComment(postId: number, content: string, comment_parent_id?: number) {
   return apiRequest<CommentNode>(`/project-posts/${postId}/comments`, {
+    method: "POST",
+    body: JSON.stringify({ content, comment_parent_id }),
+  });
+}
+
+export function createCommunityComment(postId: number, content: string, comment_parent_id?: number) {
+  return apiRequest<CommentNode>(`/community-posts/${postId}/comments`, {
     method: "POST",
     body: JSON.stringify({ content, comment_parent_id }),
   });
@@ -342,10 +415,14 @@ export function getFileUrl(body: { type: "resume" | "thumbnail"; file_path: stri
 }
 
 export function adaptFrontPostType(type?: PostType): FrontPostType {
-  return type === "project" ? "PROJECT" : "RESUME";
+  if (type === "project") return "PROJECT";
+  if (type === "community") return "COMMUNITY";
+  return "RESUME";
 }
 
 export function adaptPostType(type?: FrontPostType): PostType | undefined {
   if (!type) return undefined;
-  return type === "PROJECT" ? "project" : "resume";
+  if (type === "PROJECT") return "project";
+  if (type === "COMMUNITY") return "community";
+  return "resume";
 }
