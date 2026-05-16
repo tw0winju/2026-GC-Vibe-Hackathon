@@ -24,6 +24,7 @@ export const ROUTES = {
   notificationSettings: "/mypage/notification-settings",
   community: "/community",
   guide: "/guide",
+  guideDetail: "/guide/:slug",
   terms: "/terms",
   privacy: "/privacy",
 } as const;
