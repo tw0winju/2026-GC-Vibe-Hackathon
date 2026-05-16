@@ -2,7 +2,7 @@
   display: grid;
   width: 100%;
   min-height: calc(100vh - 68px - 96px);
-  grid-template-columns: 220px minmax(0, 1fr);
+  grid-template-columns: 220px minmax(0, 1fr) 320px;
   gap: 32px;
   padding: 30px 42px 48px;
   background:
@@ -562,6 +562,37 @@
   font-weight: 900;
 }
 
+.resume-review-points {
+  display: grid;
+  gap: 18px;
+}
+
+.resume-review-points article {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+.resume-review-points svg {
+  color: #4054f7;
+}
+
+.resume-review-points strong {
+  display: block;
+  color: #111827;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.resume-review-points span {
+  display: block;
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+}
+
 .resume-rating-score {
   display: flex;
   align-items: baseline;
@@ -681,9 +712,14 @@
   gap: 10px;
 }
 
-@media (max-width: 1180px) {
+@media (max-width: 1280px) {
   .resume-detail-page {
-    grid-template-columns: 190px minmax(0, 1fr);
+    grid-template-columns: 220px minmax(0, 1fr);
+  }
+
+  .resume-detail-aside {
+    grid-column: 2;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

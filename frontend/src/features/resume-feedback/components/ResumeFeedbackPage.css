@@ -148,6 +148,40 @@
   font-weight: 600;
 }
 
+.resume-search {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  align-items: center;
+  height: 44px;
+  margin-bottom: 18px;
+  padding: 0 14px;
+  border: 1px solid #dfe4ef;
+  border-radius: 8px;
+  color: #64748b;
+  background: #ffffff;
+}
+
+.resume-search:focus-within {
+  border-color: #a9b0ff;
+  box-shadow: 0 0 0 3px rgba(64, 84, 247, 0.08);
+  color: #4054f7;
+}
+
+.resume-search input {
+  width: 100%;
+  border: 0;
+  color: #111827;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 650;
+  outline: none;
+}
+
+.resume-search input::placeholder {
+  color: #94a3b8;
+}
+
 .resume-toolbar {
   display: flex;
   align-items: center;
@@ -260,6 +294,17 @@
 
 .resume-row:hover {
   background: #fbfcff;
+}
+
+.resume-empty {
+  display: flex;
+  min-height: 140px;
+  align-items: center;
+  justify-content: center;
+  border-top: 1px solid #edf0f6;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 750;
 }
 
 .resume-row__title {

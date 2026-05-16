@@ -9,6 +9,9 @@ import NotificationSettingsPage from "../features/dashboard/components/Notificat
 import WrittenFeedbackPage from "../features/dashboard/components/WrittenFeedbackPage";
 import { GuideDetailPage, GuideIndexPage } from "../features/guide/components/GuidePage";
 import Homepage from "../features/home/components/Homepage";
+import ProjectFeedbackDetailPage from "../features/project-feedback/components/ProjectFeedbackDetailPage";
+import ProjectFeedbackPage from "../features/project-feedback/components/ProjectFeedbackPage";
+import ProjectFeedbackWritePage from "../features/project-feedback/components/ProjectFeedbackWritePage";
 import ResumeFeedbackDetailPage from "../features/resume-feedback/components/ResumeFeedbackDetailPage";
 import ResumeFeedbackPage from "../features/resume-feedback/components/ResumeFeedbackPage";
 import ResumeFeedbackWritePage from "../features/resume-feedback/components/ResumeFeedbackWritePage";
@@ -37,9 +40,9 @@ function AppRouter() {
       <Route path={ROUTES.resumeFeedbackWrite} element={<ResumeFeedbackWritePage />} />
       <Route path={ROUTES.resumeFeedbackDetail} element={<ResumeFeedbackDetailPage />} />
       <Route path={ROUTES.resumeFeedbackEdit} element={<ReadyPage title="이력서 피드백 수정" />} />
-      <Route path={ROUTES.projectFeedbacks} element={<ReadyPage title="프로젝트 피드백" />} />
-      <Route path={ROUTES.projectFeedbackWrite} element={<ReadyPage title="프로젝트 피드백 작성" />} />
-      <Route path={ROUTES.projectFeedbackDetail} element={<ReadyPage title="프로젝트 피드백 상세" />} />
+      <Route path={ROUTES.projectFeedbacks} element={<ProjectFeedbackPage />} />
+      <Route path={ROUTES.projectFeedbackWrite} element={<ProjectFeedbackWritePage />} />
+      <Route path={ROUTES.projectFeedbackDetail} element={<ProjectFeedbackDetailPage />} />
       <Route path={ROUTES.projectFeedbackEdit} element={<ReadyPage title="프로젝트 피드백 수정" />} />
       <Route path={ROUTES.mypage} element={<DashboardPage />} />
       <Route path={ROUTES.mypageEdit} element={<ReadyPage title="마이페이지 편집" />} />

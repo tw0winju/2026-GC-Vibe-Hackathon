@@ -4,12 +4,13 @@ export type ResumeFeedbackCategory =
   | "앱 개발"
   | "백엔드"
   | "AI/ML"
+  | "데이터"
   | "인프라"
   | "보안"
   | "네트워크"
   | "기획";
 
-export type ResumeFeedbackSort = "likes" | "latest" | "comments";
+export type ResumeFeedbackSort = "likes" | "latest";
 
 export type ResumeFeedbackPost = {
   id: number;
@@ -30,6 +31,7 @@ export const RESUME_FEEDBACK_CATEGORIES: ResumeFeedbackCategory[] = [
   "앱 개발",
   "백엔드",
   "AI/ML",
+  "데이터",
   "인프라",
   "보안",
   "네트워크",
