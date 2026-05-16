@@ -6,13 +6,13 @@ import {
   TrendingUp,
   UsersRound,
 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 import { ROUTES } from "../../../app/routes";
 import googleLogo from "../../../assets/images/auth/google.png";
 import kakaoLogo from "../../../assets/images/auth/kakao.png";
 import { getMe } from "../../../lib/api/devfeedback";
-import type { AuthProvider } from "../api/authApi";
+import { socialLogin, type AuthProvider } from "../api/authApi";
 import "./SignupPage.css";
 
 const benefits = [
@@ -53,12 +53,39 @@ const signupBenefits = [
 
 function SignupPage() {
   const navigate = useNavigate();
-  const [authStatus, setAuthStatus] = useState<"idle" | "checking" | "signedIn" | "guest">(
+  const [searchParams] = useSearchParams();
+  const [authStatus, setAuthStatus] = useState<"idle" | "checking" | "signingIn" | "signedIn" | "guest" | "error">(
     "idle",
   );
+  const [authMessage, setAuthMessage] = useState("");
 
   useEffect(() => {
     let mounted = true;
+    const code = searchParams.get("code");
+    const provider = resolveOAuthProvider(searchParams);
+
+    if (code && provider) {
+      setAuthStatus("signingIn");
+      socialLogin(provider, code)
+        .then((response) => {
+          if (!mounted) return;
+          localStorage.setItem("access_token", response.access_token);
+          localStorage.setItem("refresh_token", response.refresh_token);
+          localStorage.setItem("user_id", String(response.user_id));
+          localStorage.removeItem("oauth_provider");
+          setAuthStatus("signedIn");
+          navigate(ROUTES.homepage, { replace: true });
+        })
+        .catch((error) => {
+          if (!mounted) return;
+          setAuthStatus("error");
+          setAuthMessage(error instanceof Error ? error.message : "소셜 로그인에 실패했습니다.");
+        });
+
+      return () => {
+        mounted = false;
+      };
+    }
 
     setAuthStatus("checking");
     getMe()
@@ -75,10 +102,12 @@ function SignupPage() {
     return () => {
       mounted = false;
     };
-  }, [navigate]);
+  }, [navigate, searchParams]);
 
-  const handleOAuthStart = (_provider: AuthProvider) => {
-    alert("백엔드 명세에는 OAuth 인가 URL이 없어 소셜 로그인 시작 기능은 연결하지 않았습니다. 인가 code를 받은 뒤 /auth/social/login으로 연동해야 합니다.");
+  const handleOAuthStart = (provider: AuthProvider) => {
+    const oauthUrl = getOAuthStartUrl(provider);
+    localStorage.setItem("oauth_provider", provider);
+    window.location.href = oauthUrl;
   };
 
   return (
@@ -205,11 +234,38 @@ function SignupPage() {
           </p>
 
           {authStatus === "checking" && <p className="auth-status">로그인 상태를 확인하고 있어요.</p>}
+          {authStatus === "signingIn" && <p className="auth-status">소셜 로그인 처리 중입니다.</p>}
           {authStatus === "signedIn" && <p className="auth-status">이미 로그인되어 이동합니다.</p>}
+          {authStatus === "error" && <p className="auth-status">{authMessage}</p>}
         </div>
       </section>
     </main>
   );
+}
+
+function getOAuthStartUrl(provider: AuthProvider) {
+  if (provider === "kakao") {
+    return import.meta.env.VITE_KAKAO_OAUTH_URL ?? `${import.meta.env.VITE_BASE_URL}/oauth2/authorization/kakao`;
+  }
+
+  return import.meta.env.VITE_GOOGLE_OAUTH_URL ?? `${import.meta.env.VITE_BASE_URL}/oauth2/authorization/google`;
+}
+
+function resolveOAuthProvider(searchParams: URLSearchParams): AuthProvider | null {
+  const providerParam = searchParams.get("provider") ?? searchParams.get("state");
+  const savedProvider = localStorage.getItem("oauth_provider");
+  const candidate = normalizeProvider(providerParam) ?? normalizeProvider(savedProvider);
+
+  return candidate;
+}
+
+function normalizeProvider(value: string | null): AuthProvider | null {
+  if (!value) return null;
+  const normalized = value.toLowerCase();
+
+  if (normalized.includes("kakao") || normalized.includes("카카오")) return "kakao";
+  if (normalized.includes("google") || normalized.includes("구글")) return "google";
+  return null;
 }
 
 export default SignupPage;
