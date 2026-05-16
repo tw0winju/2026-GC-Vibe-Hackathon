@@ -2,6 +2,7 @@ export const ROUTES = {
   root: "/",
   signup: "/signup",
   onboarding: "/onboarding",
+  homepage: "/homepage",
   home: "/home",
   resumeFeedbacks: "/resume-feedbacks",
   resumeFeedbackWrite: "/resume-feedbacks/write",
@@ -13,6 +14,8 @@ export const ROUTES = {
   projectFeedbackEdit: "/project-feedbacks/:id/edit",
   mypage: "/mypage",
   mypageEdit: "/mypage/edit",
+  community: "/community",
+  guide: "/guide",
   terms: "/terms",
   privacy: "/privacy",
 } as const;
