@@ -1,9 +1,7 @@
 import { useMemo, useState } from "react";
 import {
-  Boxes,
   ChevronLeft,
   ChevronRight,
-  Code2,
   Edit3,
   GitBranch,
   Heart,
@@ -18,6 +16,7 @@ import { Link } from "react-router-dom";
 
 import { ROUTES } from "../../../app/routes";
 import AppLayout from "../../../components/layout/AppLayout";
+import { projectSidebarGuides, projectTips } from "../../../mocks/data/feedbackPageContent";
 import { projectFeedbackPosts } from "../../../mocks/data/projectFeedbacks";
 import {
   PROJECT_FEEDBACK_CATEGORIES,
@@ -28,41 +27,13 @@ import "./ProjectFeedbackPage.css";
 
 const PAGE_SIZE = 10;
 
-const sidebarGuides = [
-  {
-    icon: Rocket,
-    title: "공유 전에",
-    items: ["프로젝트 목표 한 줄로 정리", "데모나 GitHub 링크 준비", "현재 단계와 고민 지점 표시"],
-  },
-  {
-    icon: GitBranch,
-    title: "좋은 요청 포인트",
-    items: ["아키텍처 구조가 적절한지", "핵심 기능 우선순위가 맞는지", "사용자 흐름이 자연스러운지"],
-  },
-  {
-    icon: SearchCheck,
-    title: "받기 좋은 피드백",
-    items: ["기술 선택 근거", "확장성과 유지보수성", "UI/UX와 완성도"],
-  },
-];
-
-const tips = [
-  {
-    icon: Boxes,
-    title: "문제와 사용자를 먼저 보여주세요",
-    description: "무엇을 해결하려는 프로젝트인지 알면 기능 피드백도 훨씬 정확해져요.",
-  },
-  {
-    icon: Code2,
-    title: "핵심 기술 선택 이유를 남겨보세요",
-    description: "스택 이름보다 왜 그 기술을 골랐는지가 좋은 토론을 만듭니다.",
-  },
-  {
-    icon: Lightbulb,
-    title: "다음 개선 목표를 적어주세요",
-    description: "현재 막힌 지점을 공유하면 실행 가능한 피드백을 받기 쉬워요.",
-  },
-];
+const contentIconByKey = {
+  branch: GitBranch,
+  file: Sparkles,
+  lightbulb: Lightbulb,
+  rocket: Rocket,
+  search: SearchCheck,
+};
 
 function ProjectFeedbackPage() {
   const [selectedCategory, setSelectedCategory] = useState<ProjectFeedbackCategory>("전체");
@@ -121,7 +92,10 @@ function ProjectFeedbackPage() {
             글 작성하기
           </Link>
           <div className="project-sidebar__guide-list">
-            {sidebarGuides.map(({ icon: Icon, title, items }) => (
+            {projectSidebarGuides.map(({ icon, title, items }) => {
+              const Icon = contentIconByKey[icon];
+
+              return (
               <section className="project-sidebar__guide-card" key={title}>
                 <div>
                   <Icon size={18} strokeWidth={2.2} />
@@ -133,7 +107,8 @@ function ProjectFeedbackPage() {
                   ))}
                 </ul>
               </section>
-            ))}
+              );
+            })}
           </div>
         </aside>
 
@@ -256,10 +231,12 @@ function ProjectFeedbackPage() {
             <ol className="project-popular-list">
               {popularPosts.map((post, index) => (
                 <li key={post.post_id}>
-                  <span>{index + 1}</span>
-                  <p>{post.title}</p>
-                  <Heart size={16} strokeWidth={2.1} />
-                  <strong>{post.like}</strong>
+                  <Link to={`/project-feedbacks/${post.post_id}`}>
+                    <span>{index + 1}</span>
+                    <p>{post.title}</p>
+                    <Heart size={16} strokeWidth={2.1} />
+                    <strong>{post.like}</strong>
+                  </Link>
                 </li>
               ))}
             </ol>
@@ -268,7 +245,10 @@ function ProjectFeedbackPage() {
           <section className="project-side-card">
             <h2>피드백 작성 팁</h2>
             <div className="project-tip-list">
-              {tips.map(({ icon: Icon, title, description }) => (
+              {projectTips.map(({ icon, title, description }) => {
+                const Icon = contentIconByKey[icon];
+
+                return (
                 <article key={title}>
                   <span>
                     <Icon size={18} strokeWidth={2.2} />
@@ -278,7 +258,8 @@ function ProjectFeedbackPage() {
                     <p>{description}</p>
                   </div>
                 </article>
-              ))}
+                );
+              })}
             </div>
           </section>
 

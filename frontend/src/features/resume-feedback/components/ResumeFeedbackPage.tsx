@@ -16,6 +16,7 @@ import { Link } from "react-router-dom";
 
 import { ROUTES } from "../../../app/routes";
 import AppLayout from "../../../components/layout/AppLayout";
+import { resumeSidebarGuides, resumeTips } from "../../../mocks/data/feedbackPageContent";
 import { resumeFeedbackPosts } from "../../../mocks/data/resumeFeedbacks";
 import { getResumeGuideByCategory, getResumeGuidePath } from "../../guide/model/resumeGuide";
 import {
@@ -27,43 +28,14 @@ import "./ResumeFeedbackPage.css";
 
 const PAGE_SIZE = 10;
 
-const sidebarGuides = [
-  {
-    icon: MessageSquare,
-    title: "피드백 요청 전에",
-    items: ["지원 직무를 명확히 적기", "궁금한 지점을 2~3개로 좁히기", "이력서 파일 최신본 첨부하기"],
-  },
-  {
-    icon: Lightbulb,
-    title: "좋은 요청 예시",
-    items: ["백엔드 신입 지원용입니다.", "프로젝트 설명이 충분한지 봐주세요.", "기술 스택 순서가 자연스러운지 궁금해요."],
-  },
-  {
-    icon: SearchCheck,
-    title: "받기 좋은 피드백",
-    items: ["경험 표현 방식", "직무와의 연결성", "빠진 역량이나 키워드"],
-  },
-];
-
 const guides = RESUME_FEEDBACK_CATEGORIES.filter((category) => category !== "전체");
 
-const tips = [
-  {
-    icon: FileText,
-    title: "경험은 구체적으로 작성하세요",
-    description: "프로젝트, 역할, 성과를 구체적으로 작성하면 더 좋은 피드백을 받을 수 있어요.",
-  },
-  {
-    icon: Lightbulb,
-    title: "기술 스택은 명확히 정리하세요",
-    description: "사용한 기술과 숙련도를 명확히 기재하면 피드백이 더 정확해져요.",
-  },
-  {
-    icon: SearchCheck,
-    title: "맞춤형 이력서를 작성하세요",
-    description: "지원하는 회사와 직무에 맞춰 이력서를 최적화해보세요.",
-  },
-];
+const contentIconByKey = {
+  file: FileText,
+  lightbulb: Lightbulb,
+  message: MessageSquare,
+  search: SearchCheck,
+};
 
 function ResumeFeedbackPage() {
   const [selectedCategory, setSelectedCategory] = useState<ResumeFeedbackCategory>("전체");
@@ -122,7 +94,10 @@ function ResumeFeedbackPage() {
             글 작성하기
           </Link>
           <div className="resume-sidebar__guide-list">
-            {sidebarGuides.map(({ icon: Icon, title, items }) => (
+            {resumeSidebarGuides.map(({ icon, title, items }) => {
+              const Icon = contentIconByKey[icon];
+
+              return (
               <section className="resume-sidebar__guide-card" key={title}>
                 <div>
                   <Icon size={18} strokeWidth={2.2} />
@@ -134,7 +109,8 @@ function ResumeFeedbackPage() {
                   ))}
                 </ul>
               </section>
-            ))}
+              );
+            })}
           </div>
         </aside>
 
@@ -257,10 +233,12 @@ function ResumeFeedbackPage() {
             <ol className="popular-list">
               {popularPosts.map((post, index) => (
                 <li key={post.id}>
-                  <span>{index + 1}</span>
-                  <p>{post.title}</p>
-                  <Heart size={16} strokeWidth={2.1} />
-                  <strong>{post.likes}</strong>
+                  <Link to={`/resume-feedbacks/${post.id}`}>
+                    <span>{index + 1}</span>
+                    <p>{post.title}</p>
+                    <Heart size={16} strokeWidth={2.1} />
+                    <strong>{post.likes}</strong>
+                  </Link>
                 </li>
               ))}
             </ol>
@@ -285,7 +263,10 @@ function ResumeFeedbackPage() {
           <section className="resume-side-card">
             <h2>이력서 작성 팁</h2>
             <div className="tip-list">
-              {tips.map(({ icon: Icon, title, description }) => (
+              {resumeTips.map(({ icon, title, description }) => {
+                const Icon = contentIconByKey[icon];
+
+                return (
                 <article key={title}>
                   <span>
                     <Icon size={18} strokeWidth={2.2} />
@@ -295,7 +276,8 @@ function ResumeFeedbackPage() {
                     <p>{description}</p>
                   </div>
                 </article>
-              ))}
+                );
+              })}
             </div>
           </section>
         </aside>

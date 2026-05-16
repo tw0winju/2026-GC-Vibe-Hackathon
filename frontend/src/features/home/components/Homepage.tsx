@@ -1,11 +1,11 @@
 import { Code2, Eye, FileText, Flame, MessageCircle, Pencil, UserRound } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { ROUTES } from "../../../app/routes";
 import AppLayout from "../../../components/layout/AppLayout";
 import { homeMyFeedbacks, homePopularFeedbacks } from "../../../mocks/data/homeFeedbacks";
-import { getHome, type FeedbackType, type HomeResponse, type MyFeedbackItem, type PopularFeedbackItem } from "../api/homeApi";
+import { type FeedbackType, type MyFeedbackItem, type PopularFeedbackItem } from "../api/homeApi";
 import "./Homepage.css";
 
 function formatCount(count?: number) {
@@ -91,37 +91,12 @@ function PopularFeedbackRow({ item }: { item: PopularFeedbackItem }) {
 }
 
 function Homepage() {
-  const [home, setHome] = useState<HomeResponse | null>(null);
   const [activeFeedbackType, setActiveFeedbackType] = useState<"RESUME" | "PROJECT">("RESUME");
 
-  useEffect(() => {
-    let ignore = false;
-
-    getHome()
-      .then((data) => {
-        if (!ignore) {
-          setHome(data);
-        }
-      })
-      .catch(() => undefined);
-
-    return () => {
-      ignore = true;
-    };
-  }, []);
-
   const myFeedbacks = useMemo(() => {
-    const apiFeedbacks = [
-      ...(home?.myResumeFeedbacks ?? []).map((item) => ({ ...item, type: item.type ?? "RESUME" })),
-      ...(home?.myProjectFeedbacks ?? []).map((item) => ({ ...item, type: item.type ?? "PROJECT" })),
-    ];
-    const source = apiFeedbacks.length ? apiFeedbacks : homeMyFeedbacks;
-
-    return source.filter((item) => item.type === activeFeedbackType);
-  }, [activeFeedbackType, home]);
-  const popularFeedbacks = home?.popularFeedbacks?.length
-    ? home.popularFeedbacks
-    : homePopularFeedbacks;
+    return homeMyFeedbacks.filter((item) => item.type === activeFeedbackType);
+  }, [activeFeedbackType]);
+  const popularFeedbacks = homePopularFeedbacks;
 
   return (
     <AppLayout>
