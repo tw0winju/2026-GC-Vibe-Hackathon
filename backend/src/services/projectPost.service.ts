@@ -19,7 +19,7 @@ type ProjectPostInput = {
 };
 
 const PROJECT_POST_SELECT =
-  "id,title,description,file_url,thumbnail,likes,position,created_at,user:users(id,nickname)";
+  "id,title,description,thumbnail,likes,position,created_at,user:users(id,nickname)";
 
 export const listProjectPosts = async (query: ListProjectPostsInput) => {
   const from = (query.page - 1) * query.size;
@@ -60,7 +60,6 @@ export const createProjectPost = async (
       user_id: userId,
       title: input.title,
       description: input.description,
-      file_url: input.file_url,
       thumbnail: input.thumbnail,
       position: input.position,
       tag: input.tag,
@@ -116,9 +115,7 @@ export const updateProjectPost = async (
     .from("project_posts")
     .update(input)
     .eq("id", postId)
-    .select(
-      "id,title,description,file_url,thumbnail,likes,position,tag,updated_at",
-    )
+    .select("id,title,description,thumbnail,likes,position,tag,updated_at")
     .single();
 
   if (error || !data) {
@@ -132,7 +129,11 @@ export const deleteProjectPost = async (postId: number, userId: number) => {
   await assertProjectPostOwner(postId, userId);
 
   await supabase.from("comments").delete().eq("post_id", postId);
-  await supabase.from("likes").delete().eq("post_type", "project").eq("post_id", postId);
+  await supabase
+    .from("likes")
+    .delete()
+    .eq("post_type", "project")
+    .eq("post_id", postId);
 
   const { error } = await supabase
     .from("project_posts")
@@ -207,7 +208,7 @@ export const likeProjectPost = async (postId: number, userId: number) => {
     throw new AppError(500, "프로젝트 게시글 좋아요 처리에 실패했습니다.");
   }
 
-  return { like: data.likes, liked };
+  return { likes: data.likes, liked };
 };
 
 async function assertProjectPostOwner(postId: number, userId: number) {
