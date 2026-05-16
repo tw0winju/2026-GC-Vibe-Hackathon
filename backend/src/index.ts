@@ -29,7 +29,9 @@ app.use(helmet());
 app.use(
   cors({
     origin:
-      process.env.CORS_ORIGIN || "http://localhost:3000".split(",") || "*",
+      "https://2026-gc-vibehackathon.vercel.app,http://localhost:5173".split(
+        ",",
+      ),
     credentials: true,
   }),
 );
