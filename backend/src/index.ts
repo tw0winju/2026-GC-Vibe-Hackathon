@@ -8,6 +8,7 @@ import authRouter from "./routes/auth.route.js";
 import projectPostRouter from "./routes/projectPost.route.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 import storageRouter from "./routes/storage.route.js";
+import userRouter from "./routes/user.route.js";
 
 import { env } from "./config/env.js";
 
@@ -36,6 +37,8 @@ app.use("/api/storage", storageRouter);
 app.use("/storage", storageRouter);
 app.use("/api/project-posts", projectPostRouter);
 app.use("/project-posts", projectPostRouter);
+app.use("/api/users", userRouter);
+app.use("/users", userRouter);
 
 // Swagger는 라우트 등록 후
 const openApiDocument = generateOpenApiDocument();
