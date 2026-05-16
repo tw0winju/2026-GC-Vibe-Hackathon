@@ -18,6 +18,7 @@ import { ROUTES } from "../../../app/routes";
 import AppLayout from "../../../components/layout/AppLayout";
 import { projectSidebarGuides, projectTips } from "../../../mocks/data/feedbackPageContent";
 import { projectFeedbackPosts } from "../../../mocks/data/projectFeedbacks";
+import { getMockUserById } from "../../../mocks/data/users";
 import {
   PROJECT_FEEDBACK_CATEGORIES,
   type ProjectFeedbackCategory,
@@ -37,7 +38,7 @@ const contentIconByKey = {
 
 function ProjectFeedbackPage() {
   const [selectedCategory, setSelectedCategory] = useState<ProjectFeedbackCategory>("전체");
-  const [sort, setSort] = useState<ProjectFeedbackSort>("like");
+  const [sort, setSort] = useState<ProjectFeedbackSort>("likes");
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
 
@@ -50,7 +51,7 @@ function ProjectFeedbackPage() {
 
     const posts = normalizedQuery
       ? postsByCategory.filter((post) =>
-          [post.title, post.description, post.user.nickname, post.position]
+          [post.title, post.description, getMockUserById(post.user_id)?.nickname, post.position]
             .join(" ")
             .toLowerCase()
             .includes(normalizedQuery),
@@ -58,14 +59,14 @@ function ProjectFeedbackPage() {
       : postsByCategory;
 
     return posts.sort((a, b) => {
-      if (sort === "latest") return b.created_at.localeCompare(a.created_at);
-      return b.like - a.like;
+      if (sort === "latest") return (b.created_at ?? "").localeCompare(a.created_at ?? "");
+      return b.likes - a.likes;
     });
   }, [searchQuery, selectedCategory, sort]);
 
   const totalPages = Math.max(1, Math.ceil(filteredPosts.length / PAGE_SIZE));
   const paginatedPosts = filteredPosts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-  const popularPosts = [...projectFeedbackPosts].sort((a, b) => b.like - a.like).slice(0, 5);
+  const popularPosts = [...projectFeedbackPosts].sort((a, b) => b.likes - a.likes).slice(0, 5);
 
   const handleCategoryChange = (category: ProjectFeedbackCategory) => {
     setSelectedCategory(category);
@@ -150,7 +151,7 @@ function ProjectFeedbackPage() {
               value={sort}
               onChange={(event) => handleSortChange(event.target.value as ProjectFeedbackSort)}
             >
-              <option value="like">좋아요 많은 순</option>
+              <option value="likes">좋아요 많은 순</option>
               <option value="latest">최신순</option>
             </select>
           </div>
@@ -174,7 +175,7 @@ function ProjectFeedbackPage() {
             </div>
 
             {paginatedPosts.map((post) => (
-              <Link className="project-row" key={post.post_id} to={`/project-feedbacks/${post.post_id}`} role="row">
+              <Link className="project-row" key={post.id} to={`/project-feedbacks/${post.id}`} role="row">
                 <div className="project-row__title">
                   <strong>{post.title}</strong>
                   <span>{post.description}</span>
@@ -185,11 +186,11 @@ function ProjectFeedbackPage() {
                   <span className="project-row__avatar">
                     <UserRoundCheck size={16} strokeWidth={2.3} />
                   </span>
-                  {post.user.nickname}
+                  {getMockUserById(post.user_id)?.nickname ?? "사용자"}
                 </span>
                 <span className="project-row__stats">
                   <Heart size={17} strokeWidth={2.1} />
-                  {post.like}
+                  {post.likes}
                 </span>
               </Link>
             ))}
@@ -230,12 +231,12 @@ function ProjectFeedbackPage() {
             <h2>인기 프로젝트</h2>
             <ol className="project-popular-list">
               {popularPosts.map((post, index) => (
-                <li key={post.post_id}>
-                  <Link to={`/project-feedbacks/${post.post_id}`}>
+                <li key={post.id}>
+                  <Link to={`/project-feedbacks/${post.id}`}>
                     <span>{index + 1}</span>
                     <p>{post.title}</p>
                     <Heart size={16} strokeWidth={2.1} />
-                    <strong>{post.like}</strong>
+                    <strong>{post.likes}</strong>
                   </Link>
                 </li>
               ))}
@@ -269,7 +270,11 @@ function ProjectFeedbackPage() {
   );
 }
 
-function formatProjectDate(value: string) {
+function formatProjectDate(value?: string) {
+  if (!value) {
+    return "";
+  }
+
   return new Intl.DateTimeFormat("ko-KR", {
     month: "numeric",
     day: "numeric",

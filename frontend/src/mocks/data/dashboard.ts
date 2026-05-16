@@ -37,18 +37,16 @@ export const dashboardRecentPosts: DashboardPost[] = [
     type: "RESUME" as const,
     title: post.title,
     description: post.description,
-    createdAtText: post.createdAt,
-    commentCount: post.comments,
-    likeCount: post.likes,
+    created_at: post.created_at,
+    likes: post.likes,
   })),
   ...projectFeedbackPosts.slice(0, 1).map((post) => ({
-    id: post.post_id,
+    id: post.id,
     type: "PROJECT" as const,
     title: post.title,
     description: post.description,
-    createdAtText: formatRelativeProjectDate(post.created_at),
-    commentCount: Math.max(3, Math.round(post.like / 6)),
-    likeCount: post.like,
+    created_at: formatRelativeProjectDate(post.created_at),
+    likes: post.likes,
   })),
 ];
 
@@ -61,24 +59,22 @@ export const dashboardPopularFeedbacks: DashboardPopularFeedback[] = [
       id: post.id,
       type: "RESUME" as const,
       title: post.title,
-      mentorRole: `${post.category} 멘토`,
-      commentCount: post.comments,
-      likeCount: post.likes,
+      position: post.position,
+      likes: post.likes,
     })),
   ...projectFeedbackPosts
     .slice()
-    .sort((a, b) => b.like - a.like)
+    .sort((a, b) => b.likes - a.likes)
     .slice(0, 2)
     .map((post) => ({
-      id: post.post_id,
+      id: post.id,
       type: "PROJECT" as const,
       title: post.title,
-      mentorRole: `${post.position} 멘토`,
-      commentCount: Math.max(3, Math.round(post.like / 6)),
-      likeCount: post.like,
+      position: post.position,
+      likes: post.likes,
     })),
 ]
-  .sort((a, b) => (b.likeCount ?? 0) - (a.likeCount ?? 0))
+  .sort((a, b) => (b.likes ?? 0) - (a.likes ?? 0))
   .slice(0, 5)
   .map((item, index) => ({ ...item, rank: index + 1 }));
 
@@ -87,15 +83,15 @@ export const dashboardLikedPosts: DashboardLikedPost[] = [
     id: post.id,
     type: "RESUME" as const,
     title: post.title,
-    authorRole: post.authorRole,
-    createdAtText: post.createdAt,
+    position: post.position,
+    created_at: post.created_at,
   })),
   ...projectFeedbackPosts.slice(0, 1).map((post) => ({
-    id: post.post_id,
+    id: post.id,
     type: "PROJECT" as const,
     title: post.title,
-    authorRole: post.user.nickname,
-    createdAtText: formatRelativeProjectDate(post.created_at),
+    position: post.position,
+    created_at: formatRelativeProjectDate(post.created_at),
   })),
 ];
 
@@ -272,7 +268,11 @@ export const notificationSettingsGroups = [
   },
 ] as const;
 
-function formatRelativeProjectDate(value: string) {
+function formatRelativeProjectDate(value?: string) {
+  if (!value) {
+    return "";
+  }
+
   const date = new Date(value);
   const now = new Date("2026-05-17T12:00:00+09:00");
   const diffHours = Math.max(1, Math.round((now.getTime() - date.getTime()) / (1000 * 60 * 60)));

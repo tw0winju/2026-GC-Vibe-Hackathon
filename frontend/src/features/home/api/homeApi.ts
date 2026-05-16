@@ -8,21 +8,17 @@ export type MyFeedbackItem = {
   type?: FeedbackType;
   title: string;
   status?: FeedbackStatus;
-  createdAtText?: string;
-  mentorCount?: number;
   summary?: string;
-  commentCount?: number;
-  viewCount?: number;
+  created_at?: string;
+  likes?: number;
 };
 
 export type PopularFeedbackItem = {
   id: number;
   title: string;
-  category?: "RESUME" | "PROJECT" | string;
-  mentorRole?: string;
-  authorRole?: string;
-  viewCount?: number;
-  commentCount?: number;
+  type?: "RESUME" | "PROJECT" | string;
+  position?: string;
+  likes?: number;
 };
 
 export type HomeResponse = {

@@ -18,6 +18,7 @@ import { ROUTES } from "../../../app/routes";
 import AppLayout from "../../../components/layout/AppLayout";
 import { resumeSidebarGuides, resumeTips } from "../../../mocks/data/feedbackPageContent";
 import { resumeFeedbackPosts } from "../../../mocks/data/resumeFeedbacks";
+import { getMockUserById } from "../../../mocks/data/users";
 import { getResumeGuideByCategory, getResumeGuidePath } from "../../guide/model/resumeGuide";
 import {
   RESUME_FEEDBACK_CATEGORIES,
@@ -48,11 +49,11 @@ function ResumeFeedbackPage() {
     const postsByCategory =
       selectedCategory === "전체"
         ? [...resumeFeedbackPosts]
-        : resumeFeedbackPosts.filter((post) => post.category === selectedCategory);
+        : resumeFeedbackPosts.filter((post) => post.position === selectedCategory);
 
     const posts = normalizedQuery
       ? postsByCategory.filter((post) =>
-          [post.title, post.description, post.author, post.category]
+          [post.title, post.description, getMockUserById(post.user_id)?.nickname, post.position]
             .join(" ")
             .toLowerCase()
             .includes(normalizedQuery),
@@ -181,14 +182,14 @@ function ResumeFeedbackPage() {
                   <strong>{post.title}</strong>
                   <span>{post.description}</span>
                 </div>
-                <span className="resume-row__category">{post.category}</span>
+                <span className="resume-row__category">{post.position}</span>
                 <span className="resume-row__author">
                   <span className="resume-row__avatar">
                     <UserRoundCheck size={16} strokeWidth={2.3} />
                   </span>
-                  {post.author}
+                  {getMockUserById(post.user_id)?.nickname ?? "사용자"}
                 </span>
-                <span className="resume-row__date">{post.createdAt}</span>
+                <span className="resume-row__date">{post.created_at}</span>
                 <span className="resume-row__likes">
                   <Heart size={18} strokeWidth={2.1} />
                   {post.likes}
@@ -237,7 +238,7 @@ function ResumeFeedbackPage() {
                     <span>{index + 1}</span>
                     <p>{post.title}</p>
                     <Heart size={16} strokeWidth={2.1} />
-                    <strong>{post.likes}</strong>
+                  <strong>{post.likes}</strong>
                   </Link>
                 </li>
               ))}

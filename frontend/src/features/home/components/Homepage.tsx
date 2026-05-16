@@ -1,4 +1,4 @@
-import { Code2, Eye, FileText, Flame, MessageCircle, Pencil, UserRound } from "lucide-react";
+import { Code2, FileText, Flame, Pencil, UserRound } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -7,46 +7,6 @@ import AppLayout from "../../../components/layout/AppLayout";
 import { homeMyFeedbacks, homePopularFeedbacks } from "../../../mocks/data/homeFeedbacks";
 import { type FeedbackType, type MyFeedbackItem, type PopularFeedbackItem } from "../api/homeApi";
 import "./Homepage.css";
-
-function formatCount(count?: number) {
-  if (!count) {
-    return "0";
-  }
-
-  if (count >= 1000) {
-    const compactCount = Math.round((count / 1000) * 10) / 10;
-    return `${compactCount}k`;
-  }
-
-  return String(count);
-}
-
-function getCategoryLabel(category?: string) {
-  return category === "PROJECT" ? "프로젝트" : "이력서";
-}
-
-function FeedbackMeta({ comments, views }: { comments?: number; views?: number }) {
-  if (comments === undefined && views === undefined) {
-    return null;
-  }
-
-  return (
-    <span className="homepage-feedback-meta" aria-label="피드백 지표">
-      {comments !== undefined && (
-        <span>
-          <MessageCircle size={16} />
-          {formatCount(comments)}
-        </span>
-      )}
-      {views !== undefined && (
-        <span>
-          <Eye size={16} />
-          {formatCount(views)}
-        </span>
-      )}
-    </span>
-  );
-}
 
 function getFeedbackTypeLabel(type?: FeedbackType) {
   return type === "PROJECT" ? "프로젝트" : "이력서";
@@ -59,7 +19,7 @@ function getFeedbackDetailPath(type: FeedbackType | undefined, id: number) {
 function MyFeedbackRow({ item }: { item: MyFeedbackItem }) {
   const helperText =
     item.summary ??
-    `${item.createdAtText ?? "최근"} · ${item.mentorCount ?? 0}명의 멘토가 피드백을 남겼습니다`;
+    `${item.created_at ?? "최근"} · 좋아요 ${item.likes ?? 0}`;
 
   return (
     <Link className="homepage-my-row" to={getFeedbackDetailPath(item.type, item.id)}>
@@ -71,21 +31,19 @@ function MyFeedbackRow({ item }: { item: MyFeedbackItem }) {
         <h3>{item.title}</h3>
         <p>{helperText}</p>
       </div>
-      <FeedbackMeta comments={item.commentCount} views={item.viewCount} />
     </Link>
   );
 }
 
 function PopularFeedbackRow({ item }: { item: PopularFeedbackItem }) {
   return (
-    <Link className="homepage-popular-row" to={getFeedbackDetailPath(item.category, item.id)}>
+    <Link className="homepage-popular-row" to={getFeedbackDetailPath(item.type, item.id)}>
       <Flame className="homepage-flame" size={20} fill="currentColor" />
       <div className="homepage-popular-content">
-        <span className="homepage-category">{getCategoryLabel(item.category)}</span>
+        <span className="homepage-category">{getFeedbackTypeLabel(item.type)}</span>
         <h3>{item.title}</h3>
-        <p>멘토 · {item.mentorRole ?? item.authorRole ?? "개발자"}</p>
+        <p>{item.position ?? "피드백"} · 좋아요 {item.likes ?? 0}</p>
       </div>
-      <FeedbackMeta comments={item.commentCount} />
     </Link>
   );
 }

@@ -71,7 +71,7 @@ function RecentPost({ post }: { post: DashboardPost }) {
         <h3>{post.title}</h3>
         <p>{post.description}</p>
         <span className="dashboard-post-meta">
-          {post.createdAtText ?? "최근"} · 댓글 {post.commentCount ?? 0} · 좋아요 {post.likeCount ?? 0}
+          {post.created_at ?? "최근"} · 좋아요 {post.likes ?? 0}
         </span>
       </div>
     </Link>
@@ -87,7 +87,7 @@ function PopularFeedback({ item }: { item: DashboardPopularFeedback }) {
       </div>
       <span className="dashboard-popular-likes">
         <Heart size={16} />
-        {item.likeCount ?? 0}
+        {item.likes ?? 0}
       </span>
     </Link>
   );
@@ -102,9 +102,9 @@ function LikedPost({ post }: { post: DashboardLikedPost }) {
           {post.title}
           <span className="dashboard-chip">{getTypeLabel(post.type)}</span>
         </h3>
-        <p>{post.type === "PROJECT" ? "개발자" : "멘토"} · {post.authorRole ?? "개발자"}</p>
+        <p>{post.position ?? "피드백"}</p>
       </div>
-      <time>{post.createdAtText ?? "최근"}</time>
+      <time>{post.created_at ?? "최근"}</time>
     </Link>
   );
 }

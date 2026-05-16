@@ -84,11 +84,11 @@ function SignupPage() {
   return (
     <main className="signup-page">
       <section className="signup-intro" aria-label="DevFeedback 소개">
-        <Link className="brand" to={ROUTES.signup} aria-label="DevFeedback 회원가입">
+        <Link className="brand" to={ROUTES.signup} aria-label="GachonGrow 회원가입">
           <span className="brand-mark">
             <MessageSquareText size={18} strokeWidth={2.6} />
           </span>
-          <span>DevFeedback</span>
+          <span>GachonGrow</span>
         </Link>
 
         <div className="intro-content">
@@ -165,7 +165,7 @@ function SignupPage() {
 
           <div className="signup-heading">
             <h2>회원가입</h2>
-            <p>계정을 생성하고 DevFeedback을 시작해보세요!</p>
+            <p>계정을 생성하고 GachonGrow을 시작해보세요!</p>
           </div>
 
           <div className="signup-benefits">
@@ -200,7 +200,7 @@ function SignupPage() {
           </div>
 
           <p className="agreement">
-            가입하면 DevFeedback의 <Link to={ROUTES.terms}>이용약관</Link> 및{" "}
+            가입하면 GachonGrow의 <Link to={ROUTES.terms}>이용약관</Link> 및{" "}
             <Link to={ROUTES.privacy}>개인정보처리방침</Link>에 동의하게 됩니다.
           </p>
 

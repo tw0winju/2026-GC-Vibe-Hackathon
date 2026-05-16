@@ -18,12 +18,13 @@ import { Link, Navigate, useParams } from "react-router-dom";
 import { ROUTES } from "../../../app/routes";
 import AppLayout from "../../../components/layout/AppLayout";
 import {
-  projectFeedbackComments,
   projectFeedbackDetailsByPostId,
   projectFeedbackFallbackDetail,
 } from "../../../mocks/data/feedbackDetails";
 import { projectSidebarGuides } from "../../../mocks/data/feedbackPageContent";
+import { getMockComments } from "../../../mocks/data/comments";
 import { projectFeedbackPosts } from "../../../mocks/data/projectFeedbacks";
+import { getMockUserById } from "../../../mocks/data/users";
 import "./ProjectFeedbackDetailPage.css";
 
 const CURRENT_USER_ID = 101;
@@ -67,14 +68,16 @@ function ProjectDetailSidebar() {
 
 function ProjectFeedbackDetailPage() {
   const { id } = useParams();
-  const post = projectFeedbackPosts.find((item) => item.post_id === Number(id));
+  const post = projectFeedbackPosts.find((item) => item.id === Number(id));
 
   if (!post) {
     return <Navigate to={ROUTES.projectFeedbacks} replace />;
   }
 
-  const isAuthor = post.user.user_id === CURRENT_USER_ID;
-  const detail = projectFeedbackDetailsByPostId[post.post_id] ?? projectFeedbackFallbackDetail;
+  const isAuthor = post.user_id === CURRENT_USER_ID;
+  const detail = projectFeedbackDetailsByPostId[post.id] ?? projectFeedbackFallbackDetail;
+  const author = getMockUserById(post.user_id);
+  const comments = getMockComments("PROJECT", post.id);
 
   return (
     <AppLayout>
@@ -84,7 +87,7 @@ function ProjectFeedbackDetailPage() {
         <section className="project-detail-content">
           {isAuthor && (
             <div className="project-detail-actions" aria-label="작성자 작업">
-              <Link to={`/project-feedbacks/${post.post_id}/edit`}>수정</Link>
+              <Link to={`/project-feedbacks/${post.id}/edit`}>수정</Link>
               <button type="button">삭제</button>
             </div>
           )}
@@ -102,12 +105,12 @@ function ProjectFeedbackDetailPage() {
                 <UserRoundCheck size={18} />
               </span>
               <div>
-                <strong>{post.user.nickname}</strong>
+                <strong>{author?.nickname ?? "사용자"}</strong>
                 <span>{post.position} · 프로젝트 작성자</span>
               </div>
               <time>{formatProjectDateTime(post.created_at)}</time>
-              <span>좋아요 {post.like}</span>
-              <span>피드백 {projectFeedbackComments.length}</span>
+              <span>좋아요 {post.likes}</span>
+              <span>피드백 {comments.length}</span>
             </div>
 
             <div className="project-detail-tools">
@@ -169,30 +172,32 @@ function ProjectFeedbackDetailPage() {
 
           <section className="project-comments">
             <div className="project-comments__header">
-              <h2>피드백 {projectFeedbackComments.length}</h2>
+              <h2>피드백 {comments.length}</h2>
             </div>
 
             <div className="project-comment-list">
-              {projectFeedbackComments.map((comment) => (
+              {comments.map((comment) => {
+                const commentAuthor = getMockUserById(comment.user_id);
+
+                return (
                 <article className="project-comment" key={comment.id}>
                   <span className="project-comment__avatar">
                     <UserRoundCheck size={18} />
                   </span>
                   <div>
                     <div className="project-comment__meta">
-                      <strong>{comment.author}</strong>
-                      <span>{comment.role}</span>
-                      <time>{comment.createdAt}</time>
+                      <strong>{commentAuthor?.nickname ?? "사용자"}</strong>
+                      <time>{comment.created_at}</time>
                     </div>
                     <p>{comment.content}</p>
                     <div className="project-comment__actions">
-                      <button type="button">도움돼요 {comment.helpful}</button>
                       <button type="button">댓글 달기</button>
                       <button type="button">신고</button>
                     </div>
                   </div>
                 </article>
-              ))}
+                );
+              })}
             </div>
           </section>
         </section>
@@ -239,7 +244,11 @@ function ProjectFeedbackDetailPage() {
   );
 }
 
-function formatProjectDateTime(value: string) {
+function formatProjectDateTime(value?: string) {
+  if (!value) {
+    return "";
+  }
+
   return new Intl.DateTimeFormat("ko-KR", {
     year: "numeric",
     month: "2-digit",
