@@ -6,6 +6,7 @@ import DashboardPage from "../features/dashboard/components/DashboardPage";
 import LikedPostsPage from "../features/dashboard/components/LikedPostsPage";
 import MyActivityPage from "../features/dashboard/components/MyActivityPage";
 import NotificationSettingsPage from "../features/dashboard/components/NotificationSettingsPage";
+import ProfileEditPage from "../features/dashboard/components/ProfileEditPage";
 import WrittenFeedbackPage from "../features/dashboard/components/WrittenFeedbackPage";
 import { GuideDetailPage, GuideIndexPage } from "../features/guide/components/GuidePage";
 import Homepage from "../features/home/components/Homepage";
@@ -45,7 +46,7 @@ function AppRouter() {
       <Route path={ROUTES.projectFeedbackDetail} element={<ProjectFeedbackDetailPage />} />
       <Route path={ROUTES.projectFeedbackEdit} element={<ReadyPage title="프로젝트 피드백 수정" />} />
       <Route path={ROUTES.mypage} element={<DashboardPage />} />
-      <Route path={ROUTES.mypageEdit} element={<ReadyPage title="마이페이지 편집" />} />
+      <Route path={ROUTES.mypageEdit} element={<ProfileEditPage />} />
       <Route path={ROUTES.myActivity} element={<MyActivityPage />} />
       <Route path={ROUTES.writtenFeedbacks} element={<WrittenFeedbackPage />} />
       <Route path={ROUTES.likedPosts} element={<LikedPostsPage />} />

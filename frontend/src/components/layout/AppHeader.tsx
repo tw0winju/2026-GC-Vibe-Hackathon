@@ -41,13 +41,13 @@ function AppHeader() {
           <button className="app-header__icon-button" type="button" aria-label="알림">
             <Bell size={21} strokeWidth={2.1} />
           </button>
-          <button className="app-header__profile" type="button" aria-label="프로필 메뉴">
+          <NavLink className="app-header__profile" to={ROUTES.mypage} aria-label="마이페이지로 이동">
             <span className="app-header__avatar">
               <UserRound size={18} strokeWidth={2.5} />
             </span>
             <span>김코딩</span>
             <ChevronDown size={16} strokeWidth={2.3} />
-          </button>
+          </NavLink>
         </div>
       </div>
     </header>
