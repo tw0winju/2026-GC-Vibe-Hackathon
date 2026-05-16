@@ -15,6 +15,7 @@ type ProjectPostInput = {
   file_url?: string;
   thumbnail?: string;
   position?: Position;
+  tag?: Array<string>;
 };
 
 const PROJECT_POST_SELECT =
@@ -49,7 +50,10 @@ export const listProjectPosts = async (query: ListProjectPostsInput) => {
   };
 };
 
-export const createProjectPost = async (userId: number, input: Required<ProjectPostInput>) => {
+export const createProjectPost = async (
+  userId: number,
+  input: Required<ProjectPostInput>,
+) => {
   const { data, error } = await supabase
     .from("project_posts")
     .insert({
@@ -59,6 +63,7 @@ export const createProjectPost = async (userId: number, input: Required<ProjectP
       file_url: input.file_url,
       thumbnail: input.thumbnail,
       position: input.position,
+      tag: input.tag,
       like: 0,
     })
     .select("id,title,description,file_url,thumbnail,like,position,created_at")
@@ -75,7 +80,7 @@ export const getProjectPost = async (postId: number) => {
   const { data: post, error } = await supabase
     .from("project_posts")
     .select(
-      "id,title,description,file_url,thumbnail,like,position,created_at,updated_at,user:users(id,nickname,position)"
+      "id,title,description,file_url,thumbnail,like,position,tag,created_at,updated_at,user:users(id,nickname,position)",
     )
     .eq("id", postId)
     .single();
@@ -86,7 +91,9 @@ export const getProjectPost = async (postId: number) => {
 
   const { data: comments, error: commentError } = await supabase
     .from("comments")
-    .select("id,user_id,content,comment_parent_id,created_at,user:users(id,nickname)")
+    .select(
+      "id,user_id,content,comment_parent_id,created_at,user:users(id,nickname)",
+    )
     .eq("post_type", "project")
     .eq("post_id", postId)
     .order("created_at", { ascending: true });
@@ -101,7 +108,7 @@ export const getProjectPost = async (postId: number) => {
 export const updateProjectPost = async (
   postId: number,
   userId: number,
-  input: ProjectPostInput
+  input: ProjectPostInput,
 ) => {
   await assertProjectPostOwner(postId, userId);
 
@@ -109,7 +116,9 @@ export const updateProjectPost = async (
     .from("project_posts")
     .update(input)
     .eq("id", postId)
-    .select("id,title,description,file_url,thumbnail,like,position,updated_at")
+    .select(
+      "id,title,description,file_url,thumbnail,like,position,tag,updated_at",
+    )
     .single();
 
   if (error || !data) {
@@ -122,10 +131,17 @@ export const updateProjectPost = async (
 export const deleteProjectPost = async (postId: number, userId: number) => {
   await assertProjectPostOwner(postId, userId);
 
-  await supabase.from("comments").delete().eq("post_type", "project").eq("post_id", postId);
+  await supabase
+    .from("comments")
+    .delete()
+    .eq("post_type", "project")
+    .eq("post_id", postId);
   await supabase.from("project_post_likes").delete().eq("post_id", postId);
 
-  const { error } = await supabase.from("project_posts").delete().eq("id", postId);
+  const { error } = await supabase
+    .from("project_posts")
+    .delete()
+    .eq("id", postId);
 
   if (error) {
     throw new AppError(500, "프로젝트 게시글 삭제에 실패했습니다.");
@@ -155,7 +171,9 @@ export const likeProjectPost = async (postId: number, userId: number) => {
   }
 
   const liked = !likedRow;
-  const nextLike = liked ? Number(post.like ?? 0) + 1 : Math.max(Number(post.like ?? 0) - 1, 0);
+  const nextLike = liked
+    ? Number(post.like ?? 0) + 1
+    : Math.max(Number(post.like ?? 0) - 1, 0);
 
   if (liked) {
     const { error } = await supabase.from("project_post_likes").insert({
@@ -204,6 +222,9 @@ async function assertProjectPostOwner(postId: number, userId: number) {
   }
 
   if (data.user_id !== userId) {
-    throw new AppError(403, "프로젝트 게시글 작성자만 수정하거나 삭제할 수 있습니다.");
+    throw new AppError(
+      403,
+      "프로젝트 게시글 작성자만 수정하거나 삭제할 수 있습니다.",
+    );
   }
 }
