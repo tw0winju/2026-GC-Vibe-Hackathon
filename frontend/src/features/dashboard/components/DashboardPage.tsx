@@ -202,7 +202,7 @@ function PopularFeedback({ item }: { item: DashboardPopularFeedback }) {
         <h3>{item.title}</h3>
       </div>
       <span className="dashboard-popular-likes">
-        <Heart size={28} />
+        <Heart size={16} />
         {item.likeCount ?? 0}
       </span>
     </article>
