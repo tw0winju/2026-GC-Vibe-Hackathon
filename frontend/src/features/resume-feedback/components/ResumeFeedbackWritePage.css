@@ -10,6 +10,11 @@
     #f8f9ff;
 }
 
+.resume-write-page--edit {
+  grid-template-columns: minmax(0, 920px);
+  justify-content: center;
+}
+
 .resume-write-sidebar {
   position: sticky;
   top: 96px;

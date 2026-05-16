@@ -1,4 +1,4 @@
-import { LogOut, ShieldAlert } from "lucide-react";
+import { LogOut, UserX } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { ROUTES } from "../../../app/routes";
@@ -16,6 +16,11 @@ function AccountSettingsPage() {
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
     navigate(ROUTES.signup);
+  };
+
+  const handleWithdraw = () => {
+    if (!window.confirm("회원 탈퇴를 진행할까요?")) return;
+    window.alert("회원 탈퇴 API가 연결되면 바로 처리할 수 있습니다.");
   };
 
   return (
@@ -47,20 +52,7 @@ function AccountSettingsPage() {
           <section className="settings-hero">
             <p>마이페이지</p>
             <h1>계정 설정</h1>
-            <span>백엔드 명세에 포함된 로그아웃만 사용할 수 있습니다.</span>
-          </section>
-
-          <section className="settings-card">
-            <h2>백엔드 미지원</h2>
-            <button className="settings-row" disabled type="button">
-              <span className="settings-row-icon">
-                <ShieldAlert size={20} />
-              </span>
-              <span className="settings-row-main">
-                <strong>비밀번호, 2단계 인증, 전화번호, 회원 탈퇴</strong>
-                <span>현재 API 명세에 endpoint가 없어 비활성화했습니다.</span>
-              </span>
-            </button>
+            <span>로그아웃하거나 계정 탈퇴를 진행할 수 있습니다.</span>
           </section>
 
           <section className="settings-card">
@@ -69,6 +61,10 @@ function AccountSettingsPage() {
               <button type="button" onClick={handleLogout}>
                 <LogOut size={18} />
                 로그아웃
+              </button>
+              <button className="is-danger" type="button" onClick={handleWithdraw}>
+                <UserX size={18} />
+                회원탈퇴
               </button>
             </div>
           </section>

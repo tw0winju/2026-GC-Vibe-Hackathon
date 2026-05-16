@@ -11,6 +11,7 @@ function MyActivityPage() {
     getMyPosts({ page: 1, size: 50 }).then((response) => {
       setItems(response.posts.map((post) => ({
         id: post.post_id,
+        href: post.type === "project" ? `/project-feedbacks/${post.post_id}` : `/resume-feedbacks/${post.post_id}`,
         category: post.type === "project" ? "프로젝트" : "이력서",
         title: post.title,
         description: post.description,

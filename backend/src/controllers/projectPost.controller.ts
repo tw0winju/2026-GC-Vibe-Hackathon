@@ -14,7 +14,7 @@ export const createProjectPost = async (req: Request, res: Response) => {
 };
 
 export const getProjectPost = async (req: Request, res: Response) => {
-  const result = await projectPostService.getProjectPost(Number(req.params.post_id));
+  const result = await projectPostService.getProjectPost(Number(req.params.post_id), req.user?.userId);
   res.json(result);
 };
 

@@ -17,7 +17,7 @@ export const ResumePostIdParamSchema = z.object({
 export const ResumePostCreateSchema = z.object({
   title: z.string().min(1).max(100),
   description: z.string().min(1).max(3000),
-  file_url: z.string().url(),
+  file_url: z.string().min(1),
   thumbnail: z.string().url().optional(),
   position: z.enum(POSITIONS),
 });

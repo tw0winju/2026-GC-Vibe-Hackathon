@@ -8,12 +8,13 @@ import {
   MessageSquare,
   Rocket,
   SearchCheck,
+  Send,
   ShieldCheck,
-  UserRoundCheck,
 } from "lucide-react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 
 import { ROUTES } from "../../../app/routes";
+import profileImage from "../../../assets/images/home/gg.png";
 import AppLayout from "../../../components/layout/AppLayout";
 import {
   createProjectComment,
@@ -71,6 +72,9 @@ function ProjectFeedbackDetailPage() {
   const [post, setPost] = useState<ProjectPost | null>(null);
   const [comments, setComments] = useState<CommentNode[]>([]);
   const [commentContent, setCommentContent] = useState("");
+  const [isLiking, setIsLiking] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeMessage, setLikeMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -84,6 +88,7 @@ function ProjectFeedbackDetailPage() {
       .then(([postResponse, commentsResponse]) => {
         if (!mounted) return;
         setPost(postResponse);
+        setIsLiked(Boolean(postResponse.liked));
         setComments(commentsResponse.comments);
       })
       .catch((error) => {
@@ -104,9 +109,22 @@ function ProjectFeedbackDetailPage() {
   }
 
   const handleLike = () => {
-    toggleProjectLike(postId).then((response) => {
-      setPost((current) => current ? { ...current, likes: response.likes } : current);
-    });
+    if (isLiking) return;
+    setIsLiking(true);
+    setLikeMessage("");
+
+    toggleProjectLike(postId)
+      .then((response) => {
+        setPost((current) => current ? { ...current, likes: response.likes } : current);
+        setIsLiked(response.liked);
+        setLikeMessage(response.liked ? "좋아요를 눌렀습니다." : "좋아요를 취소했습니다.");
+      })
+      .catch((error) => {
+        setLikeMessage(error instanceof Error ? error.message : "좋아요 처리에 실패했습니다.");
+      })
+      .finally(() => {
+        setIsLiking(false);
+      });
   };
 
   const handleDelete = () => {
@@ -151,7 +169,7 @@ function ProjectFeedbackDetailPage() {
 
                 <div className="project-detail-meta">
                   <span className="project-detail-avatar">
-                    <UserRoundCheck size={18} />
+                    <img src={profileImage} alt="" />
                   </span>
                   <div>
                     <strong>{post.user?.nickname ?? "사용자"}</strong>
@@ -163,14 +181,18 @@ function ProjectFeedbackDetailPage() {
                 </div>
 
                 <div className="project-detail-tools">
-                  <button type="button" onClick={handleLike}>
-                    <Heart size={18} />
-                    좋아요
+                  <button className={isLiked ? "is-liked" : ""} type="button" disabled={isLiking} onClick={handleLike}>
+                    <Heart size={18} fill={isLiked ? "currentColor" : "none"} />
+                    {isLiking ? "처리 중..." : "좋아요"}
                   </button>
                 </div>
+                {likeMessage && <p className="project-detail-feedback">{likeMessage}</p>}
 
                 <section className="project-detail-section">
                   <h2>프로젝트 소개</h2>
+                  {post.thumbnail && (
+                    <img className="project-detail-thumbnail" src={post.thumbnail} alt="" />
+                  )}
                   <p>{post.description}</p>
                 </section>
 
@@ -191,15 +213,21 @@ function ProjectFeedbackDetailPage() {
                   <h2>피드백 {comments.length}</h2>
                 </div>
 
-                <form className="project-comment-list" onSubmit={handleCommentSubmit}>
+                <form className="project-comment-form" onSubmit={handleCommentSubmit}>
                   <textarea
                     aria-label="댓글 내용"
                     maxLength={1000}
-                    placeholder="댓글을 입력하세요."
+                    placeholder="좋았던 점, 개선 아이디어, 다음 단계 제안을 남겨주세요."
                     value={commentContent}
                     onChange={(event) => setCommentContent(event.target.value)}
                   />
-                  <button disabled={!commentContent.trim()} type="submit">댓글 작성</button>
+                  <div className="project-comment-form__footer">
+                    <span>{commentContent.length}/1000</span>
+                    <button disabled={!commentContent.trim()} type="submit">
+                      <Send size={16} strokeWidth={2.3} />
+                      댓글 작성
+                    </button>
+                  </div>
                 </form>
 
                 <div className="project-comment-list">
@@ -249,7 +277,7 @@ function CommentArticle({ comment }: { comment: CommentNode }) {
   return (
     <article className="project-comment">
       <span className="project-comment__avatar">
-        <UserRoundCheck size={18} />
+        <img src={profileImage} alt="" />
       </span>
       <div>
         <div className="project-comment__meta">

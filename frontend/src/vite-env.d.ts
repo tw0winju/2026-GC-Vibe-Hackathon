@@ -2,8 +2,9 @@
 
 interface ImportMetaEnv {
   readonly VITE_BASE_URL?: string;
-  readonly VITE_KAKAO_OAUTH_URL?: string;
-  readonly VITE_GOOGLE_OAUTH_URL?: string;
+  readonly VITE_KAKAO_REST_API_KEY?: string;
+  readonly VITE_GOOGLE_CLIENT_ID?: string;
+  readonly VITE_OAUTH_REDIRECT_URI?: string;
 }
 
 interface ImportMeta {

@@ -24,3 +24,19 @@ export const authenticate = (req: Request, _res: Response, next: NextFunction) =
     throw new AppError(401, '유효하지 않은 토큰입니다');
   }
 };
+
+export const optionalAuthenticate = (req: Request, _res: Response, next: NextFunction) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader?.startsWith('Bearer ')) {
+    return next();
+  }
+
+  try {
+    req.user = verifyToken(authHeader.substring(7));
+  } catch {
+    req.user = undefined;
+  }
+
+  next();
+};

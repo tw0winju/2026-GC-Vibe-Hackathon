@@ -12,8 +12,9 @@ function WrittenFeedbackPage() {
     Promise.all([getMyComments({ page: 1, size: 50 }), getMe()]).then(([comments, me]) => {
       setItems(comments.comments.map((comment) => ({
         id: comment.id,
+        href: comment.post_type === "project" ? `/project-feedbacks/${comment.post_id}` : `/resume-feedbacks/${comment.post_id}`,
         category: comment.post_type === "project" ? "프로젝트" : "이력서",
-        title: `게시글 #${comment.post_id}에 작성한 댓글`,
+        title: comment.post_title ?? `게시글 #${comment.post_id}에 작성한 댓글`,
         description: comment.content,
         author: "나",
         date: formatDate(comment.created_at),

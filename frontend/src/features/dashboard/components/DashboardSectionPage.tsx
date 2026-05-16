@@ -8,6 +8,7 @@ import "./DashboardSectionPage.css";
 
 export type DashboardSectionItem = {
   id: number;
+  href?: string;
   category: string;
   title: string;
   description: string;
@@ -132,38 +133,50 @@ function DashboardSectionPage({
 
             <div className="dashboard-section-list">
               {visibleItems.length ? (
-                visibleItems.map((item) => (
-                  <article className="dashboard-section-item" key={item.id}>
-                    <span className="dashboard-section-chip">{item.category}</span>
-                    <div className="dashboard-section-item-main">
-                      <div>
-                        <h2>{item.title}</h2>
-                        {item.status && <span className="dashboard-section-status">{item.status}</span>}
+                visibleItems.map((item) => {
+                  const content = (
+                    <>
+                      <span className="dashboard-section-chip">{item.category}</span>
+                      <div className="dashboard-section-item-main">
+                        <div>
+                          <h2>{item.title}</h2>
+                          {item.status && <span className="dashboard-section-status">{item.status}</span>}
+                        </div>
+                        <p>{item.description}</p>
+                        <div className="dashboard-section-tags">
+                          {item.tags?.map((tag) => (
+                            <span key={tag}>#{tag}</span>
+                          ))}
+                        </div>
                       </div>
-                      <p>{item.description}</p>
-                      <div className="dashboard-section-tags">
-                        {item.tags?.map((tag) => (
-                          <span key={tag}>#{tag}</span>
-                        ))}
+                      <div className="dashboard-section-meta">
+                        <span>{item.author}</span>
+                        <span>
+                          <CalendarDays size={15} />
+                          {item.date}
+                        </span>
+                        <span>
+                          <MessageCircle size={15} />
+                          {item.comments ?? 0}
+                        </span>
+                        <span>
+                          <Heart size={15} />
+                          {item.likes ?? 0}
+                        </span>
                       </div>
-                    </div>
-                    <div className="dashboard-section-meta">
-                      <span>{item.author}</span>
-                      <span>
-                        <CalendarDays size={15} />
-                        {item.date}
-                      </span>
-                      <span>
-                        <MessageCircle size={15} />
-                        {item.comments ?? 0}
-                      </span>
-                      <span>
-                        <Heart size={15} />
-                        {item.likes ?? 0}
-                      </span>
-                    </div>
-                  </article>
-                ))
+                    </>
+                  );
+
+                  return item.href ? (
+                    <Link className="dashboard-section-item dashboard-section-item--link" key={item.id} to={item.href}>
+                      {content}
+                    </Link>
+                  ) : (
+                    <article className="dashboard-section-item" key={item.id}>
+                      {content}
+                    </article>
+                  );
+                })
               ) : (
                 <p className="dashboard-section-empty">아직 표시할 항목이 없습니다.</p>
               )}

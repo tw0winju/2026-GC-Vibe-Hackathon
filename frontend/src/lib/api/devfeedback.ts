@@ -39,6 +39,9 @@ export type MeResponse = {
   nickname: string;
   position: Position;
   introduction: string | null;
+  school: string | null;
+  grade: string | null;
+  email: string | null;
   git_url: string | null;
   linked_url: string | null;
   blog_url: string | null;
@@ -58,6 +61,7 @@ export type ResumePost = {
   file_url?: string | null;
   thumbnail?: string | null;
   likes: number;
+  liked?: boolean;
   position: Position;
   created_at: string;
   updated_at?: string;
@@ -71,6 +75,7 @@ export type ProjectPost = {
   description: string;
   thumbnail?: string | null;
   likes: number;
+  liked?: boolean;
   position: Position;
   tag: string[];
   created_at: string;
@@ -135,6 +140,7 @@ export type UserComment = {
   id: number;
   content: string;
   post_id: number;
+  post_title?: string;
   post_type: PostType;
   created_at: string;
 };
@@ -171,6 +177,9 @@ export type CreateProjectPostBody = {
   position: Position;
   tag: string[];
 };
+
+export type UpdateResumePostBody = Partial<CreateResumePostBody>;
+export type UpdateProjectPostBody = Partial<CreateProjectPostBody>;
 
 export type UpdateProfileBody = Partial<{
   nickname: string;
@@ -214,11 +223,11 @@ export function getProjectPosts(params: ListPostsParams = {}) {
 }
 
 export function getResumePost(postId: number) {
-  return apiRequest<ResumePost>(`/resume-posts/${postId}`, { auth: false });
+  return apiRequest<ResumePost>(`/resume-posts/${postId}`);
 }
 
 export function getProjectPost(postId: number) {
-  return apiRequest<ProjectPost>(`/project-posts/${postId}`, { auth: false });
+  return apiRequest<ProjectPost>(`/project-posts/${postId}`);
 }
 
 export function createResumePost(body: CreateResumePostBody) {
@@ -231,6 +240,20 @@ export function createResumePost(body: CreateResumePostBody) {
 export function createProjectPost(body: CreateProjectPostBody) {
   return apiRequest<ProjectPost>("/project-posts", {
     method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export function updateResumePost(postId: number, body: UpdateResumePostBody) {
+  return apiRequest<ResumePost>(`/resume-posts/${postId}`, {
+    method: "PUT",
+    body: JSON.stringify(body),
+  });
+}
+
+export function updateProjectPost(postId: number, body: UpdateProjectPostBody) {
+  return apiRequest<ProjectPost>(`/project-posts/${postId}`, {
+    method: "PUT",
     body: JSON.stringify(body),
   });
 }
@@ -297,12 +320,13 @@ export function getUploadUrl(body: { type: "resume" | "thumbnail"; filename: str
 }
 
 export async function uploadFileToSignedUrl(uploadUrl: string, file: File) {
+  const formData = new FormData();
+  formData.append("cacheControl", "3600");
+  formData.append("", file);
+
   const response = await fetch(uploadUrl, {
     method: "PUT",
-    headers: {
-      "Content-Type": file.type,
-    },
-    body: file,
+    body: formData,
   });
 
   if (!response.ok) {

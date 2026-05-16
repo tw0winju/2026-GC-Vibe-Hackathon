@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { authenticate } from "../middlewares/auth.js";
+import { authenticate, optionalAuthenticate } from "../middlewares/auth.js";
 import { validate } from "../middlewares/validate.js";
 import * as resumePostController from "../controllers/resumePost.controller.js";
 import {
@@ -47,7 +47,7 @@ const ResumePostListResponseSchema = z
 
 const LikeResponseSchema = z
   .object({
-    like: z.number().int(),
+    likes: z.number().int(),
     liked: z.boolean(),
   })
   .openapi("ResumeLikeResponse");
@@ -199,6 +199,7 @@ router.post(
 
 router.get(
   "/:post_id",
+  optionalAuthenticate,
   validate({ params: ResumePostIdParamSchema }),
   resumePostController.getResumePost,
 );

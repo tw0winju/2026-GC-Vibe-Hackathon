@@ -5,8 +5,10 @@ import type {
   UserListQuery,
 } from "../schemas/user.schema.js";
 
-const USER_PUBLIC_SELECT =
+const USER_BASE_SELECT =
   "id,nickname,position,introduction,git_url,linked_url,blog_url,tag";
+const USER_PUBLIC_SELECT =
+  "id,nickname,position,introduction,school,grade,email,git_url,linked_url,blog_url,tag";
 
 // DB 컬럼명 'likes' 사용
 const POST_BASIC_SELECT =
@@ -19,11 +21,36 @@ function formatUser(row: Record<string, unknown>) {
     nickname: row.nickname,
     position: row.position ?? null,
     introduction: row.introduction ?? null,
+    school: row.school ?? null,
+    grade: row.grade ?? null,
+    email: row.email ?? null,
     git_url: row.git_url ?? null,
     linked_url: row.linked_url ?? null,
     blog_url: row.blog_url ?? null,
     tag: (row.tag as string[] | null) ?? [],
   };
+}
+
+function hasProfileColumnPatch(input: UpdateUserBody) {
+  return "school" in input || "grade" in input || "email" in input;
+}
+
+function isMissingProfileColumnError(error: unknown) {
+  const message =
+    typeof error === "object" && error !== null && "message" in error
+      ? String((error as { message?: string }).message)
+      : "";
+
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    ((error as { code?: string }).code === "42703" ||
+      (error as { code?: string }).code === "PGRST204" ||
+      message.includes("school") ||
+      message.includes("grade") ||
+      message.includes("email"))
+  );
 }
 
 function formatPostRow(p: any, type: "resume" | "project") {
@@ -71,15 +98,28 @@ async function getUserCounts(userId: number) {
 
 // ── GET /users/me ─────────────────────────────────────────
 export const getMe = async (userId: number) => {
-  const { data, error } = await supabase
+  const profileResult = await supabase
     .from("users")
     .select(USER_PUBLIC_SELECT)
     .eq("id", userId)
     .single();
+  let data = profileResult.data as Record<string, unknown> | null;
+  let error = profileResult.error;
+
+  if (isMissingProfileColumnError(error)) {
+    const fallback = await supabase
+      .from("users")
+      .select(USER_BASE_SELECT)
+      .eq("id", userId)
+      .single();
+
+    data = fallback.data as Record<string, unknown> | null;
+    error = fallback.error;
+  }
 
   if (error || !data) throw new AppError(404, "유저를 찾을 수 없습니다");
 
-  const profile = formatUser(data as Record<string, unknown>);
+  const profile = formatUser(data);
   const counts = await getUserCounts(userId);
 
   return { ...profile, counts };
@@ -98,15 +138,35 @@ export const updateMe = async (userId: number, input: UpdateUserBody) => {
     if (dup) throw new AppError(409, "이미 사용 중인 닉네임입니다");
   }
 
-  const { data, error } = await supabase
+  const updateResult = await supabase
     .from("users")
     .update({ ...input, updated_at: new Date().toISOString() })
     .eq("id", userId)
     .select(USER_PUBLIC_SELECT)
     .single();
+  let data = updateResult.data as Record<string, unknown> | null;
+  let error = updateResult.error;
+
+  if (isMissingProfileColumnError(error) && !hasProfileColumnPatch(input)) {
+    const fallback = await supabase
+      .from("users")
+      .select(USER_BASE_SELECT)
+      .eq("id", userId)
+      .single();
+
+    data = fallback.data as Record<string, unknown> | null;
+    error = fallback.error;
+  }
+
+  if (isMissingProfileColumnError(error) && hasProfileColumnPatch(input)) {
+    throw new AppError(
+      500,
+      "프로필 확장 컬럼(school, grade, email)이 DB에 없습니다. 마이그레이션을 먼저 적용해주세요",
+    );
+  }
 
   if (error || !data) throw new AppError(500, "프로필 수정에 실패했습니다");
-  return formatUser(data as Record<string, unknown>);
+  return formatUser(data);
 };
 
 // ── GET /users/posts ──────────────────────────────────────
@@ -117,7 +177,7 @@ export const getMyPosts = async (userId: number, query: UserListQuery) => {
   const wantResume = !query.post_type || query.post_type === "resume";
   const wantProject = !query.post_type || query.post_type === "project";
 
-  const requests: Promise<any>[] = [];
+  const requests: Array<PromiseLike<any>> = [];
   if (wantResume) {
     requests.push(
       supabase
@@ -191,7 +251,41 @@ export const getMyComments = async (
   const { data, error, count } = await request;
   if (error) throw new AppError(500, "작성한 댓글 조회에 실패했습니다");
 
-  return { comments: data ?? [], total: count ?? 0, page: query.page };
+  const comments = data ?? [];
+  const resumeIds = comments
+    .filter((comment: any) => comment.post_type === "resume")
+    .map((comment: any) => comment.post_id);
+  const projectIds = comments
+    .filter((comment: any) => comment.post_type === "project")
+    .map((comment: any) => comment.post_id);
+
+  const [resumeRes, projectRes] = await Promise.all([
+    resumeIds.length
+      ? supabase.from("resume_posts").select("id,title").in("id", resumeIds)
+      : Promise.resolve({ data: [], error: null }),
+    projectIds.length
+      ? supabase.from("project_posts").select("id,title").in("id", projectIds)
+      : Promise.resolve({ data: [], error: null }),
+  ]);
+
+  if (resumeRes.error || projectRes.error) {
+    throw new AppError(500, "댓글 대상 게시글 조회에 실패했습니다");
+  }
+
+  const resumeTitleMap = new Map((resumeRes.data ?? []).map((post: any) => [post.id, post.title]));
+  const projectTitleMap = new Map((projectRes.data ?? []).map((post: any) => [post.id, post.title]));
+
+  return {
+    comments: comments.map((comment: any) => ({
+      ...comment,
+      post_title:
+        comment.post_type === "resume"
+          ? resumeTitleMap.get(comment.post_id) ?? "삭제된 게시글"
+          : projectTitleMap.get(comment.post_id) ?? "삭제된 게시글",
+    })),
+    total: count ?? 0,
+    page: query.page,
+  };
 };
 
 // ── GET /users/likes ──────────────────────────────────────

@@ -18,7 +18,7 @@ export const ProjectPostCreateSchema = z.object({
   title: z.string().min(1).max(100),
   description: z.string().min(1).max(3000),
   file_url: z.string().url().optional(),
-  thumbnail: z.string().url().optional(),
+  thumbnail: z.string().min(1).optional(),
   position: z.enum(POSITIONS),
   tag: z.array(z.string()).default([]),
 });

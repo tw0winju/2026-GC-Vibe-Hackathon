@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { authenticate } from "../middlewares/auth.js";
+import { authenticate, optionalAuthenticate } from "../middlewares/auth.js";
 import { validate } from "../middlewares/validate.js";
 import * as projectPostController from "../controllers/projectPost.controller.js";
 import {
@@ -46,7 +46,7 @@ const ProjectPostListResponseSchema = z
   .openapi("ProjectPostListResponse");
 
 const LikeResponseSchema = z
-  .object({ like: z.number().int(), liked: z.boolean() })
+  .object({ likes: z.number().int(), liked: z.boolean() })
   .openapi("LikeResponse");
 
 // ── Swagger 등록 ───────────────────────────────────────────
@@ -155,7 +155,7 @@ registry.registerPath({
 
 router.get("/", validate({ query: ProjectPostListQuerySchema }), projectPostController.listProjectPosts);
 router.post("/", authenticate, validate({ body: ProjectPostCreateSchema }), projectPostController.createProjectPost);
-router.get("/:post_id", validate({ params: ProjectPostIdParamSchema }), projectPostController.getProjectPost);
+router.get("/:post_id", optionalAuthenticate, validate({ params: ProjectPostIdParamSchema }), projectPostController.getProjectPost);
 router.put("/:post_id", authenticate, validate({ params: ProjectPostIdParamSchema, body: ProjectPostUpdateSchema }), projectPostController.updateProjectPost);
 router.delete("/:post_id", authenticate, validate({ params: ProjectPostIdParamSchema }), projectPostController.deleteProjectPost);
 router.post("/:post_id/like", authenticate, validate({ params: ProjectPostIdParamSchema }), projectPostController.likeProjectPost);

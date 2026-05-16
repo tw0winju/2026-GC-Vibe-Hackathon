@@ -204,6 +204,19 @@
   border-bottom: 1px solid #edf0f6;
 }
 
+.dashboard-section-item--link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.dashboard-section-item--link:hover h2 {
+  color: #4054f7;
+}
+
+.dashboard-section-item--link:hover {
+  background: #fbfbff;
+}
+
 .dashboard-section-item:last-child {
   border-bottom: 0;
 }

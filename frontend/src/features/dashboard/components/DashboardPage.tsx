@@ -9,12 +9,12 @@ import {
   Pencil,
   Star,
   ThumbsUp,
-  UserRound,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
 import { ROUTES } from "../../../app/routes";
+import profileImage from "../../../assets/images/home/gg.png";
 import AppLayout from "../../../components/layout/AppLayout";
 import {
   adaptFrontPostType,
@@ -127,6 +127,9 @@ function DashboardPage() {
   const [profile, setProfile] = useState({
     name: "",
     bio: "",
+    school: "",
+    grade: "",
+    email: "",
     githubUrl: "",
     blogUrl: "",
     techStacks: [] as string[],
@@ -154,6 +157,9 @@ function DashboardPage() {
         setProfile({
           name: me.nickname,
           bio: me.introduction ?? "",
+          school: me.school ?? "",
+          grade: me.grade ?? "",
+          email: me.email ?? "",
           githubUrl: me.git_url ?? "",
           blogUrl: me.blog_url ?? "",
           techStacks: me.tag ?? [],
@@ -234,19 +240,19 @@ function DashboardPage() {
         <div className="dashboard-content">
           <section className="dashboard-profile-card">
             <div className="dashboard-avatar">
-              <UserRound size={62} />
+              <img src={profileImage} alt="" />
             </div>
             <div className="dashboard-profile-main">
               <div className="dashboard-profile-heading">
                 <h1>{profile.name}</h1>
-                <span>백엔드 미지원: 학교/학년</span>
+                <span>{[profile.school, profile.grade].filter(Boolean).join(" · ") || "학교/학년 미입력"}</span>
               </div>
               <p>{profile.bio}</p>
               <div className="dashboard-profile-grid">
                 <ProfileValue icon={Code} text={profile.githubUrl} />
-                <ProfileValue icon={Mail} text="" />
+                <ProfileValue icon={Mail} text={profile.email} />
                 <ProfileValue icon={Bookmark} text={profile.blogUrl} />
-                <ProfileValue icon={MapPin} text="" />
+                <ProfileValue icon={MapPin} text={profile.school} />
               </div>
               <div className="dashboard-tech-stack" aria-label="테크스택">
                 <strong>테크스택</strong>

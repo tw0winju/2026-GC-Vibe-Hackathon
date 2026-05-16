@@ -1,8 +1,11 @@
-import { Bell, ChevronDown, UserRound } from "lucide-react";
+import { Bell, ChevronDown } from "lucide-react";
+import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 
 import { ROUTES } from "../../app/routes";
 import ggLogo from "../../assets/images/home/GG_logo.png";
+import profileImage from "../../assets/images/home/gg.png";
+import { getMe } from "../../lib/api/devfeedback";
 
 const navItems = [
   { label: "홈", to: ROUTES.homepage },
@@ -13,6 +16,18 @@ const navItems = [
 ];
 
 function AppHeader() {
+  const [nickname, setNickname] = useState("");
+
+  useEffect(() => {
+    getMe()
+      .then((profile) => {
+        setNickname(profile.nickname);
+      })
+      .catch(() => {
+        setNickname("");
+      });
+  }, []);
+
   return (
     <header className="app-header">
       <div className="app-header__inner">
@@ -39,10 +54,8 @@ function AppHeader() {
             <Bell size={21} strokeWidth={2.1} />
           </button>
           <NavLink className="app-header__profile" to={ROUTES.mypage} aria-label="마이페이지로 이동">
-            <span className="app-header__avatar">
-              <UserRound size={18} strokeWidth={2.5} />
-            </span>
-            <span>김코딩</span>
+            <img className="app-header__avatar" src={profileImage} alt="" />
+            <span>{nickname || "마이페이지"}</span>
             <ChevronDown size={16} strokeWidth={2.3} />
           </NavLink>
         </div>

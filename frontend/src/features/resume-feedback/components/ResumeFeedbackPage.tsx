@@ -10,11 +10,11 @@ import {
   Search,
   SearchCheck,
   Sparkles,
-  UserRoundCheck,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { ROUTES } from "../../../app/routes";
+import profileImage from "../../../assets/images/home/gg.png";
 import AppLayout from "../../../components/layout/AppLayout";
 import { getResumePosts, type ResumePost } from "../../../lib/api/devfeedback";
 import { resumeSidebarGuides, resumeTips } from "../../../mocks/data/feedbackPageContent";
@@ -206,7 +206,7 @@ function ResumeFeedbackPage() {
                 <span className="resume-row__category">{post.position}</span>
                 <span className="resume-row__author">
                   <span className="resume-row__avatar">
-                    <UserRoundCheck size={16} strokeWidth={2.3} />
+                    <img src={profileImage} alt="" />
                   </span>
                   {post.user?.nickname ?? "사용자"}
                 </span>

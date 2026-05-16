@@ -1,6 +1,12 @@
 import { z } from '../config/zod.js';
 import { POSITIONS } from '../constants/enums.js';
 
+const nullableEmptyString = (schema: z.ZodString) =>
+  z.preprocess(
+    (value) => (value === '' ? null : value),
+    schema.nullable().optional(),
+  );
+
 // ── 공통: 프로필 카운트 ───────────────────────────────────
 // counts 객체 안의 키는 DB 컬럼 매핑이 아니라 의미별 이름이라
 // like(좋아요 누른 개수), comment(작성한 댓글 개수) 단수 유지
@@ -20,6 +26,9 @@ export const UserProfileSchema = z
     nickname: z.string(),
     position: z.enum(POSITIONS).nullable(),
     introduction: z.string().nullable(),
+    school: z.string().nullable(),
+    grade: z.string().nullable(),
+    email: z.string().nullable(),
     git_url: z.string().nullable(),
     linked_url: z.string().nullable(),
     blog_url: z.string().nullable(),
@@ -38,9 +47,12 @@ export const UpdateUserSchema = z
     nickname: z.string().min(1).max(30).optional(),
     position: z.enum(POSITIONS).optional(),
     introduction: z.string().max(500).optional(),
-    git_url: z.string().url().optional().nullable(),
-    linked_url: z.string().url().optional().nullable(),
-    blog_url: z.string().url().optional().nullable(),
+    school: nullableEmptyString(z.string().max(100)),
+    grade: nullableEmptyString(z.string().max(30)),
+    email: nullableEmptyString(z.string().email()),
+    git_url: nullableEmptyString(z.string().url()),
+    linked_url: nullableEmptyString(z.string().url()),
+    blog_url: nullableEmptyString(z.string().url()),
     tag: z.array(z.string()).optional(),
   })
   .openapi('UpdateUserRequest');
@@ -85,6 +97,7 @@ export const UserCommentItemSchema = z
     id: z.number().int(),
     content: z.string(),
     post_id: z.number().int(),
+    post_title: z.string(),
     post_type: z.enum(['resume', 'project']),
     created_at: z.string(),
   })

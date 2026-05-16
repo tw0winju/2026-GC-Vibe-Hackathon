@@ -7,15 +7,16 @@ import LikedPostsPage from "../features/dashboard/components/LikedPostsPage";
 import MyActivityPage from "../features/dashboard/components/MyActivityPage";
 import MyProjectsPage from "../features/dashboard/components/MyProjectsPage";
 import MyResumesPage from "../features/dashboard/components/MyResumesPage";
-import NotificationSettingsPage from "../features/dashboard/components/NotificationSettingsPage";
 import ProfileEditPage from "../features/dashboard/components/ProfileEditPage";
 import WrittenFeedbackPage from "../features/dashboard/components/WrittenFeedbackPage";
 import { GuideDetailPage, GuideIndexPage } from "../features/guide/components/GuidePage";
 import Homepage from "../features/home/components/Homepage";
 import ProjectFeedbackDetailPage from "../features/project-feedback/components/ProjectFeedbackDetailPage";
+import ProjectFeedbackEditPage from "../features/project-feedback/components/ProjectFeedbackEditPage";
 import ProjectFeedbackPage from "../features/project-feedback/components/ProjectFeedbackPage";
 import ProjectFeedbackWritePage from "../features/project-feedback/components/ProjectFeedbackWritePage";
 import ResumeFeedbackDetailPage from "../features/resume-feedback/components/ResumeFeedbackDetailPage";
+import ResumeFeedbackEditPage from "../features/resume-feedback/components/ResumeFeedbackEditPage";
 import ResumeFeedbackPage from "../features/resume-feedback/components/ResumeFeedbackPage";
 import ResumeFeedbackWritePage from "../features/resume-feedback/components/ResumeFeedbackWritePage";
 import { ROUTES } from "./routes";
@@ -36,17 +37,20 @@ function AppRouter() {
     <Routes>
       <Route path={ROUTES.root} element={<Navigate to={ROUTES.signup} replace />} />
       <Route path={ROUTES.signup} element={<SignupPage />} />
+      <Route path="/auth/callback" element={<SignupPage />} />
+      <Route path="/login/oauth2/code/kakao" element={<SignupPage />} />
+      <Route path="/login/oauth2/code/google" element={<SignupPage />} />
       <Route path={ROUTES.onboarding} element={<ReadyPage title="가입 후 설문" />} />
       <Route path={ROUTES.homepage} element={<Homepage />} />
       <Route path={ROUTES.home} element={<ReadyPage title="홈" />} />
       <Route path={ROUTES.resumeFeedbacks} element={<ResumeFeedbackPage />} />
       <Route path={ROUTES.resumeFeedbackWrite} element={<ResumeFeedbackWritePage />} />
       <Route path={ROUTES.resumeFeedbackDetail} element={<ResumeFeedbackDetailPage />} />
-      <Route path={ROUTES.resumeFeedbackEdit} element={<ReadyPage title="이력서 피드백 수정" />} />
+      <Route path={ROUTES.resumeFeedbackEdit} element={<ResumeFeedbackEditPage />} />
       <Route path={ROUTES.projectFeedbacks} element={<ProjectFeedbackPage />} />
       <Route path={ROUTES.projectFeedbackWrite} element={<ProjectFeedbackWritePage />} />
       <Route path={ROUTES.projectFeedbackDetail} element={<ProjectFeedbackDetailPage />} />
-      <Route path={ROUTES.projectFeedbackEdit} element={<ReadyPage title="프로젝트 피드백 수정" />} />
+      <Route path={ROUTES.projectFeedbackEdit} element={<ProjectFeedbackEditPage />} />
       <Route path={ROUTES.mypage} element={<DashboardPage />} />
       <Route path={ROUTES.mypageEdit} element={<ProfileEditPage />} />
       <Route path={ROUTES.myActivity} element={<MyActivityPage />} />
@@ -55,7 +59,7 @@ function AppRouter() {
       <Route path={ROUTES.myProjects} element={<MyProjectsPage />} />
       <Route path={ROUTES.myResumes} element={<MyResumesPage />} />
       <Route path={ROUTES.accountSettings} element={<AccountSettingsPage />} />
-      <Route path={ROUTES.notificationSettings} element={<NotificationSettingsPage />} />
+      <Route path={ROUTES.notificationSettings} element={<Navigate to={ROUTES.accountSettings} replace />} />
       <Route path={ROUTES.guide} element={<GuideIndexPage />} />
       <Route path={ROUTES.guideDetail} element={<GuideDetailPage />} />
       <Route path={ROUTES.terms} element={<ReadyPage title="이용약관" />} />

@@ -13,7 +13,6 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ROUTES } from "../../../app/routes";
 import AppLayout from "../../../components/layout/AppLayout";
 import { getMe, updateMe } from "../../../lib/api/devfeedback";
-import { profileEditInitialData } from "../../../mocks/data/dashboard";
 import { dashboardMenuGroups } from "./dashboardMenu";
 import "./DashboardPage.css";
 import "./ProfileEditPage.css";
@@ -30,23 +29,21 @@ const positionOptions = [
   "기획",
 ] as const;
 
-const gradeOptions = ["1학년", "2학년", "3학년", "4학년", "졸업생", "기타"];
+const gradeOptions = ["1학년", "2학년", "3학년", "4학년", "졸업생", "기타"] as const;
 
 function ProfileEditPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [nickname, setNickname] = useState(profileEditInitialData.nickname);
-  const [position, setPosition] = useState<(typeof positionOptions)[number]>(
-    profileEditInitialData.position as (typeof positionOptions)[number],
-  );
-  const [tagline, setTagline] = useState(profileEditInitialData.tagline);
-  const [school, setSchool] = useState(profileEditInitialData.school);
-  const [grade, setGrade] = useState(profileEditInitialData.grade);
-  const [email, setEmail] = useState(profileEditInitialData.email);
-  const [githubUrl, setGithubUrl] = useState(profileEditInitialData.githubUrl);
-  const [blogUrl, setBlogUrl] = useState(profileEditInitialData.blogUrl);
-  const [linkedUrl, setLinkedUrl] = useState(profileEditInitialData.linkedUrl);
-  const [techStacks, setTechStacks] = useState(profileEditInitialData.techStacks);
+  const [nickname, setNickname] = useState("");
+  const [position, setPosition] = useState<(typeof positionOptions)[number]>("웹 개발");
+  const [tagline, setTagline] = useState("");
+  const [school, setSchool] = useState("");
+  const [grade, setGrade] = useState<(typeof gradeOptions)[number]>("1학년");
+  const [email, setEmail] = useState("");
+  const [githubUrl, setGithubUrl] = useState("");
+  const [blogUrl, setBlogUrl] = useState("");
+  const [linkedUrl, setLinkedUrl] = useState("");
+  const [techStacks, setTechStacks] = useState<string[]>([]);
   const [stackInput, setStackInput] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -54,9 +51,12 @@ function ProfileEditPage() {
   useEffect(() => {
     getMe()
       .then((profile) => {
-        setNickname(profile.nickname);
-        setPosition(profile.position);
+        setNickname(profile.nickname ?? "");
+        setPosition(profile.position ?? "웹 개발");
         setTagline(profile.introduction ?? "");
+        setSchool(profile.school ?? "");
+        setGrade((profile.grade as (typeof gradeOptions)[number] | null) ?? "1학년");
+        setEmail(profile.email ?? "");
         setGithubUrl(profile.git_url ?? "");
         setBlogUrl(profile.blog_url ?? "");
         setLinkedUrl(profile.linked_url ?? "");
@@ -74,12 +74,15 @@ function ProfileEditPage() {
       nickname,
       position,
       introduction: tagline,
+      school,
+      grade,
+      email,
       git_url: githubUrl,
       linked_url: linkedUrl,
       blog_url: blogUrl,
       tag: techStacks,
     }),
-    [blogUrl, githubUrl, linkedUrl, nickname, position, tagline, techStacks],
+    [blogUrl, email, githubUrl, grade, linkedUrl, nickname, position, school, tagline, techStacks],
   );
 
   const addStack = () => {
@@ -174,15 +177,24 @@ function ProfileEditPage() {
                 </label>
                 <label>
                   <span>학교</span>
-                  <input disabled value="백엔드 미지원" readOnly />
+                  <input value={school} onChange={(event) => setSchool(event.target.value)} maxLength={100} />
                 </label>
                 <label>
                   <span>학년</span>
-                  <input disabled value="백엔드 미지원" readOnly />
+                  <select value={grade} onChange={(event) => setGrade(event.target.value as typeof grade)}>
+                    {gradeOptions.map((option) => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                  </select>
                 </label>
                 <label className="profile-edit-grid-wide">
                   <span>이메일</span>
-                  <input disabled value="백엔드 미지원" readOnly />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    maxLength={120}
+                  />
                 </label>
               </div>
             </section>
@@ -261,8 +273,8 @@ function ProfileEditPage() {
             </div>
             <p className="profile-preview-tagline">{tagline}</p>
             <div className="profile-preview-info">
-              <span><BookOpen size={16} />{school} {grade}</span>
-              <span><Mail size={16} />{email}</span>
+              <span><BookOpen size={16} />{school || "학교 미입력"} {grade}</span>
+              <span><Mail size={16} />{email || "이메일 미입력"}</span>
               <span><GitBranch size={16} />{githubUrl}</span>
               <span><LinkIcon size={16} />{blogUrl}</span>
             </div>

@@ -1,4 +1,5 @@
 import { supabase } from "../config/supabase.js";
+import { env } from "../config/env.js";
 import { AppError } from "../middlewares/errorHandler.js";
 import type { Position } from "../constants/enums.js";
 
@@ -23,13 +24,38 @@ type ProjectPostInput = {
 const PROJECT_POST_SELECT =
   "id,title,description,thumbnail,likes,position,tag,created_at,user:users(id,nickname)";
 
+function isAbsoluteUrl(value?: string | null) {
+  if (!value) return false;
+  try {
+    new URL(value);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function withPublicThumbnail<T extends { thumbnail?: string | null }>(post: T): T {
+  if (!post.thumbnail || isAbsoluteUrl(post.thumbnail)) return post;
+
+  const { data } = supabase.storage
+    .from(env.SUPABASE_BUCKET_THUMBNAIL)
+    .getPublicUrl(post.thumbnail);
+
+  return {
+    ...post,
+    thumbnail: data.publicUrl,
+  };
+}
+
 function sanitizeKeyword(raw: string): string {
   return raw.replace(/[%_]/g, "").replace(/[,()\\]/g, " ").trim();
 }
 
 export const listProjectPosts = async (query: ListProjectPostsInput) => {
-  const from = (query.page - 1) * query.size;
-  const to = from + query.size - 1;
+  const page = Number(query.page);
+  const size = Number(query.size);
+  const from = (page - 1) * size;
+  const to = from + size - 1;
   // sort: 'like' enum 값과 실제 DB 컬럼명 'likes' 매핑
   const orderColumn = query.sort === "like" ? "likes" : "created_at";
 
@@ -52,14 +78,15 @@ export const listProjectPosts = async (query: ListProjectPostsInput) => {
 
   const { data, error, count } = await request;
   if (error) {
+    console.error("Project post list lookup failed:", error);
     throw new AppError(500, "프로젝트 게시글 목록 조회에 실패했습니다.");
   }
 
   return {
-    posts: data ?? [],
+    posts: (data ?? []).map(withPublicThumbnail),
     total: count ?? 0,
-    page: query.page,
-    size: query.size,
+    page,
+    size,
   };
 };
 
@@ -85,10 +112,10 @@ export const createProjectPost = async (
     throw new AppError(500, "프로젝트 게시글 작성에 실패했습니다.");
   }
 
-  return data;
+  return withPublicThumbnail(data);
 };
 
-export const getProjectPost = async (postId: number) => {
+export const getProjectPost = async (postId: number, userId?: number) => {
   const { data: post, error } = await supabase
     .from("project_posts")
     .select(
@@ -110,8 +137,23 @@ export const getProjectPost = async (postId: number) => {
     .eq("post_id", postId)
     .order("created_at", { ascending: true });
 
-  if (commentError) return { ...post, comments: [] };
-  return { ...post, comments: comments ?? [] };
+  const postWithThumbnail = withPublicThumbnail(post);
+  let liked = false;
+
+  if (userId) {
+    const { data: likedRow } = await supabase
+      .from("likes")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("post_id", postId)
+      .eq("post_type", "project")
+      .maybeSingle();
+
+    liked = Boolean(likedRow);
+  }
+
+  if (commentError) return { ...postWithThumbnail, liked, comments: [] };
+  return { ...postWithThumbnail, liked, comments: comments ?? [] };
 };
 
 export const updateProjectPost = async (
@@ -132,7 +174,7 @@ export const updateProjectPost = async (
     throw new AppError(500, "프로젝트 게시글 수정에 실패했습니다.");
   }
 
-  return data;
+  return withPublicThumbnail(data);
 };
 
 export const deleteProjectPost = async (postId: number, userId: number) => {

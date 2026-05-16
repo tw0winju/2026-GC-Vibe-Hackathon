@@ -373,6 +373,13 @@
   background: linear-gradient(135deg, #263247 0%, #5f708c 100%);
 }
 
+.resume-row__avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
 .resume-row__likes {
   color: #536179;
 }

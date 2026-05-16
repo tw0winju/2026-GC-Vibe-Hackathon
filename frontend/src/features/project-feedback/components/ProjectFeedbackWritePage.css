@@ -10,6 +10,11 @@
     #f8f9ff;
 }
 
+.project-write-page--edit {
+  grid-template-columns: minmax(0, 920px);
+  justify-content: center;
+}
+
 .project-write-sidebar {
   position: sticky;
   top: 96px;

@@ -21,6 +21,7 @@ export const createResumePost = async (req: Request, res: Response) => {
 export const getResumePost = async (req: Request, res: Response) => {
   const result = await resumePostService.getResumePost(
     Number(req.params.post_id),
+    req.user?.userId,
   );
 
   res.json(result);

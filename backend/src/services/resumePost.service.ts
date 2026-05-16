@@ -27,8 +27,10 @@ function sanitizeKeyword(raw: string): string {
 }
 
 export const listResumePosts = async (query: ListResumePostsInput) => {
-  const from = (query.page - 1) * query.size;
-  const to = from + query.size - 1;
+  const page = Number(query.page);
+  const size = Number(query.size);
+  const from = (page - 1) * size;
+  const to = from + size - 1;
   // sort enum 'like' ↔ DB 컬럼 'likes' 매핑
   const orderColumn = query.sort === "like" ? "likes" : "created_at";
 
@@ -51,14 +53,15 @@ export const listResumePosts = async (query: ListResumePostsInput) => {
 
   const { data, error, count } = await request;
   if (error) {
+    console.error("Resume post list lookup failed:", error);
     throw new AppError(500, "이력서 게시글 목록 조회에 실패했습니다.");
   }
 
   return {
     posts: data ?? [],
     total: count ?? 0,
-    page: query.page,
-    size: query.size,
+    page,
+    size,
   };
 };
 
@@ -89,7 +92,7 @@ export const createResumePost = async (
   return data;
 };
 
-export const getResumePost = async (postId: number) => {
+export const getResumePost = async (postId: number, userId?: number) => {
   const { data: post, error } = await supabase
     .from("resume_posts")
     .select(
@@ -111,8 +114,23 @@ export const getResumePost = async (postId: number) => {
     .eq("post_type", "resume")
     .order("created_at", { ascending: true });
 
+  let liked = false;
+
+  if (userId) {
+    const { data: likedRow } = await supabase
+      .from("likes")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("post_id", postId)
+      .eq("post_type", "resume")
+      .maybeSingle();
+
+    liked = Boolean(likedRow);
+  }
+
   return {
     ...post,
+    liked,
     comments: comments ?? [],
   };
 };
@@ -172,17 +190,17 @@ export const likeResumePost = async (
   postId: number,
   userId: number,
 ) => {
-  const { data: post } = await supabase
+  const { data: post, error: postError } = await supabase
     .from("resume_posts")
     .select("id,likes")
     .eq("id", postId)
     .single();
 
-  if (!post) {
+  if (postError || !post) {
     throw new AppError(404, "이력서 게시글을 찾을 수 없습니다.");
   }
 
-  const { data: likedRow } = await supabase
+  const { data: likedRow, error: likeReadError } = await supabase
     .from("likes")
     .select("id")
     .eq("user_id", userId)
@@ -190,28 +208,44 @@ export const likeResumePost = async (
     .eq("post_type", "resume")
     .maybeSingle();
 
+  if (likeReadError) {
+    throw new AppError(500, "이력서 게시글 좋아요 조회에 실패했습니다.");
+  }
+
   let nextLikes = Number(post.likes ?? 0);
   let liked = false;
 
   if (likedRow) {
     nextLikes = Math.max(nextLikes - 1, 0);
-    await supabase.from("likes").delete().eq("id", likedRow.id);
+    const { error } = await supabase.from("likes").delete().eq("id", likedRow.id);
+    if (error) {
+      throw new AppError(500, "이력서 게시글 좋아요 취소에 실패했습니다.");
+    }
   } else {
     nextLikes += 1;
     liked = true;
-    await supabase.from("likes").insert({
+    const { error } = await supabase.from("likes").insert({
       user_id: userId,
       post_id: postId,
       post_type: "resume",
     });
+    if (error) {
+      throw new AppError(500, "이력서 게시글 좋아요 등록에 실패했습니다.");
+    }
   }
 
-  await supabase
+  const { data, error } = await supabase
     .from("resume_posts")
     .update({ likes: nextLikes })
-    .eq("id", postId);
+    .eq("id", postId)
+    .select("likes")
+    .single();
 
-  return { likes: nextLikes, liked };
+  if (error || !data) {
+    throw new AppError(500, "이력서 게시글 좋아요 처리에 실패했습니다.");
+  }
+
+  return { likes: data.likes, liked };
 };
 
 const assertResumePostOwner = async (

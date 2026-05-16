@@ -6,13 +6,14 @@ import {
   Lightbulb,
   MessageSquare,
   SearchCheck,
+  Send,
   Target,
-  UserRoundCheck,
   Wand2,
 } from "lucide-react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 
 import { ROUTES } from "../../../app/routes";
+import profileImage from "../../../assets/images/home/gg.png";
 import AppLayout from "../../../components/layout/AppLayout";
 import {
   createResumeComment,
@@ -32,6 +33,14 @@ const contentIconByKey = {
   message: MessageSquare,
   search: SearchCheck,
 };
+
+function isExampleFileUrl(fileUrl: string) {
+  try {
+    return new URL(fileUrl).hostname === "example.com";
+  } catch {
+    return false;
+  }
+}
 
 function ResumeSidebar() {
   return (
@@ -72,6 +81,10 @@ function ResumeFeedbackDetailPage() {
   const [comments, setComments] = useState<CommentNode[]>([]);
   const [commentContent, setCommentContent] = useState("");
   const [fileHref, setFileHref] = useState("");
+  const [fileMessage, setFileMessage] = useState("");
+  const [isLiking, setIsLiking] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeMessage, setLikeMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -80,20 +93,28 @@ function ResumeFeedbackDetailPage() {
     let mounted = true;
     setIsLoading(true);
     setErrorMessage("");
+    setFileHref("");
+    setFileMessage("");
 
     Promise.all([getResumePost(postId), getResumeComments(postId)])
       .then(([postResponse, commentsResponse]) => {
         if (!mounted) return;
         setPost(postResponse);
+        setIsLiked(Boolean(postResponse.liked));
         setComments(commentsResponse.comments);
 
         if (postResponse.file_url) {
+          if (isExampleFileUrl(postResponse.file_url)) {
+            setFileMessage("샘플 게시글에는 실제 이력서 파일이 연결되어 있지 않습니다.");
+            return;
+          }
+
           getFileUrl({ type: "resume", file_path: postResponse.file_url })
             .then((response) => {
               if (mounted) setFileHref(response.url);
             })
             .catch(() => {
-              if (mounted) setFileHref(postResponse.file_url ?? "");
+              if (mounted) setFileMessage("첨부 파일 링크를 불러오지 못했습니다.");
             });
         }
       })
@@ -115,9 +136,22 @@ function ResumeFeedbackDetailPage() {
   }
 
   const handleLike = () => {
-    toggleResumeLike(postId).then((response) => {
-      setPost((current) => current ? { ...current, likes: response.likes } : current);
-    });
+    if (isLiking) return;
+    setIsLiking(true);
+    setLikeMessage("");
+
+    toggleResumeLike(postId)
+      .then((response) => {
+        setPost((current) => current ? { ...current, likes: response.likes } : current);
+        setIsLiked(response.liked);
+        setLikeMessage(response.liked ? "좋아요를 눌렀습니다." : "좋아요를 취소했습니다.");
+      })
+      .catch((error) => {
+        setLikeMessage(error instanceof Error ? error.message : "좋아요 처리에 실패했습니다.");
+      })
+      .finally(() => {
+        setIsLiking(false);
+      });
   };
 
   const handleDelete = () => {
@@ -162,7 +196,7 @@ function ResumeFeedbackDetailPage() {
 
                 <div className="resume-detail-meta">
                   <span className="resume-detail-avatar">
-                    <UserRoundCheck size={18} />
+                    <img src={profileImage} alt="" />
                   </span>
                   <div>
                     <strong>{post.user?.nickname ?? "사용자"}</strong>
@@ -173,11 +207,12 @@ function ResumeFeedbackDetailPage() {
                 </div>
 
                 <div className="resume-detail-tools">
-                  <button type="button" onClick={handleLike}>
-                    <Heart size={18} />
-                    좋아요
+                  <button className={isLiked ? "is-liked" : ""} type="button" disabled={isLiking} onClick={handleLike}>
+                    <Heart size={18} fill={isLiked ? "currentColor" : "none"} />
+                    {isLiking ? "처리 중..." : "좋아요"}
                   </button>
                 </div>
+                {likeMessage && <p className="resume-detail-feedback">{likeMessage}</p>}
 
                 <section className="resume-detail-description-section">
                   <h2>피드백 요청 내용</h2>
@@ -187,9 +222,15 @@ function ResumeFeedbackDetailPage() {
                 {post.file_url && (
                   <section className="resume-attachment-section">
                     <h2>첨부 파일</h2>
-                    <a className="resume-file-box" href={fileHref || post.file_url} target="_blank" rel="noreferrer">
-                      이력서 파일 열기
-                    </a>
+                    {fileHref ? (
+                      <a className="resume-file-box" href={fileHref} target="_blank" rel="noreferrer">
+                        이력서 파일 열기
+                      </a>
+                    ) : (
+                      <span className="resume-file-box is-disabled">
+                        {fileMessage || "첨부 파일 링크를 준비하고 있습니다."}
+                      </span>
+                    )}
                   </section>
                 )}
               </article>
@@ -199,15 +240,21 @@ function ResumeFeedbackDetailPage() {
                   <h2>피드백 {comments.length}</h2>
                 </div>
 
-                <form className="resume-comment-list" onSubmit={handleCommentSubmit}>
+                <form className="resume-comment-form" onSubmit={handleCommentSubmit}>
                   <textarea
                     aria-label="댓글 내용"
                     maxLength={1000}
-                    placeholder="댓글을 입력하세요."
+                    placeholder="어떤 점이 좋았는지, 어떻게 개선하면 좋을지 남겨주세요."
                     value={commentContent}
                     onChange={(event) => setCommentContent(event.target.value)}
                   />
-                  <button disabled={!commentContent.trim()} type="submit">댓글 작성</button>
+                  <div className="resume-comment-form__footer">
+                    <span>{commentContent.length}/1000</span>
+                    <button disabled={!commentContent.trim()} type="submit">
+                      <Send size={16} strokeWidth={2.3} />
+                      댓글 작성
+                    </button>
+                  </div>
                 </form>
 
                 <div className="resume-comment-list">
@@ -257,7 +304,7 @@ function CommentArticle({ comment }: { comment: CommentNode }) {
   return (
     <article className="resume-comment">
       <span className="resume-comment__avatar">
-        <UserRoundCheck size={18} />
+        <img src={profileImage} alt="" />
       </span>
       <div>
         <div className="resume-comment__meta">

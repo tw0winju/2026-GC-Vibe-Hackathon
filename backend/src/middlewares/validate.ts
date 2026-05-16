@@ -6,8 +6,12 @@ export const validate =
   (req: Request, res: Response, next: NextFunction) => {
     try {
       if (schema.body) req.body = schema.body.parse(req.body);
-      if (schema.query) (req as any).query = schema.query.parse(req.query);
-      if (schema.params) (req as any).params = schema.params.parse(req.params);
+      if (schema.query) {
+        Object.assign(req.query, schema.query.parse(req.query));
+      }
+      if (schema.params) {
+        Object.assign(req.params, schema.params.parse(req.params));
+      }
       next();
     } catch (error) {
       if (error instanceof ZodError) {

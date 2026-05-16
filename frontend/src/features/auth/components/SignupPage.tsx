@@ -6,11 +6,12 @@ import {
   TrendingUp,
   UsersRound,
 } from "lucide-react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
 import { ROUTES } from "../../../app/routes";
 import googleLogo from "../../../assets/images/auth/google.png";
 import kakaoLogo from "../../../assets/images/auth/kakao.png";
+import { BASE_URL } from "../../../lib/api/client";
 import { getMe } from "../../../lib/api/devfeedback";
 import { socialLogin, type AuthProvider } from "../api/authApi";
 import "./SignupPage.css";
@@ -51,8 +52,11 @@ const signupBenefits = [
   },
 ];
 
+const socialLoginRequests = new Map<string, ReturnType<typeof socialLogin>>();
+
 function SignupPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const [authStatus, setAuthStatus] = useState<"idle" | "checking" | "signingIn" | "signedIn" | "guest" | "error">(
     "idle",
@@ -61,12 +65,37 @@ function SignupPage() {
 
   useEffect(() => {
     let mounted = true;
+    const accessToken = searchParams.get("access_token");
+    const refreshToken = searchParams.get("refresh_token");
+    const userId = searchParams.get("user_id");
+    const oauthError = searchParams.get("error");
     const code = searchParams.get("code");
-    const provider = resolveOAuthProvider(searchParams);
+    const provider = resolveOAuthProvider(searchParams, location.pathname);
+
+    if (oauthError) {
+      setAuthStatus("error");
+      setAuthMessage(decodeURIComponent(oauthError));
+      return () => {
+        mounted = false;
+      };
+    }
+
+    if (accessToken && refreshToken && userId) {
+      localStorage.setItem("access_token", accessToken);
+      localStorage.setItem("refresh_token", refreshToken);
+      localStorage.setItem("user_id", userId);
+      localStorage.removeItem("oauth_provider");
+      setAuthStatus("signedIn");
+      navigate(ROUTES.homepage, { replace: true });
+
+      return () => {
+        mounted = false;
+      };
+    }
 
     if (code && provider) {
       setAuthStatus("signingIn");
-      socialLogin(provider, code)
+      socialLoginOnce(provider, code)
         .then((response) => {
           if (!mounted) return;
           localStorage.setItem("access_token", response.access_token);
@@ -102,10 +131,17 @@ function SignupPage() {
     return () => {
       mounted = false;
     };
-  }, [navigate, searchParams]);
+  }, [location.pathname, navigate, searchParams]);
 
   const handleOAuthStart = (provider: AuthProvider) => {
     const oauthUrl = getOAuthStartUrl(provider);
+
+    if (!oauthUrl) {
+      setAuthStatus("error");
+      setAuthMessage(".env의 VITE_BASE_URL을 설정해주세요.");
+      return;
+    }
+
     localStorage.setItem("oauth_provider", provider);
     window.location.href = oauthUrl;
   };
@@ -244,17 +280,26 @@ function SignupPage() {
 }
 
 function getOAuthStartUrl(provider: AuthProvider) {
-  if (provider === "kakao") {
-    return import.meta.env.VITE_KAKAO_OAUTH_URL ?? `${import.meta.env.VITE_BASE_URL}/oauth2/authorization/kakao`;
-  }
-
-  return import.meta.env.VITE_GOOGLE_OAUTH_URL ?? `${import.meta.env.VITE_BASE_URL}/oauth2/authorization/google`;
+  if (!BASE_URL) return "";
+  return `${BASE_URL}/oauth2/authorization/${provider}`;
 }
 
-function resolveOAuthProvider(searchParams: URLSearchParams): AuthProvider | null {
+function socialLoginOnce(provider: AuthProvider, code: string) {
+  const requestKey = `${provider}:${code}`;
+  const cachedRequest = socialLoginRequests.get(requestKey);
+
+  if (cachedRequest) return cachedRequest;
+
+  const request = socialLogin(provider, code);
+  socialLoginRequests.set(requestKey, request);
+
+  return request;
+}
+
+function resolveOAuthProvider(searchParams: URLSearchParams, pathname: string): AuthProvider | null {
   const providerParam = searchParams.get("provider") ?? searchParams.get("state");
   const savedProvider = localStorage.getItem("oauth_provider");
-  const candidate = normalizeProvider(providerParam) ?? normalizeProvider(savedProvider);
+  const candidate = normalizeProvider(providerParam) ?? normalizeProvider(pathname) ?? normalizeProvider(savedProvider);
 
   return candidate;
 }

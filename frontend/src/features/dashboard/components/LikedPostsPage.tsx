@@ -12,6 +12,7 @@ function LikedPostsPage() {
     Promise.all([getMyLikes({ page: 1, size: 50 }), getMe()]).then(([likes, me]) => {
       setItems(likes.posts.map((post) => ({
         id: post.post_id,
+        href: post.type === "project" ? `/project-feedbacks/${post.post_id}` : `/resume-feedbacks/${post.post_id}`,
         category: post.type === "project" ? "프로젝트" : "이력서",
         title: post.title,
         description: post.description,
@@ -20,7 +21,6 @@ function LikedPostsPage() {
         likes: post.likes,
         tags: [post.position],
       })));
-      setSummaries([{ label: "좋아요 글", value: me.counts.like }]);
     });
   }, []);
 

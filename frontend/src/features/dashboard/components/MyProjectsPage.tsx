@@ -11,6 +11,7 @@ function MyProjectsPage() {
     getMyPosts({ page: 1, size: 50, post_type: "project" }).then((response) => {
       setItems(response.posts.map((post) => ({
         id: post.post_id,
+        href: `/project-feedbacks/${post.post_id}`,
         category: "프로젝트",
         title: post.title,
         description: post.description,

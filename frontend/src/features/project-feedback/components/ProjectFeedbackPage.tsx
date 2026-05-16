@@ -10,11 +10,11 @@ import {
   Search,
   SearchCheck,
   Sparkles,
-  UserRoundCheck,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { ROUTES } from "../../../app/routes";
+import profileImage from "../../../assets/images/home/gg.png";
 import AppLayout from "../../../components/layout/AppLayout";
 import { getProjectPosts, type ProjectPost } from "../../../lib/api/devfeedback";
 import { projectSidebarGuides, projectTips } from "../../../mocks/data/feedbackPageContent";
@@ -198,14 +198,23 @@ function ProjectFeedbackPage() {
             {!isLoading && !errorMessage && posts.map((post) => (
               <Link className="project-row" key={post.id} to={`/project-feedbacks/${post.id}`} role="row">
                 <div className="project-row__title">
-                  <strong>{post.title}</strong>
-                  <span>{post.description}</span>
+                  {post.thumbnail ? (
+                    <img className="project-row__thumbnail" src={post.thumbnail} alt="" loading="lazy" />
+                  ) : (
+                    <span className="project-row__thumbnail project-row__thumbnail--empty" aria-hidden="true">
+                      <Rocket size={18} strokeWidth={2.2} />
+                    </span>
+                  )}
+                  <div>
+                    <strong>{post.title}</strong>
+                    <span>{post.description}</span>
+                  </div>
                 </div>
                 <span className="project-row__category">{post.position}</span>
                 <span className="project-row__date">{formatProjectDate(post.created_at)}</span>
                 <span className="project-row__author">
                   <span className="project-row__avatar">
-                    <UserRoundCheck size={16} strokeWidth={2.3} />
+                    <img src={profileImage} alt="" />
                   </span>
                   {post.user?.nickname ?? "사용자"}
                 </span>

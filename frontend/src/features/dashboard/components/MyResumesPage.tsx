@@ -11,6 +11,7 @@ function MyResumesPage() {
     getMyPosts({ page: 1, size: 50, post_type: "resume" }).then((response) => {
       setItems(response.posts.map((post) => ({
         id: post.post_id,
+        href: `/resume-feedbacks/${post.post_id}`,
         category: "이력서",
         title: post.title,
         description: post.description,

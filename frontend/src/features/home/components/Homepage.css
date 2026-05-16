@@ -115,14 +115,15 @@
   transform: rotate(12deg);
 }
 
-.homepage-visual__profile svg {
+.homepage-visual__profile img {
   display: grid;
   width: 54px;
   height: 54px;
   place-items: center;
   padding: 10px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #626cff 0%, #313ce8 100%);
+  object-fit: cover;
+  background: #ffffff;
   box-shadow: 0 14px 22px rgba(64, 70, 241, 0.26);
 }
 
