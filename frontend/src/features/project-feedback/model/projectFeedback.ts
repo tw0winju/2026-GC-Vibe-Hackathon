@@ -3,7 +3,7 @@ export type ProjectFeedbackCategory =
   | "웹 개발"
   | "앱 개발"
   | "백엔드"
-  | "AI/데이터"
+  | "AI/ML"
   | "데이터"
   | "인프라"
   | "보안"
@@ -31,7 +31,7 @@ export const PROJECT_FEEDBACK_CATEGORIES: ProjectFeedbackCategory[] = [
   "웹 개발",
   "앱 개발",
   "백엔드",
-  "AI/데이터",
+  "AI/ML",
   "데이터",
   "인프라",
   "보안",
