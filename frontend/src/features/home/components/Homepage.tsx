@@ -1,10 +1,10 @@
 import { Code2, FileText, Flame, Pencil, UserRound } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { ROUTES } from "../../../app/routes";
 import AppLayout from "../../../components/layout/AppLayout";
-import { homeMyFeedbacks, homePopularFeedbacks } from "../../../mocks/data/homeFeedbacks";
+import { adaptFrontPostType, getMyPosts, getProjectPosts, getResumePosts } from "../../../lib/api/devfeedback";
 import { type FeedbackType, type MyFeedbackItem, type PopularFeedbackItem } from "../api/homeApi";
 import "./Homepage.css";
 
@@ -50,11 +50,54 @@ function PopularFeedbackRow({ item }: { item: PopularFeedbackItem }) {
 
 function Homepage() {
   const [activeFeedbackType, setActiveFeedbackType] = useState<"RESUME" | "PROJECT">("RESUME");
+  const [allMyFeedbacks, setAllMyFeedbacks] = useState<MyFeedbackItem[]>([]);
+  const [popularFeedbacks, setPopularFeedbacks] = useState<PopularFeedbackItem[]>([]);
 
   const myFeedbacks = useMemo(() => {
-    return homeMyFeedbacks.filter((item) => item.type === activeFeedbackType);
-  }, [activeFeedbackType]);
-  const popularFeedbacks = homePopularFeedbacks;
+    return allMyFeedbacks.filter((item) => item.type === activeFeedbackType);
+  }, [activeFeedbackType, allMyFeedbacks]);
+
+  useEffect(() => {
+    getMyPosts({ page: 1, size: 6 })
+      .then((response) => {
+        setAllMyFeedbacks(response.posts.map((post) => ({
+          id: post.post_id,
+          type: adaptFrontPostType(post.type),
+          title: post.title,
+          created_at: formatDate(post.created_at),
+          likes: post.likes,
+        })));
+      })
+      .catch(() => setAllMyFeedbacks([]));
+
+    Promise.all([
+      getResumePosts({ page: 1, size: 3, sort: "like" }),
+      getProjectPosts({ page: 1, size: 3, sort: "like" }),
+    ])
+      .then(([resume, project]) => {
+        setPopularFeedbacks(
+          [
+            ...resume.posts.map((post) => ({
+              id: post.id,
+              type: "RESUME" as const,
+              title: post.title,
+              position: post.position,
+              likes: post.likes,
+            })),
+            ...project.posts.map((post) => ({
+              id: post.id,
+              type: "PROJECT" as const,
+              title: post.title,
+              position: post.position,
+              likes: post.likes,
+            })),
+          ]
+            .sort((a, b) => (b.likes ?? 0) - (a.likes ?? 0))
+            .slice(0, 6),
+        );
+      })
+      .catch(() => setPopularFeedbacks([]));
+  }, []);
 
   return (
     <AppLayout>
@@ -162,6 +205,10 @@ function Homepage() {
       </div>
     </AppLayout>
   );
+}
+
+function formatDate(value?: string) {
+  return value ? new Intl.DateTimeFormat("ko-KR").format(new Date(value)) : "";
 }
 
 export default Homepage;

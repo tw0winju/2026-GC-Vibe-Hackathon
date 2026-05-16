@@ -1,22 +1,22 @@
-import { ChevronRight, KeyRound, Link2, Mail, ShieldCheck, Smartphone, UserRound } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { LogOut, ShieldAlert } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
+import { ROUTES } from "../../../app/routes";
 import AppLayout from "../../../components/layout/AppLayout";
-import { accountSettingsSections } from "../../../mocks/data/dashboard";
+import { logout } from "../../auth/api/authApi";
 import { dashboardMenuGroups } from "./dashboardMenu";
 import "./SettingsPage.css";
 
-const settingIconByKey = {
-  key: KeyRound,
-  link: Link2,
-  mail: Mail,
-  phone: Smartphone,
-  shield: ShieldCheck,
-  user: UserRound,
-};
-
 function AccountSettingsPage() {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout().catch(() => null);
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    navigate(ROUTES.signup);
+  };
 
   return (
     <AppLayout>
@@ -47,38 +47,29 @@ function AccountSettingsPage() {
           <section className="settings-hero">
             <p>마이페이지</p>
             <h1>계정 설정</h1>
-            <span>프로필, 로그인, 보안, 연결 계정을 관리하세요.</span>
+            <span>백엔드 명세에 포함된 로그아웃만 사용할 수 있습니다.</span>
           </section>
 
-          {accountSettingsSections.map((section) => (
-            <section className="settings-card" key={section.title}>
-              <h2>{section.title}</h2>
-              <div className="settings-list">
-                {section.items.map((item) => {
-                  const Icon = settingIconByKey[item.icon];
-
-                  return (
-                    <button className="settings-row" key={item.label} type="button">
-                      <span className="settings-row-icon">
-                        <Icon size={20} />
-                      </span>
-                      <span className="settings-row-main">
-                        <strong>{item.label}</strong>
-                        <span>{item.value}</span>
-                      </span>
-                      <ChevronRight size={20} />
-                    </button>
-                  );
-                })}
-              </div>
-            </section>
-          ))}
+          <section className="settings-card">
+            <h2>백엔드 미지원</h2>
+            <button className="settings-row" disabled type="button">
+              <span className="settings-row-icon">
+                <ShieldAlert size={20} />
+              </span>
+              <span className="settings-row-main">
+                <strong>비밀번호, 2단계 인증, 전화번호, 회원 탈퇴</strong>
+                <span>현재 API 명세에 endpoint가 없어 비활성화했습니다.</span>
+              </span>
+            </button>
+          </section>
 
           <section className="settings-card">
             <h2>계정 관리</h2>
             <div className="settings-actions">
-              <button type="button">로그아웃</button>
-              <button className="is-danger" type="button">회원 탈퇴</button>
+              <button type="button" onClick={handleLogout}>
+                <LogOut size={18} />
+                로그아웃
+              </button>
             </div>
           </section>
         </main>

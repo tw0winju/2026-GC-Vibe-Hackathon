@@ -1,29 +1,31 @@
+import { FormEvent, useEffect, useState } from "react";
 import {
   Edit3,
+  FileSearch,
+  Heart,
   Lightbulb,
   MessageSquare,
-  MoreHorizontal,
   SearchCheck,
   Target,
-  FileSearch,
-  Wand2,
   UserRoundCheck,
+  Wand2,
 } from "lucide-react";
-import { Link, Navigate, useParams } from "react-router-dom";
+import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 
 import { ROUTES } from "../../../app/routes";
 import AppLayout from "../../../components/layout/AppLayout";
 import {
-  resumeFeedbackDetail,
-  resumeRelatedTagsByCategory,
-} from "../../../mocks/data/feedbackDetails";
+  createResumeComment,
+  deleteResumePost,
+  getFileUrl,
+  getResumeComments,
+  getResumePost,
+  toggleResumeLike,
+  type CommentNode,
+  type ResumePost,
+} from "../../../lib/api/devfeedback";
 import { resumeSidebarGuides } from "../../../mocks/data/feedbackPageContent";
-import { getMockComments } from "../../../mocks/data/comments";
-import { resumeFeedbackPosts } from "../../../mocks/data/resumeFeedbacks";
-import { getMockUserById } from "../../../mocks/data/users";
 import "./ResumeFeedbackDetailPage.css";
-
-const CURRENT_USER_ID = 1;
 
 const contentIconByKey = {
   lightbulb: Lightbulb,
@@ -44,17 +46,17 @@ function ResumeSidebar() {
           const Icon = contentIconByKey[icon];
 
           return (
-          <section className="resume-detail-sidebar__guide-card" key={title}>
-            <div>
-              <Icon size={18} strokeWidth={2.2} />
-              <h3>{title}</h3>
-            </div>
-            <ul>
-              {items.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </section>
+            <section className="resume-detail-sidebar__guide-card" key={title}>
+              <div>
+                <Icon size={18} strokeWidth={2.2} />
+                <h3>{title}</h3>
+              </div>
+              <ul>
+                {items.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </section>
           );
         })}
       </div>
@@ -64,16 +66,75 @@ function ResumeSidebar() {
 
 function ResumeFeedbackDetailPage() {
   const { id } = useParams();
-  const post = resumeFeedbackPosts.find((item) => item.id === Number(id));
+  const navigate = useNavigate();
+  const postId = Number(id);
+  const [post, setPost] = useState<ResumePost | null>(null);
+  const [comments, setComments] = useState<CommentNode[]>([]);
+  const [commentContent, setCommentContent] = useState("");
+  const [fileHref, setFileHref] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  if (!post) {
+  useEffect(() => {
+    if (!postId) return;
+    let mounted = true;
+    setIsLoading(true);
+    setErrorMessage("");
+
+    Promise.all([getResumePost(postId), getResumeComments(postId)])
+      .then(([postResponse, commentsResponse]) => {
+        if (!mounted) return;
+        setPost(postResponse);
+        setComments(commentsResponse.comments);
+
+        if (postResponse.file_url) {
+          getFileUrl({ type: "resume", file_path: postResponse.file_url })
+            .then((response) => {
+              if (mounted) setFileHref(response.url);
+            })
+            .catch(() => {
+              if (mounted) setFileHref(postResponse.file_url ?? "");
+            });
+        }
+      })
+      .catch((error) => {
+        if (!mounted) return;
+        setErrorMessage(error instanceof Error ? error.message : "게시글을 불러오지 못했습니다.");
+      })
+      .finally(() => {
+        if (mounted) setIsLoading(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [postId]);
+
+  if (!postId) {
     return <Navigate to={ROUTES.resumeFeedbacks} replace />;
   }
 
-  const authorId = post.id <= 2 ? CURRENT_USER_ID : post.id;
-  const isAuthor = authorId === CURRENT_USER_ID;
-  const author = getMockUserById(post.user_id);
-  const comments = getMockComments("RESUME", post.id);
+  const handleLike = () => {
+    toggleResumeLike(postId).then((response) => {
+      setPost((current) => current ? { ...current, likes: response.likes } : current);
+    });
+  };
+
+  const handleDelete = () => {
+    if (!window.confirm("게시글을 삭제할까요?")) return;
+    deleteResumePost(postId).then(() => navigate(ROUTES.resumeFeedbacks));
+  };
+
+  const handleCommentSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const content = commentContent.trim();
+    if (!content) return;
+
+    createResumeComment(postId, content).then((created) => {
+      setComments((current) => [...current, { ...created, replies: [] }]);
+      setCommentContent("");
+    });
+  };
 
   return (
     <AppLayout>
@@ -81,84 +142,82 @@ function ResumeFeedbackDetailPage() {
         <ResumeSidebar />
 
         <section className="resume-detail-content">
-          {isAuthor && (
-            <div className="resume-detail-actions" aria-label="작성자 작업">
-              <Link to={`/resume-feedbacks/${post.id}/edit`}>수정</Link>
-              <button type="button">삭제</button>
-            </div>
-          )}
+          {isLoading && <article className="resume-detail-card">불러오는 중입니다.</article>}
+          {errorMessage && <article className="resume-detail-card">{errorMessage}</article>}
 
-          <article className="resume-detail-card">
-            <div className="resume-detail-tags">
-              <span>이력서</span>
-              <span>{post.position}</span>
-            </div>
-
-            <h1>{post.title}</h1>
-
-            <div className="resume-detail-meta">
-              <span className="resume-detail-avatar">
-                <UserRoundCheck size={18} />
-              </span>
-              <div>
-                <strong>{author?.nickname ?? "사용자"}</strong>
-                <span>{author?.position ?? post.position}</span>
+          {post && !isLoading && !errorMessage && (
+            <>
+              <div className="resume-detail-actions" aria-label="작성자 작업">
+                <Link to={`/resume-feedbacks/${post.id}/edit`}>수정</Link>
+                <button type="button" onClick={handleDelete}>삭제</button>
               </div>
-              <time>{post.created_at}</time>
-              <span>좋아요 {post.likes}</span>
-            </div>
 
-            <div className="resume-detail-tools">
-              <button type="button" aria-label="더 보기">
-                <MoreHorizontal size={18} />
-              </button>
-            </div>
+              <article className="resume-detail-card">
+                <div className="resume-detail-tags">
+                  <span>이력서</span>
+                  <span>{post.position}</span>
+                </div>
 
-            <section className="resume-detail-description-section">
-              <h2>피드백 요청 내용</h2>
-              <p>{resumeFeedbackDetail.request}</p>
-            </section>
+                <h1>{post.title}</h1>
 
-            {post.file_url && (
-              <section className="resume-attachment-section">
-                <h2>첨부 파일</h2>
-                <a className="resume-file-box" href={post.file_url}>
-                  {post.file_url}
-                </a>
-              </section>
-            )}
-          </article>
-
-          <section className="resume-comments">
-            <div className="resume-comments__header">
-              <h2>피드백 {comments.length}</h2>
-            </div>
-
-            <div className="resume-comment-list">
-              {comments.map((comment) => {
-                const commentAuthor = getMockUserById(comment.user_id);
-
-                return (
-                <article className="resume-comment" key={comment.id}>
-                  <span className="resume-comment__avatar">
+                <div className="resume-detail-meta">
+                  <span className="resume-detail-avatar">
                     <UserRoundCheck size={18} />
                   </span>
                   <div>
-                    <div className="resume-comment__meta">
-                      <strong>{commentAuthor?.nickname ?? "사용자"}</strong>
-                      <time>{comment.created_at}</time>
-                    </div>
-                    <p>{comment.content}</p>
-                    <div className="resume-comment__actions">
-                      <button type="button">댓글 달기</button>
-                      <button type="button">신고</button>
-                    </div>
+                    <strong>{post.user?.nickname ?? "사용자"}</strong>
+                    <span>{post.user?.position ?? post.position}</span>
                   </div>
-                </article>
-                );
-              })}
-            </div>
-          </section>
+                  <time>{formatDateTime(post.created_at)}</time>
+                  <span>좋아요 {post.likes}</span>
+                </div>
+
+                <div className="resume-detail-tools">
+                  <button type="button" onClick={handleLike}>
+                    <Heart size={18} />
+                    좋아요
+                  </button>
+                </div>
+
+                <section className="resume-detail-description-section">
+                  <h2>피드백 요청 내용</h2>
+                  <p>{post.description}</p>
+                </section>
+
+                {post.file_url && (
+                  <section className="resume-attachment-section">
+                    <h2>첨부 파일</h2>
+                    <a className="resume-file-box" href={fileHref || post.file_url} target="_blank" rel="noreferrer">
+                      이력서 파일 열기
+                    </a>
+                  </section>
+                )}
+              </article>
+
+              <section className="resume-comments">
+                <div className="resume-comments__header">
+                  <h2>피드백 {comments.length}</h2>
+                </div>
+
+                <form className="resume-comment-list" onSubmit={handleCommentSubmit}>
+                  <textarea
+                    aria-label="댓글 내용"
+                    maxLength={1000}
+                    placeholder="댓글을 입력하세요."
+                    value={commentContent}
+                    onChange={(event) => setCommentContent(event.target.value)}
+                  />
+                  <button disabled={!commentContent.trim()} type="submit">댓글 작성</button>
+                </form>
+
+                <div className="resume-comment-list">
+                  {comments.map((comment) => (
+                    <CommentArticle comment={comment} key={comment.comment_id} />
+                  ))}
+                </div>
+              </section>
+            </>
+          )}
         </section>
 
         <aside className="resume-detail-aside" aria-label="상세 도움말">
@@ -176,7 +235,7 @@ function ResumeFeedbackDetailPage() {
                 <Target size={18} />
                 <div>
                   <strong>직무 적합도</strong>
-                  <span>{post.position} 직무와의 연결성</span>
+                  <span>선택 직무와의 연결성</span>
                 </div>
               </article>
               <article>
@@ -188,23 +247,42 @@ function ResumeFeedbackDetailPage() {
               </article>
             </div>
           </section>
-
-          <section className="resume-detail-side-card">
-            <h2>관련 태그</h2>
-            <div className="resume-related-tags">
-              {getResumeRelatedTags(post.position).map((tag) => (
-                <span key={tag}>{tag}</span>
-              ))}
-            </div>
-          </section>
         </aside>
       </div>
     </AppLayout>
   );
 }
 
-function getResumeRelatedTags(category: string) {
-  return resumeRelatedTagsByCategory[category] ?? [category, "경험 정리", "직무 적합도"];
+function CommentArticle({ comment }: { comment: CommentNode }) {
+  return (
+    <article className="resume-comment">
+      <span className="resume-comment__avatar">
+        <UserRoundCheck size={18} />
+      </span>
+      <div>
+        <div className="resume-comment__meta">
+          <strong>{comment.user.nickname}</strong>
+          <time>{formatDateTime(comment.created_at)}</time>
+        </div>
+        <p>{comment.content}</p>
+        {comment.replies?.map((reply) => (
+          <CommentArticle comment={reply} key={reply.comment_id} />
+        ))}
+      </div>
+    </article>
+  );
+}
+
+function formatDateTime(value?: string) {
+  if (!value) return "";
+
+  return new Intl.DateTimeFormat("ko-KR", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(value));
 }
 
 export default ResumeFeedbackDetailPage;

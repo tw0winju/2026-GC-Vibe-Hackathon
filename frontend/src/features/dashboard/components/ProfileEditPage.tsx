@@ -7,11 +7,12 @@ import {
   Save,
   X,
 } from "lucide-react";
-import { FormEvent, KeyboardEvent, useMemo, useState } from "react";
+import { FormEvent, KeyboardEvent, useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { ROUTES } from "../../../app/routes";
 import AppLayout from "../../../components/layout/AppLayout";
+import { getMe, updateMe } from "../../../lib/api/devfeedback";
 import { profileEditInitialData } from "../../../mocks/data/dashboard";
 import { dashboardMenuGroups } from "./dashboardMenu";
 import "./DashboardPage.css";
@@ -47,6 +48,24 @@ function ProfileEditPage() {
   const [linkedUrl, setLinkedUrl] = useState(profileEditInitialData.linkedUrl);
   const [techStacks, setTechStacks] = useState(profileEditInitialData.techStacks);
   const [stackInput, setStackInput] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    getMe()
+      .then((profile) => {
+        setNickname(profile.nickname);
+        setPosition(profile.position);
+        setTagline(profile.introduction ?? "");
+        setGithubUrl(profile.git_url ?? "");
+        setBlogUrl(profile.blog_url ?? "");
+        setLinkedUrl(profile.linked_url ?? "");
+        setTechStacks(profile.tag ?? []);
+      })
+      .catch(() => {
+        setErrorMessage("프로필을 불러오지 못했습니다.");
+      });
+  }, []);
 
   const trimmedStackInput = stackInput.trim();
 
@@ -58,7 +77,7 @@ function ProfileEditPage() {
       git_url: githubUrl,
       linked_url: linkedUrl,
       blog_url: blogUrl,
-      stack: techStacks,
+      tag: techStacks,
     }),
     [blogUrl, githubUrl, linkedUrl, nickname, position, tagline, techStacks],
   );
@@ -84,10 +103,19 @@ function ProfileEditPage() {
     setTechStacks((prev) => prev.filter((stack) => stack !== target));
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.info("PUT /users/me", payload);
-    navigate(ROUTES.mypage);
+    setIsSubmitting(true);
+    setErrorMessage("");
+
+    try {
+      await updateMe(payload);
+      navigate(ROUTES.mypage);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "프로필 저장에 실패했습니다.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -146,20 +174,15 @@ function ProfileEditPage() {
                 </label>
                 <label>
                   <span>학교</span>
-                  <input value={school} onChange={(event) => setSchool(event.target.value)} />
+                  <input disabled value="백엔드 미지원" readOnly />
                 </label>
                 <label>
                   <span>학년</span>
-                  <select value={grade} onChange={(event) => setGrade(event.target.value)}>
-                    {gradeOptions.map((option) => (
-                      <option key={option} value={option}>{option}</option>
-                    ))}
-                  </select>
+                  <input disabled value="백엔드 미지원" readOnly />
                 </label>
                 <label className="profile-edit-grid-wide">
                   <span>이메일</span>
-                  <input value={email} onChange={(event) => setEmail(event.target.value)} />
-                  <small>로그인 계정 이메일과 다를 경우 인증이 필요합니다.</small>
+                  <input disabled value="백엔드 미지원" readOnly />
                 </label>
               </div>
             </section>
@@ -220,9 +243,10 @@ function ProfileEditPage() {
 
             <div className="profile-edit-actions">
               <Link to={ROUTES.mypage}>취소</Link>
-              <button type="submit">
+              {errorMessage && <span>{errorMessage}</span>}
+              <button disabled={isSubmitting} type="submit">
                 <Save size={18} />
-                저장하기
+                {isSubmitting ? "저장 중..." : "저장하기"}
               </button>
             </div>
           </form>

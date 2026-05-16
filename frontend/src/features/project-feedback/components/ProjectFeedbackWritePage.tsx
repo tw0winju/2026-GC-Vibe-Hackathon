@@ -8,7 +8,6 @@ import {
   FileImage,
   GitBranch,
   Lightbulb,
-  Link as LinkIcon,
   MessageSquare,
   Plus,
   ShieldCheck,
@@ -21,6 +20,11 @@ import { Link, useNavigate } from "react-router-dom";
 import { ROUTES } from "../../../app/routes";
 import AppLayout from "../../../components/layout/AppLayout";
 import {
+  createProjectPost,
+  getUploadUrl,
+  uploadFileToSignedUrl,
+} from "../../../lib/api/devfeedback";
+import {
   PROJECT_FEEDBACK_CATEGORIES,
   type ProjectFeedbackCategory,
 } from "../model/projectFeedback";
@@ -29,9 +33,9 @@ import "./ProjectFeedbackWritePage.css";
 type ProjectPostCreatePayload = {
   title: string;
   description: string;
-  file_url: string;
-  thumbnail: string;
+  thumbnail?: string;
   position: Exclude<ProjectFeedbackCategory, "전체">;
+  tag: string[];
 };
 
 type WritingStep = {
@@ -145,11 +149,9 @@ function ProjectFeedbackWritePage() {
   const [features, setFeatures] = useState("");
   const [stackInput, setStackInput] = useState("");
   const [stacks, setStacks] = useState<string[]>([]);
-  const [projectUrl, setProjectUrl] = useState("");
-  const [linkType, setLinkType] = useState("GitHub");
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [extraFeedback, setExtraFeedback] = useState("");
-  const [anonymous, setAnonymous] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const canSubmit = Boolean(title.trim() && position && intro.trim() && features.trim() && stacks.length > 0);
 
@@ -200,10 +202,15 @@ function ProjectFeedbackWritePage() {
   const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
     if (!selectedFile) return;
+    if (!["image/jpeg", "image/png", "image/webp"].includes(selectedFile.type)) {
+      setErrorMessage("백엔드 명세상 썸네일은 JPG, PNG, WEBP만 지원합니다.");
+      return;
+    }
     setImageFile(selectedFile);
+    setErrorMessage("");
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!canSubmit || !position) return;
 
@@ -212,24 +219,41 @@ function ProjectFeedbackWritePage() {
       "",
       "[주요 기능]",
       features.trim(),
-      "",
-      `[기술 스택] ${stacks.join(", ")}`,
-      extraFeedback.trim() ? `\n[추가로 받고 싶은 피드백]\n${extraFeedback.trim()}` : "",
-      anonymous ? "\n[작성 옵션] 익명 작성" : "",
     ]
       .filter(Boolean)
       .join("\n");
 
-    const payload: ProjectPostCreatePayload = {
-      title: title.trim(),
-      description,
-      file_url: projectUrl.trim(),
-      thumbnail: imageFile?.name ?? "",
-      position,
-    };
+    setIsSubmitting(true);
+    setErrorMessage("");
 
-    console.log("POST /project-posts payload", payload, { linkType });
-    navigate(ROUTES.projectFeedbacks);
+    try {
+      let thumbnail: string | undefined;
+
+      if (imageFile) {
+        const upload = await getUploadUrl({
+          type: "thumbnail",
+          filename: imageFile.name,
+          mime_type: imageFile.type,
+        });
+        await uploadFileToSignedUrl(upload.upload_url, imageFile);
+        thumbnail = upload.file_path;
+      }
+
+      const payload: ProjectPostCreatePayload = {
+        title: title.trim(),
+        description,
+        thumbnail,
+        position,
+        tag: stacks,
+      };
+
+      await createProjectPost(payload);
+      navigate(ROUTES.projectFeedbacks);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "프로젝트 피드백 글 작성에 실패했습니다.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -329,38 +353,16 @@ function ProjectFeedbackWritePage() {
             </section>
 
             <section className="project-form-section">
-              <label htmlFor="project-link">프로젝트 링크</label>
-              <p>GitHub, 배포 사이트, 시연 영상 등 관련 링크를 추가해주세요.</p>
-              <div className="project-link-row">
-                <div>
-                  <LinkIcon size={18} strokeWidth={2.2} />
-                  <input
-                    id="project-link"
-                    placeholder="https://github.com/username/project"
-                    value={projectUrl}
-                    onChange={(event) => setProjectUrl(event.target.value)}
-                  />
-                </div>
-                <select value={linkType} onChange={(event) => setLinkType(event.target.value)}>
-                  <option>GitHub</option>
-                  <option>배포 URL</option>
-                  <option>시연 영상</option>
-                  <option>문서</option>
-                </select>
-              </div>
-            </section>
-
-            <section className="project-form-section">
-              <label htmlFor="project-image">참고 이미지</label>
-              <p>프로젝트 화면, 아키텍처 다이어그램, ERD 등 참고할 수 있는 이미지를 첨부해주세요.</p>
+              <label htmlFor="project-image">썸네일 이미지</label>
+              <p>목록과 상세 화면에 표시할 이미지를 첨부해주세요.</p>
               <label className="project-image-dropzone" htmlFor="project-image">
                 <Upload size={26} strokeWidth={2.1} />
                 <strong>{imageFile ? imageFile.name : "이미지 파일을 드래그하거나 클릭해서 업로드하세요."}</strong>
-                <span>JPG, PNG, GIF 파일 권장</span>
+                <span>JPG, PNG, WEBP 파일만 지원</span>
               </label>
               <input
                 id="project-image"
-                accept="image/*"
+                accept="image/jpeg,image/png,image/webp"
                 className="project-file-input"
                 type="file"
                 onChange={handleImageChange}
@@ -376,31 +378,10 @@ function ProjectFeedbackWritePage() {
               )}
             </section>
 
-            <section className="project-form-section">
-              <label htmlFor="project-extra-feedback">추가로 받고 싶은 피드백</label>
-              <div className="project-textarea-with-count">
-                <textarea
-                  id="project-extra-feedback"
-                  maxLength={300}
-                  placeholder={"특히 어떤 부분에 대한 피드백을 받고 싶은지 적어주세요.\n예: 구조 개선 방향, 코드 리뷰, 기능 제안 등"}
-                  value={extraFeedback}
-                  onChange={(event) => setExtraFeedback(event.target.value)}
-                />
-                <span>{extraFeedback.length}/300</span>
-              </div>
-            </section>
-
             <div className="project-form-actions">
-              <label>
-                <input
-                  checked={anonymous}
-                  type="checkbox"
-                  onChange={(event) => setAnonymous(event.target.checked)}
-                />
-                익명으로 작성
-              </label>
-              <button disabled={!canSubmit} type="submit">
-                작성 완료
+              {errorMessage && <p>{errorMessage}</p>}
+              <button disabled={!canSubmit || isSubmitting} type="submit">
+                {isSubmitting ? "작성 중..." : "작성 완료"}
               </button>
             </div>
           </form>

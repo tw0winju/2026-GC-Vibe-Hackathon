@@ -11,7 +11,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { ROUTES } from "../../../app/routes";
 import googleLogo from "../../../assets/images/auth/google.png";
 import kakaoLogo from "../../../assets/images/auth/kakao.png";
-import { getMe, getOAuthUrl, type AuthProvider } from "../api/authApi";
+import { getMe } from "../../../lib/api/devfeedback";
+import type { AuthProvider } from "../api/authApi";
 import "./SignupPage.css";
 
 const benefits = [
@@ -61,11 +62,10 @@ function SignupPage() {
 
     setAuthStatus("checking");
     getMe()
-      .then((user) => {
+      .then(() => {
         if (!mounted) return;
         setAuthStatus("signedIn");
-        const nextPath = user.onboardingCompleted ? ROUTES.home : ROUTES.onboarding;
-        navigate(nextPath, { replace: true });
+        navigate(ROUTES.homepage, { replace: true });
       })
       .catch(() => {
         if (!mounted) return;
@@ -77,8 +77,8 @@ function SignupPage() {
     };
   }, [navigate]);
 
-  const handleOAuthStart = (provider: AuthProvider) => {
-    window.location.href = getOAuthUrl(provider);
+  const handleOAuthStart = (_provider: AuthProvider) => {
+    alert("백엔드 명세에는 OAuth 인가 URL이 없어 소셜 로그인 시작 기능은 연결하지 않았습니다. 인가 code를 받은 뒤 /auth/social/login으로 연동해야 합니다.");
   };
 
   return (

@@ -1,5 +1,3 @@
-import { apiRequest } from "../../../lib/api/client";
-
 export type FeedbackStatus = "DONE" | "IN_PROGRESS" | "WAITING" | string;
 export type FeedbackType = "RESUME" | "PROJECT" | string;
 
@@ -27,7 +25,3 @@ export type HomeResponse = {
   savedFeedbacks?: MyFeedbackItem[];
   popularFeedbacks?: PopularFeedbackItem[];
 };
-
-export function getHome() {
-  return apiRequest<HomeResponse>("/api/home");
-}

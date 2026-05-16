@@ -1,4 +1,4 @@
-import { Bookmark, CalendarDays, ChevronDown, Heart, MessageCircle, Search } from "lucide-react";
+import { Bookmark, CalendarDays, ChevronDown, Heart, MessageCircle } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
@@ -128,10 +128,6 @@ function DashboardSectionPage({
                   </button>
                 ))}
               </div>
-              <label>
-                <Search size={16} />
-                <input placeholder="검색어를 입력하세요" />
-              </label>
             </div>
 
             <div className="dashboard-section-list">
