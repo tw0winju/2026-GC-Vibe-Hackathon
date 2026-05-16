@@ -15,7 +15,6 @@ export const ROUTES = {
   mypage: "/mypage",
   mypageEdit: "/mypage/edit",
   myActivity: "/mypage/activity",
-  receivedFeedbacks: "/mypage/received-feedbacks",
   writtenFeedbacks: "/mypage/written-feedbacks",
   likedPosts: "/mypage/likes",
   myProjects: "/mypage/projects",

@@ -1,6 +1,5 @@
 import {
   Bookmark,
-  ChevronDown,
   Code,
   FileText,
   Heart,
@@ -323,10 +322,6 @@ function DashboardPage() {
                 <RecentPost post={post} key={post.id} />
               ))}
             </div>
-            <button className="dashboard-more-button" type="button">
-              더 보기
-              <ChevronDown size={18} />
-            </button>
           </section>
         </div>
 
