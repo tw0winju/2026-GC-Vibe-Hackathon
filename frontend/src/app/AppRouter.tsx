@@ -24,7 +24,7 @@ function ReadyPage({ title }: { title: string }) {
   return (
     <main className="ready-page">
       <section>
-        <p>DevFeedback</p>
+        <p>GachonGrow</p>
         <h1>{title}</h1>
       </section>
     </main>
