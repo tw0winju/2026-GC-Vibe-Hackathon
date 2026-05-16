@@ -5,7 +5,9 @@
   gap: 32px;
   margin: 0;
   padding: 30px 42px 42px;
-  background: #ffffff;
+  background:
+    radial-gradient(circle at 14% 6%, rgba(64, 84, 247, 0.06), transparent 25%),
+    #f8f9ff;
 }
 
 .resume-sidebar {
@@ -54,14 +56,73 @@
 
 .resume-sidebar__write {
   justify-content: center;
-  margin-top: 24px;
   color: #ffffff;
   background: linear-gradient(135deg, #5b63ff 0%, #3f46f5 100%);
   box-shadow: 0 16px 28px rgba(64, 70, 245, 0.22);
 }
 
+.resume-sidebar__guide-list {
+  display: grid;
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.resume-sidebar__guide-card {
+  padding: 18px;
+  border: 1px solid #e3e7f0;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.84);
+}
+
+.resume-sidebar__guide-card > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #4054f7;
+}
+
+.resume-sidebar__guide-card h3 {
+  margin: 0;
+  color: #111827;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.resume-sidebar__guide-card ul {
+  display: grid;
+  gap: 8px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.resume-sidebar__guide-card li {
+  position: relative;
+  padding-left: 12px;
+  color: #536179;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.resume-sidebar__guide-card li::before {
+  position: absolute;
+  top: 9px;
+  left: 0;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #8b94ff;
+  content: "";
+}
+
 .resume-content {
   min-width: 0;
+  padding: 28px;
+  border: 1px solid #e3e7f0;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 18px 40px rgba(56, 67, 112, 0.04);
 }
 
 .resume-content__heading {
@@ -314,6 +375,7 @@
   border: 1px solid #e3e7f0;
   border-radius: 8px;
   background: #ffffff;
+  box-shadow: 0 18px 40px rgba(56, 67, 112, 0.04);
 }
 
 .resume-side-card h2 {
@@ -462,6 +524,10 @@
     padding: 24px;
   }
 
+  .resume-content {
+    padding: 22px;
+  }
+
   .resume-sidebar {
     position: static;
     min-height: auto;
@@ -504,6 +570,10 @@
 @media (max-width: 560px) {
   .resume-feedback-page {
     padding: 20px;
+  }
+
+  .resume-content {
+    padding: 18px;
   }
 
   .resume-sidebar__nav {

@@ -4,10 +4,9 @@ import {
   ChevronRight,
   Edit3,
   FileText,
-  Flame,
   Heart,
+  Lightbulb,
   MessageSquare,
-  PenLine,
   SearchCheck,
   Sparkles,
   UserRoundCheck,
@@ -27,12 +26,22 @@ import "./ResumeFeedbackPage.css";
 
 const PAGE_SIZE = 10;
 
-const sideMenuItems = [
-  { label: "피드백 게시판", icon: MessageSquare, active: true },
-  { label: "내가 쓴 글", icon: FileText },
-  { label: "받은 피드백", icon: MessageSquare },
-  { label: "작성한 피드백", icon: PenLine },
-  { label: "좋아요", icon: Heart },
+const sidebarGuides = [
+  {
+    icon: MessageSquare,
+    title: "피드백 요청 전에",
+    items: ["지원 직무를 명확히 적기", "궁금한 지점을 2~3개로 좁히기", "이력서 파일 최신본 첨부하기"],
+  },
+  {
+    icon: Lightbulb,
+    title: "좋은 요청 예시",
+    items: ["백엔드 신입 지원용입니다.", "프로젝트 설명이 충분한지 봐주세요.", "기술 스택 순서가 자연스러운지 궁금해요."],
+  },
+  {
+    icon: SearchCheck,
+    title: "받기 좋은 피드백",
+    items: ["경험 표현 방식", "직무와의 연결성", "빠진 역량이나 키워드"],
+  },
 ];
 
 const guides = RESUME_FEEDBACK_CATEGORIES.filter((category) => category !== "전체");
@@ -44,7 +53,7 @@ const tips = [
     description: "프로젝트, 역할, 성과를 구체적으로 작성하면 더 좋은 피드백을 받을 수 있어요.",
   },
   {
-    icon: PenLine,
+    icon: Lightbulb,
     title: "기술 스택은 명확히 정리하세요",
     description: "사용한 기술과 숙련도를 명확히 기재하면 피드백이 더 정확해져요.",
   },
@@ -92,18 +101,25 @@ function ResumeFeedbackPage() {
       <div className="resume-feedback-page">
         <aside className="resume-sidebar" aria-label="이력서 피드백 메뉴">
           <h2>이력서 피드백</h2>
-          <nav className="resume-sidebar__nav">
-            {sideMenuItems.map(({ label, icon: Icon, active }) => (
-              <button className={active ? "is-active" : ""} key={label} type="button">
-                <Icon size={18} strokeWidth={2.1} />
-                {label}
-              </button>
-            ))}
-          </nav>
           <Link className="resume-sidebar__write" to={ROUTES.resumeFeedbackWrite}>
             <Edit3 size={18} strokeWidth={2.2} />
             글 작성하기
           </Link>
+          <div className="resume-sidebar__guide-list">
+            {sidebarGuides.map(({ icon: Icon, title, items }) => (
+              <section className="resume-sidebar__guide-card" key={title}>
+                <div>
+                  <Icon size={18} strokeWidth={2.2} />
+                  <h3>{title}</h3>
+                </div>
+                <ul>
+                  {items.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </section>
+            ))}
+          </div>
         </aside>
 
         <section className="resume-content">

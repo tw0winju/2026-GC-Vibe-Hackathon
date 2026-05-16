@@ -12,7 +12,9 @@ import ReceivedFeedbackPage from "../features/dashboard/components/ReceivedFeedb
 import WrittenFeedbackPage from "../features/dashboard/components/WrittenFeedbackPage";
 import { GuideDetailPage, GuideIndexPage } from "../features/guide/components/GuidePage";
 import Homepage from "../features/home/components/Homepage";
+import ResumeFeedbackDetailPage from "../features/resume-feedback/components/ResumeFeedbackDetailPage";
 import ResumeFeedbackPage from "../features/resume-feedback/components/ResumeFeedbackPage";
+import ResumeFeedbackWritePage from "../features/resume-feedback/components/ResumeFeedbackWritePage";
 import { ROUTES } from "./routes";
 
 function ReadyPage({ title }: { title: string }) {
@@ -35,8 +37,8 @@ function AppRouter() {
       <Route path={ROUTES.homepage} element={<Homepage />} />
       <Route path={ROUTES.home} element={<ReadyPage title="홈" />} />
       <Route path={ROUTES.resumeFeedbacks} element={<ResumeFeedbackPage />} />
-      <Route path={ROUTES.resumeFeedbackWrite} element={<ReadyPage title="이력서 피드백 작성" />} />
-      <Route path={ROUTES.resumeFeedbackDetail} element={<ReadyPage title="이력서 피드백 상세" />} />
+      <Route path={ROUTES.resumeFeedbackWrite} element={<ResumeFeedbackWritePage />} />
+      <Route path={ROUTES.resumeFeedbackDetail} element={<ResumeFeedbackDetailPage />} />
       <Route path={ROUTES.resumeFeedbackEdit} element={<ReadyPage title="이력서 피드백 수정" />} />
       <Route path={ROUTES.projectFeedbacks} element={<ReadyPage title="프로젝트 피드백" />} />
       <Route path={ROUTES.projectFeedbackWrite} element={<ReadyPage title="프로젝트 피드백 작성" />} />
