@@ -4,90 +4,9 @@ import { Link } from "react-router-dom";
 
 import { ROUTES } from "../../../app/routes";
 import AppLayout from "../../../components/layout/AppLayout";
+import { homeMyFeedbacks, homePopularFeedbacks } from "../../../mocks/data/homeFeedbacks";
 import { getHome, type FeedbackType, type HomeResponse, type MyFeedbackItem, type PopularFeedbackItem } from "../api/homeApi";
 import "./Homepage.css";
-
-const fallbackMyFeedbacks: MyFeedbackItem[] = [
-  {
-    id: 1,
-    type: "RESUME",
-    title: "백엔드 개발자 신입 이력서 피드백 부탁드립니다!",
-    createdAtText: "2일 전",
-    mentorCount: 3,
-    commentCount: 8,
-  },
-  {
-    id: 2,
-    type: "RESUME",
-    title: "경력 3년 백엔드 개발자 이력서 피드백 요청합니다",
-    createdAtText: "1일 전",
-    mentorCount: 2,
-    commentCount: 5,
-  },
-  {
-    id: 3,
-    type: "RESUME",
-    title: "이직을 위한 이력서 첨삭 부탁드립니다",
-    createdAtText: "방금 전",
-    summary: "멘토 매칭 중입니다",
-    commentCount: 0,
-  },
-  {
-    id: 4,
-    type: "PROJECT",
-    title: "사이드 프로젝트 기능 구성 피드백 부탁드립니다",
-    createdAtText: "3일 전",
-    mentorCount: 4,
-    commentCount: 12,
-  },
-  {
-    id: 5,
-    type: "PROJECT",
-    title: "포트폴리오 프로젝트 아키텍처 방향이 괜찮을까요?",
-    createdAtText: "5일 전",
-    mentorCount: 2,
-    commentCount: 6,
-  },
-];
-
-const fallbackPopularFeedbacks: PopularFeedbackItem[] = [
-  {
-    id: 1,
-    title: "신입 개발자 이력서, 어떤 점을 개선하면 좋을까요?",
-    category: "RESUME",
-    mentorRole: "코드리뷰어",
-    viewCount: 1200,
-    commentCount: 24,
-  },
-  {
-    id: 2,
-    title: "이 기능, 꼭 필요한 기능일까? 사이드 프로젝트 기능 구성 피드백",
-    category: "PROJECT",
-    mentorRole: "백엔드 개발자",
-    viewCount: 980,
-    commentCount: 18,
-  },
-  {
-    id: 3,
-    title: "경력 개발자 기술 스택, 이렇게 정리하는 게 좋을까요?",
-    category: "RESUME",
-    mentorRole: "시니어 개발자",
-    viewCount: 756,
-    commentCount: 12,
-  },
-];
-
-const statusLabel: Record<string, string> = {
-  DONE: "완료",
-  IN_PROGRESS: "진행중",
-  WAITING: "대기중",
-};
-
-const statusClassName: Record<string, string> = {
-  DONE: "done",
-  IN_PROGRESS: "progress",
-  WAITING: "waiting",
-};
 
 function formatCount(count?: number) {
   if (!count) {
@@ -133,14 +52,17 @@ function getFeedbackTypeLabel(type?: FeedbackType) {
   return type === "PROJECT" ? "프로젝트" : "이력서";
 }
 
+function getFeedbackDetailPath(type: FeedbackType | undefined, id: number) {
+  return type === "PROJECT" ? `/project-feedbacks/${id}` : `/resume-feedbacks/${id}`;
+}
+
 function MyFeedbackRow({ item }: { item: MyFeedbackItem }) {
-  const status = item.status ?? "WAITING";
   const helperText =
     item.summary ??
     `${item.createdAtText ?? "최근"} · ${item.mentorCount ?? 0}명의 멘토가 피드백을 남겼습니다`;
 
   return (
-    <article className={item.status ? "homepage-my-row" : "homepage-my-row homepage-my-row--compact"}>
+    <Link className="homepage-my-row" to={getFeedbackDetailPath(item.type, item.id)}>
       <span className="homepage-document-icon" aria-hidden="true">
         <FileText size={22} />
       </span>
@@ -149,19 +71,14 @@ function MyFeedbackRow({ item }: { item: MyFeedbackItem }) {
         <h3>{item.title}</h3>
         <p>{helperText}</p>
       </div>
-      {item.status && (
-        <span className={`homepage-status homepage-status--${statusClassName[status] ?? "waiting"}`}>
-          {statusLabel[status] ?? status}
-        </span>
-      )}
       <FeedbackMeta comments={item.commentCount} views={item.viewCount} />
-    </article>
+    </Link>
   );
 }
 
 function PopularFeedbackRow({ item }: { item: PopularFeedbackItem }) {
   return (
-    <article className="homepage-popular-row">
+    <Link className="homepage-popular-row" to={getFeedbackDetailPath(item.category, item.id)}>
       <Flame className="homepage-flame" size={20} fill="currentColor" />
       <div className="homepage-popular-content">
         <span className="homepage-category">{getCategoryLabel(item.category)}</span>
@@ -169,7 +86,7 @@ function PopularFeedbackRow({ item }: { item: PopularFeedbackItem }) {
         <p>멘토 · {item.mentorRole ?? item.authorRole ?? "개발자"}</p>
       </div>
       <FeedbackMeta comments={item.commentCount} />
-    </article>
+    </Link>
   );
 }
 
@@ -198,13 +115,13 @@ function Homepage() {
       ...(home?.myResumeFeedbacks ?? []).map((item) => ({ ...item, type: item.type ?? "RESUME" })),
       ...(home?.myProjectFeedbacks ?? []).map((item) => ({ ...item, type: item.type ?? "PROJECT" })),
     ];
-    const source = apiFeedbacks.length ? apiFeedbacks : fallbackMyFeedbacks;
+    const source = apiFeedbacks.length ? apiFeedbacks : homeMyFeedbacks;
 
     return source.filter((item) => item.type === activeFeedbackType);
   }, [activeFeedbackType, home]);
   const popularFeedbacks = home?.popularFeedbacks?.length
     ? home.popularFeedbacks
-    : fallbackPopularFeedbacks;
+    : homePopularFeedbacks;
 
   return (
     <AppLayout>
@@ -258,7 +175,10 @@ function Homepage() {
           <div className="homepage-card">
             <div className="homepage-card__header">
               <h2>내 피드백 현황</h2>
-              <Link className="homepage-write-link" to={ROUTES.resumeFeedbackWrite}>
+              <Link
+                className="homepage-write-link"
+                to={activeFeedbackType === "RESUME" ? ROUTES.resumeFeedbackWrite : ROUTES.projectFeedbackWrite}
+              >
                 <Pencil size={16} />
                 글 작성하기
               </Link>
@@ -298,7 +218,6 @@ function Homepage() {
           <div className="homepage-card">
             <div className="homepage-card__header">
               <h2>인기 피드백</h2>
-              <Link className="homepage-plain-link" to={ROUTES.community}>더 보기</Link>
             </div>
             <div className="homepage-list">
               {popularFeedbacks.map((item) => (
