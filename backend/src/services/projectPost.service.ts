@@ -38,7 +38,7 @@ function withPublicThumbnail<T extends { thumbnail?: string | null }>(post: T): 
   if (!post.thumbnail || isAbsoluteUrl(post.thumbnail)) return post;
 
   const { data } = supabase.storage
-    .from(env.SUPABASE_BUCKET_THUMBNAIL)
+    .from(process.env.SUPABASE_BUCKET_THUMBNAIL || "thumbnails")
     .getPublicUrl(post.thumbnail);
 
   return {

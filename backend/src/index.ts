@@ -23,10 +23,16 @@ import { env } from "./config/env.js";
 dotenv.config();
 
 const app = express();
-const PORT = env.PORT;
+const PORT = process.env.PORT || 3000;
 
 app.use(helmet());
-app.use(cors({ origin: env.CORS_ORIGIN.split(","), credentials: true }));
+app.use(
+  cors({
+    origin:
+      process.env.CORS_ORIGIN || "http://localhost:3000".split(",") || "*",
+    credentials: true,
+  }),
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -88,8 +94,5 @@ app.get("/api-docs.json", (_req, res) => {
 app.use(errorHandler);
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-  console.log(`📚 API docs: http://localhost:${PORT}/api-docs`);
-  console.log(`🔐 Kakao Login: http://localhost:${PORT}/oauth2/authorization/kakao`);
-  console.log(`🔐 Google Login: http://localhost:${PORT}/oauth2/authorization/google`);
+  console.log(`Server running on ${PORT}`);
 });

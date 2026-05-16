@@ -1,7 +1,7 @@
-import { Router, Request, Response } from 'express';
-import { env } from '../config/env.js';
-import * as authService from '../services/auth.service.js';
-import { AppError } from '../middlewares/errorHandler.js';
+import { Router, Request, Response } from "express";
+import { env } from "../config/env.js";
+import * as authService from "../services/auth.service.js";
+import { AppError } from "../middlewares/errorHandler.js";
 
 // ============================================
 // 1단계: OAuth 인증 시작
@@ -10,24 +10,24 @@ import { AppError } from '../middlewares/errorHandler.js';
 const router = Router();
 
 // GET /oauth2/authorization/kakao
-router.get('/authorization/kakao', (_req, res) => {
+router.get("/authorization/kakao", (_req, res) => {
   const params = new URLSearchParams({
-    client_id: env.KAKAO_CLIENT_ID,
-    redirect_uri: env.KAKAO_REDIRECT_URI,
-    response_type: 'code',
+    client_id: process.env.KAKAO_CLIENT_ID || "",
+    redirect_uri: process.env.KAKAO_REDIRECT_URI || "",
+    response_type: "code",
   });
   res.redirect(`https://kauth.kakao.com/oauth/authorize?${params.toString()}`);
 });
 
 // GET /oauth2/authorization/google
-router.get('/authorization/google', (_req, res) => {
+router.get("/authorization/google", (_req, res) => {
   const params = new URLSearchParams({
-    client_id: env.GOOGLE_CLIENT_ID,
-    redirect_uri: env.GOOGLE_REDIRECT_URI,
-    response_type: 'code',
-    scope: 'openid email profile',
-    access_type: 'offline',
-    prompt: 'consent',
+    client_id: process.env.GOOGLE_CLIENT_ID || "",
+    redirect_uri: process.env.GOOGLE_REDIRECT_URI || "",
+    response_type: "code",
+    scope: "openid email profile",
+    access_type: "offline",
+    prompt: "consent",
   });
   res.redirect(
     `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`,
@@ -44,19 +44,19 @@ export default router;
 export const oauthCallbackRouter = Router();
 
 // GET /login/oauth2/code/kakao
-oauthCallbackRouter.get('/kakao', async (req, res) => {
-  await handleOAuthCallback(req, res, '카카오톡');
+oauthCallbackRouter.get("/kakao", async (req, res) => {
+  await handleOAuthCallback(req, res, "카카오톡");
 });
 
 // GET /login/oauth2/code/google
-oauthCallbackRouter.get('/google', async (req, res) => {
-  await handleOAuthCallback(req, res, '구글');
+oauthCallbackRouter.get("/google", async (req, res) => {
+  await handleOAuthCallback(req, res, "구글");
 });
 
 async function handleOAuthCallback(
   req: Request,
   res: Response,
-  provider: '카카오톡' | '구글',
+  provider: "카카오톡" | "구글",
 ) {
   const code = req.query.code as string | undefined;
   const oauthError = req.query.error as string | undefined;
@@ -64,14 +64,12 @@ async function handleOAuthCallback(
   // OAuth 페이지에서 에러 (사용자 취소 등)
   if (oauthError) {
     return res.redirect(
-      `${env.FRONTEND_CALLBACK_URL}?error=${encodeURIComponent(oauthError)}`,
+      `${process.env.FRONTEND_CALLBACK_URL || "http://localhost:5173/auth/callback"}?error=${encodeURIComponent(oauthError)}`,
     );
   }
 
   if (!code) {
-    return res.redirect(
-      `${env.FRONTEND_CALLBACK_URL}?error=missing_code`,
-    );
+    return res.redirect(`${process.env.FRONTEND_CALLBACK_URL || "http://localhost:5173/auth/callback"}?error=missing_code`);
   }
 
   try {
@@ -84,13 +82,11 @@ async function handleOAuthCallback(
       refresh_token: result.refresh_token,
       user_id: String(result.user_id),
     });
-    return res.redirect(
-      `${env.FRONTEND_CALLBACK_URL}?${params.toString()}`,
-    );
+    return res.redirect(`${process.env.FRONTEND_CALLBACK_URL || "http://localhost:5173/auth/callback"}?${params.toString()}`);
   } catch (err) {
-    const message = err instanceof AppError ? err.message : 'login_failed';
+    const message = err instanceof AppError ? err.message : "login_failed";
     return res.redirect(
-      `${env.FRONTEND_CALLBACK_URL}?error=${encodeURIComponent(message)}`,
+      `${process.env.FRONTEND_CALLBACK_URL || "http://localhost:5173/auth/callback"}?error=${encodeURIComponent(message)}`,
     );
   }
 }

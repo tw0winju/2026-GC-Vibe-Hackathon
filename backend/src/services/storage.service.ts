@@ -17,14 +17,14 @@ const UPLOAD_CONFIG: Record<
   }
 > = {
   resume: {
-    bucket: env.SUPABASE_BUCKET_RESUME,
-    maxSize: env.MAX_FILE_SIZE_PDF,
+    bucket: process.env.SUPABASE_BUCKET_RESUME || "resume-files", 
+    maxSize: process.env.MAX_FILE_SIZE_PDF ? parseInt(process.env.MAX_FILE_SIZE_PDF) : 5 * 1024 * 1024,
     allowedMimes: ["application/pdf"],
     isPublic: false,
   },
   thumbnail: {
-    bucket: env.SUPABASE_BUCKET_THUMBNAIL,
-    maxSize: env.MAX_FILE_SIZE_IMAGE,
+    bucket: process.env.SUPABASE_BUCKET_THUMBNAIL || "thumbnails",
+    maxSize: process.env.MAX_FILE_SIZE_IMAGE ? parseInt(process.env.MAX_FILE_SIZE_IMAGE) : 2 * 1024 * 1024,
     allowedMimes: ["image/jpeg", "image/png", "image/webp"],
     isPublic: true,
   },
