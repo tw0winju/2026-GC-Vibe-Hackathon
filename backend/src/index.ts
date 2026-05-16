@@ -14,6 +14,7 @@ import {
 } from "./routes/comment.route.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 import storageRouter from "./routes/storage.route.js";
+import resumePostRouter from "./routes/resumePost.route.js";
 import { env } from "./config/env.js";
 
 dotenv.config();
@@ -39,6 +40,9 @@ app.use("/storage", storageRouter);
 
 app.use("/api/project-posts", projectPostRouter);
 app.use("/project-posts", projectPostRouter);
+
+app.use("/api/resume-posts", resumePostRouter);
+app.use("/resume-posts", resumePostRouter);
 
 // 댓글: 게시글 하위 라우터
 app.use("/api/resume-posts/:post_id/comments", resumeCommentRouter);
