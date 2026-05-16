@@ -1,0 +1,237 @@
+.app-layout {
+  min-height: 100vh;
+  background: #f8f9ff;
+}
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  border-bottom: 1px solid #e7eaf4;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(16px);
+}
+
+.app-header__inner {
+  display: grid;
+  width: 100%;
+  height: 68px;
+  grid-template-columns: auto auto 1fr auto;
+  gap: 42px;
+  align-items: center;
+  margin: 0;
+  padding: 0 48px;
+}
+
+.app-header__brand {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.app-header__brand-logo {
+  display: block;
+  width: auto;
+  height: 34px;
+  object-fit: contain;
+}
+
+.app-header__nav {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  gap: 38px;
+  justify-self: start;
+}
+
+.app-header__nav-link {
+  position: relative;
+  display: inline-flex;
+  height: 100%;
+  align-items: center;
+  color: #1f2937;
+  font-size: 15px;
+  font-weight: 750;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.app-header__nav-link::after {
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 3px;
+  border-radius: 999px 999px 0 0;
+  background: #4054f7;
+  content: "";
+  opacity: 0;
+  transform: scaleX(0.6);
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
+}
+
+.app-header__nav-link.is-active {
+  color: #4054f7;
+}
+
+.app-header__nav-link.is-active::after,
+.app-header__nav-link:hover::after {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+.app-header__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 18px;
+  justify-self: end;
+}
+
+.app-header__icon-button,
+.app-header__profile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #0f172a;
+  background: transparent;
+  cursor: pointer;
+}
+
+.app-header__icon-button {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+}
+
+.app-header__icon-button:hover,
+.app-header__profile:hover {
+  background: #f1f4ff;
+}
+
+.app-header__profile {
+  gap: 9px;
+  min-height: 42px;
+  padding: 4px 8px 4px 4px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 750;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.app-header__avatar {
+  display: inline-flex;
+  width: 34px;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(64, 84, 247, 0.12);
+  border-radius: 50%;
+  color: #111827;
+  background:
+    radial-gradient(circle at 50% 30%, #ffffff 0 25%, transparent 26%),
+    linear-gradient(135deg, #e9ecff 0%, #f7f8ff 100%);
+  box-shadow: inset 0 -8px 14px rgba(64, 84, 247, 0.11);
+}
+
+.app-layout__main {
+  min-height: calc(100vh - 68px - 96px);
+}
+
+.homepage-shell {
+  min-height: calc(100vh - 68px - 96px);
+  background:
+    radial-gradient(circle at 16% 6%, rgba(77, 94, 255, 0.08), transparent 28%),
+    radial-gradient(circle at 85% 18%, rgba(115, 128, 255, 0.07), transparent 24%),
+    #f8f9ff;
+}
+
+.app-footer {
+  border-top: 1px solid #e7eaf4;
+  background: #ffffff;
+}
+
+.app-footer__inner {
+  display: flex;
+  width: min(100%, 1440px);
+  min-height: 96px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  margin: 0 auto;
+  padding: 22px 48px;
+}
+
+.app-footer__school {
+  display: grid;
+  gap: 8px;
+}
+
+.app-footer__school img {
+  display: block;
+  width: 128px;
+  height: auto;
+}
+
+.app-footer__school p,
+.app-footer__copy {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.app-footer__copy {
+  text-align: right;
+}
+
+@media (max-width: 960px) {
+  .app-header__inner {
+    height: auto;
+    min-height: 68px;
+    grid-template-columns: 1fr auto;
+    gap: 14px 24px;
+    padding: 14px 24px;
+  }
+
+  .app-header__nav {
+    grid-column: 1 / -1;
+    order: 3;
+    height: 42px;
+    gap: 26px;
+    overflow-x: auto;
+  }
+
+  .app-layout__main,
+  .homepage-shell {
+    min-height: calc(100vh - 124px - 96px);
+  }
+}
+
+@media (max-width: 640px) {
+  .app-header__inner,
+  .app-footer__inner {
+    padding-right: 20px;
+    padding-left: 20px;
+  }
+
+  .app-header__brand {
+    font-size: 18px;
+  }
+
+  .app-header__profile span:not(.app-header__avatar) {
+    display: none;
+  }
+
+  .app-footer__inner {
+    min-height: 132px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .app-footer__copy {
+    text-align: left;
+  }
+}
