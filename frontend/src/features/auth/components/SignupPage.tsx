@@ -36,7 +36,7 @@ const signupBenefits = [
   {
     icon: UsersRound,
     title: "같은 목표를 가진 사람들과 연결",
-    description: "개발자를 준비하는 동료들과 네트워크를 만들어요.",
+    description: "IT 직군을 준비하는 동료들과 네트워크를 만들어요.",
   },
   {
     icon: MessageSquareText,

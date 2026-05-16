@@ -62,13 +62,13 @@ function Homepage() {
         <section className="homepage-hero" aria-labelledby="homepage-title">
           <div className="homepage-hero__copy">
             <h1 id="homepage-title">
-              개발자의 성장을 위한
+              가천 IT 인재의 성장을 위한
               <strong>피드백 플랫폼</strong>
             </h1>
             <p>
               이력서와 사이드 프로젝트를 더 좋게 만들고,
               <br />
-              개발자로서 한 단계 성장해보세요.
+              가천 IT 인재로서 한 단계 성장해보세요.
             </p>
             <div className="homepage-hero__actions">
               <Link className="homepage-primary-button" to={ROUTES.resumeFeedbackWrite}>
@@ -96,7 +96,7 @@ function Homepage() {
               <span />
               <span />
             </div>
-            <div className="homepage-visual__tip">피드백으로 더 나은 개발자가 되세요!</div>
+            <div className="homepage-visual__tip">피드백으로 더 나은 가천 IT 인재가 되세요!</div>
             <div className="homepage-visual__badge">
               <Code2 size={44} />
             </div>
