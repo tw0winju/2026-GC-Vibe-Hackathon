@@ -11,6 +11,7 @@ export const POSITIONS = [
   "보안",
   "네트워크",
   "기획",
+  "데이터",
 ] as const;
 
 export type Position = (typeof POSITIONS)[number];
