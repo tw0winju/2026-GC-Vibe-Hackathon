@@ -6,6 +6,8 @@ export const ProjectPostListQuerySchema = z.object({
   sort: z.enum(["latest", "like"]).optional().default("latest"),
   page: z.coerce.number().int().positive().optional().default(1),
   size: z.coerce.number().int().positive().max(50).optional().default(10),
+  // 제목 또는 내용에서 keyword 검색 (부분 일치, 대소문자 무시)
+  keyword: z.string().min(1).max(100).optional(),
 });
 
 export const ProjectPostIdParamSchema = z.object({

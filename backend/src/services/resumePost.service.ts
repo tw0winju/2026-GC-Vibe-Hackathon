@@ -7,6 +7,7 @@ type ListResumePostsInput = {
   sort: "latest" | "like";
   page: number;
   size: number;
+  keyword?: string;
 };
 
 type ResumePostInput = {
@@ -17,13 +18,19 @@ type ResumePostInput = {
   position?: Position;
 };
 
+// DB 컬럼명은 'likes' (복수형)
 const RESUME_POST_SELECT =
-  "id,title,description,file_url,thumbnail,like,position,created_at,user:users(id,nickname)";
+  "id,title,description,file_url,thumbnail,likes,position,created_at,user:users(id,nickname)";
+
+function sanitizeKeyword(raw: string): string {
+  return raw.replace(/[%_]/g, "").replace(/[,()\\]/g, " ").trim();
+}
 
 export const listResumePosts = async (query: ListResumePostsInput) => {
   const from = (query.page - 1) * query.size;
   const to = from + query.size - 1;
-  const orderColumn = query.sort === "like" ? "like" : "created_at";
+  // sort enum 'like' ↔ DB 컬럼 'likes' 매핑
+  const orderColumn = query.sort === "like" ? "likes" : "created_at";
 
   let request = supabase
     .from("resume_posts")
@@ -31,12 +38,18 @@ export const listResumePosts = async (query: ListResumePostsInput) => {
     .order(orderColumn, { ascending: false })
     .range(from, to);
 
-  if (query.position) {
-    request = request.eq("position", query.position);
+  if (query.position) request = request.eq("position", query.position);
+
+  if (query.keyword) {
+    const safe = sanitizeKeyword(query.keyword);
+    if (safe) {
+      request = request.or(
+        `title.ilike.%${safe}%,description.ilike.%${safe}%`,
+      );
+    }
   }
 
   const { data, error, count } = await request;
-
   if (error) {
     throw new AppError(500, "이력서 게시글 목록 조회에 실패했습니다.");
   }
@@ -62,10 +75,10 @@ export const createResumePost = async (
       file_url: input.file_url,
       thumbnail: input.thumbnail,
       position: input.position,
-      like: 0,
+      likes: 0,
     })
     .select(
-      "id,title,description,file_url,thumbnail,like,position,created_at",
+      "id,title,description,file_url,thumbnail,likes,position,created_at",
     )
     .single();
 
@@ -80,7 +93,7 @@ export const getResumePost = async (postId: number) => {
   const { data: post, error } = await supabase
     .from("resume_posts")
     .select(
-      "id,title,description,file_url,thumbnail,like,position,created_at,updated_at,user:users(id,nickname,position)",
+      "id,title,description,file_url,thumbnail,likes,position,created_at,updated_at,user:users(id,nickname,position)",
     )
     .eq("id", postId)
     .single();
@@ -113,10 +126,10 @@ export const updateResumePost = async (
 
   const { data, error } = await supabase
     .from("resume_posts")
-    .update(input)
+    .update({ ...input, updated_at: new Date().toISOString() })
     .eq("id", postId)
     .select(
-      "id,title,description,file_url,thumbnail,like,position,updated_at",
+      "id,title,description,file_url,thumbnail,likes,position,updated_at",
     )
     .single();
 
@@ -161,7 +174,7 @@ export const likeResumePost = async (
 ) => {
   const { data: post } = await supabase
     .from("resume_posts")
-    .select("id,like")
+    .select("id,likes")
     .eq("id", postId)
     .single();
 
@@ -177,20 +190,15 @@ export const likeResumePost = async (
     .eq("post_type", "resume")
     .maybeSingle();
 
-  let nextLike = post.like;
+  let nextLikes = Number(post.likes ?? 0);
   let liked = false;
 
   if (likedRow) {
-    nextLike -= 1;
-
-    await supabase
-      .from("likes")
-      .delete()
-      .eq("id", likedRow.id);
+    nextLikes = Math.max(nextLikes - 1, 0);
+    await supabase.from("likes").delete().eq("id", likedRow.id);
   } else {
-    nextLike += 1;
+    nextLikes += 1;
     liked = true;
-
     await supabase.from("likes").insert({
       user_id: userId,
       post_id: postId,
@@ -200,13 +208,10 @@ export const likeResumePost = async (
 
   await supabase
     .from("resume_posts")
-    .update({ like: nextLike })
+    .update({ likes: nextLikes })
     .eq("id", postId);
 
-  return {
-    like: nextLike,
-    liked,
-  };
+  return { likes: nextLikes, liked };
 };
 
 const assertResumePostOwner = async (

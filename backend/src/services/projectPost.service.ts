@@ -7,6 +7,7 @@ type ListProjectPostsInput = {
   sort: "latest" | "like";
   page: number;
   size: number;
+  keyword?: string;
 };
 
 type ProjectPostInput = {
@@ -18,13 +19,19 @@ type ProjectPostInput = {
   tag?: Array<string>;
 };
 
+// DB 컬럼명은 'likes' (복수형)
 const PROJECT_POST_SELECT =
-  "id,title,description,thumbnail,likes,position,created_at,user:users(id,nickname)";
+  "id,title,description,thumbnail,likes,position,tag,created_at,user:users(id,nickname)";
+
+function sanitizeKeyword(raw: string): string {
+  return raw.replace(/[%_]/g, "").replace(/[,()\\]/g, " ").trim();
+}
 
 export const listProjectPosts = async (query: ListProjectPostsInput) => {
   const from = (query.page - 1) * query.size;
   const to = from + query.size - 1;
-  const orderColumn = query.sort === "like" ? "like" : "created_at";
+  // sort: 'like' enum 값과 실제 DB 컬럼명 'likes' 매핑
+  const orderColumn = query.sort === "like" ? "likes" : "created_at";
 
   let request = supabase
     .from("project_posts")
@@ -32,12 +39,18 @@ export const listProjectPosts = async (query: ListProjectPostsInput) => {
     .order(orderColumn, { ascending: false })
     .range(from, to);
 
-  if (query.position) {
-    request = request.eq("position", query.position);
+  if (query.position) request = request.eq("position", query.position);
+
+  if (query.keyword) {
+    const safe = sanitizeKeyword(query.keyword);
+    if (safe) {
+      request = request.or(
+        `title.ilike.%${safe}%,description.ilike.%${safe}%`,
+      );
+    }
   }
 
   const { data, error, count } = await request;
-
   if (error) {
     throw new AppError(500, "프로젝트 게시글 목록 조회에 실패했습니다.");
   }
@@ -63,9 +76,9 @@ export const createProjectPost = async (
       thumbnail: input.thumbnail,
       position: input.position,
       tag: input.tag,
-      like: 0,
+      likes: 0,
     })
-    .select("id,title,description,file_url,thumbnail,likes,position,created_at")
+    .select("id,title,description,thumbnail,likes,position,tag,created_at")
     .single();
 
   if (error || !data) {
@@ -97,10 +110,7 @@ export const getProjectPost = async (postId: number) => {
     .eq("post_id", postId)
     .order("created_at", { ascending: true });
 
-  if (commentError) {
-    return { ...post, comments: [] };
-  }
-
+  if (commentError) return { ...post, comments: [] };
   return { ...post, comments: comments ?? [] };
 };
 
@@ -113,7 +123,7 @@ export const updateProjectPost = async (
 
   const { data, error } = await supabase
     .from("project_posts")
-    .update(input)
+    .update({ ...input, updated_at: new Date().toISOString() })
     .eq("id", postId)
     .select("id,title,description,thumbnail,likes,position,tag,updated_at")
     .single();
@@ -128,7 +138,11 @@ export const updateProjectPost = async (
 export const deleteProjectPost = async (postId: number, userId: number) => {
   await assertProjectPostOwner(postId, userId);
 
-  await supabase.from("comments").delete().eq("post_id", postId);
+  await supabase
+    .from("comments")
+    .delete()
+    .eq("post_type", "project")
+    .eq("post_id", postId);
   await supabase
     .from("likes")
     .delete()
@@ -138,7 +152,6 @@ export const deleteProjectPost = async (postId: number, userId: number) => {
   const { error } = await supabase
     .from("project_posts")
     .delete()
-    .eq("post_type", "project")
     .eq("id", postId);
 
   if (error) {
@@ -149,7 +162,7 @@ export const deleteProjectPost = async (postId: number, userId: number) => {
 export const likeProjectPost = async (postId: number, userId: number) => {
   const { data: post, error: readError } = await supabase
     .from("project_posts")
-    .select("id,like")
+    .select("id,likes")
     .eq("id", postId)
     .single();
 
@@ -170,9 +183,9 @@ export const likeProjectPost = async (postId: number, userId: number) => {
   }
 
   const liked = !likedRow;
-  const nextLike = liked
-    ? Number(post.like ?? 0) + 1
-    : Math.max(Number(post.like ?? 0) - 1, 0);
+  const nextLikes = liked
+    ? Number(post.likes ?? 0) + 1
+    : Math.max(Number(post.likes ?? 0) - 1, 0);
 
   if (liked) {
     const { error } = await supabase.from("likes").insert({
@@ -180,7 +193,6 @@ export const likeProjectPost = async (postId: number, userId: number) => {
       user_id: userId,
       post_type: "project",
     });
-
     if (error) {
       throw new AppError(500, "프로젝트 게시글 좋아요 등록에 실패했습니다.");
     }
@@ -191,7 +203,6 @@ export const likeProjectPost = async (postId: number, userId: number) => {
       .eq("post_type", "project")
       .eq("post_id", postId)
       .eq("user_id", userId);
-
     if (error) {
       throw new AppError(500, "프로젝트 게시글 좋아요 취소에 실패했습니다.");
     }
@@ -199,9 +210,9 @@ export const likeProjectPost = async (postId: number, userId: number) => {
 
   const { data, error } = await supabase
     .from("project_posts")
-    .update({ likes: nextLike })
+    .update({ likes: nextLikes })
     .eq("id", postId)
-    .select("like")
+    .select("likes")
     .single();
 
   if (error || !data) {
