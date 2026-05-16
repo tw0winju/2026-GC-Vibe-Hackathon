@@ -7,6 +7,7 @@ import { generateOpenApiDocument } from "./config/openapi.js";
 import authRouter from "./routes/auth.route.js";
 import projectPostRouter from "./routes/projectPost.route.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
+import storageRouter from "./routes/storage.route.js";
 
 import { env } from "./config/env.js";
 
@@ -36,6 +37,7 @@ app.get("/health", (_req, res) => {
 // Swagger보다 먼저 라우트 import (registerPath 실행되도록)
 app.use("/api/auth", authRouter);
 app.use("/auth", authRouter);
+app.use("/storage", storageRouter);
 app.use("/api/project-posts", projectPostRouter);
 app.use("/project-posts", projectPostRouter);
 
