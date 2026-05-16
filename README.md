@@ -1,316 +1,250 @@
-# Contributing Guide (팀 협업 표준)
+# GachonGrow
 
-이 문서는 **Git으로 협업할 때의 규칙**을 정의합니다.  
-목표는 다음 3가지입니다.
+> 가천대학교 IT 인재들이 포트폴리오, 프로젝트, 커뮤니티 피드백을 주고받으며 함께 성장하는 웹 서비스
 
-- ✅ main 브랜치 안정성 유지
-- ✅ 충돌(conflict) 최소화
-- ✅ 누구나 이해 가능한 히스토리(커밋/PR) 유지
+<p align="center">
+  <img src="./frontend/src/assets/images/home/GG_logo.png" alt="GachonGrow logo" width="180" />
+</p>
 
----
+<p align="center">
+  <a href="https://gg-web.onrender.com/api-docs/">Swagger API Docs</a>
+  ·
+  <a href="#web-ui">Web UI</a>
+  ·
+  <a href="#local-setup">Local Setup</a>
+  ·
+  <a href="#deployment">Deployment</a>
+</p>
 
-## 0. 우리 팀 원칙
-
-- **main에는 직접 push 금지**
-- **모든 작업은 브랜치에서**
-- **PR → 리뷰 승인 → Merge**
-
----
-
-## 1. 브랜치 전략 규칙
-
-### ✅ 핵심 규칙
-1. **main 브랜치에는 절대 직접 push 하지 않는다.**
-2. 모든 작업은 **main에서 새 브랜치를 따서 진행한다.**
-3. 작업이 끝나면 **PR(Pull Request) 생성 → 팀원 승인 후 Merge**한다.
-
-### ✅ Merge 방식
-- **Squash and merge**
-  - PR 안의 여러 커밋을 **하나로 합쳐서** main에 반영
+<p align="center">
+  <img alt="React" src="https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black" />
+  <img alt="Vite" src="https://img.shields.io/badge/Vite-6-646CFF?style=flat-square&logo=vite&logoColor=white" />
+  <img alt="Express" src="https://img.shields.io/badge/Express-5-000000?style=flat-square&logo=express&logoColor=white" />
+  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5+-3178C6?style=flat-square&logo=typescript&logoColor=white" />
+  <img alt="Supabase" src="https://img.shields.io/badge/Supabase-Backend-3FCF8E?style=flat-square&logo=supabase&logoColor=white" />
+</p>
 
 ---
 
-## 2. 브랜치 이름 규칙
+## Overview
 
-### ✅ 기본 형식 (필수)
-- `feature/기능이름`
-- 영어 소문자 + 하이픈(-) 사용
+GachonGrow는 가천대 개발자들이 서로의 결과물을 더 빠르게 개선할 수 있도록 만든 피드백 커뮤니티입니다.
 
-### ✅ 예시
-- `feature/login`
-- `feature/map-view`
-- `feature/user-profile`
+포트폴리오와 프로젝트를 올리고, 댓글과 좋아요로 피드백을 주고받고, 커뮤니티에서 팀원 모집과 진로 이야기를 나눌 수 있습니다. 프론트엔드는 Vite + React 기반의 SPA로 구성되어 있고, 백엔드는 Express + Supabase + OpenAPI 문서화를 중심으로 구성되어 있습니다.
 
-### ❌ 금지 예시
-- `feature/Login` (대문자)
-- `login-feature` (형식 불일치)
-- `feature_map` (언더바 사용)
+## Features
 
-### 🟨 확장 가능한 접두어
-> 원칙적으로는 `feature/`만 써도 됩니다.  
-> 기능이 명확히 다르면 아래 접두어를 써도 됩니다.
+| 영역 | 기능 |
+| --- | --- |
+| Auth | 일반 회원가입/로그인, Kakao/Google OAuth 로그인 |
+| Portfolio Feedback | 포트폴리오 피드백 게시글 목록, 상세, 작성, 수정, 삭제, 댓글, 좋아요 |
+| Project Feedback | 프로젝트 소개, 기술 스택, 썸네일 기반 피드백 게시글 관리 |
+| Community | 자유 글, 프로젝트 팀 구하기, 취업/진로 카테고리 게시판 |
+| My Page | 내가 쓴 글, 좋아요한 글, 작성한 피드백, 프로필 관리 |
+| File Storage | 이력서 파일 및 프로젝트 썸네일 업로드 URL 발급 |
+| API Docs | OpenAPI 기반 Swagger UI 제공 |
 
-- `fix/` : 버그 수정
-- `docs/` : 문서 작업
-- `refactor/` : 리팩토링
-- `chore/` : 설정/잡일
+## Web UI
 
-예시:
-- `fix/login-redirect`
-- `docs/api-spec`
+GachonGrow 웹 UI는 실제 사용 흐름을 기준으로 화면이 구성되어 있습니다.
 
----
+| Route | Screen |
+| --- | --- |
+| `/signup` | 회원가입 및 소셜 로그인 |
+| `/homepage` | 서비스 홈 |
+| `/resume-feedbacks` | 포트폴리오 피드백 목록 |
+| `/resume-feedbacks/write` | 포트폴리오 피드백 작성 |
+| `/project-feedbacks` | 프로젝트 피드백 목록 |
+| `/project-feedbacks/write` | 프로젝트 피드백 작성 |
+| `/community` | 커뮤니티 목록 |
+| `/community/write` | 커뮤니티 글 작성 |
+| `/mypage` | 마이페이지 대시보드 |
+| `/guide` | 포트폴리오 작성 가이드 |
 
-## 3. 작업 시작
+### UI Highlights
 
-### ✅ 1) main 최신화
-```bash
-git checkout main
-git pull origin main
-```
+- 게시판형 레이아웃으로 피드백 글을 빠르게 탐색
+- 포트폴리오/프로젝트 성격에 맞춘 작성 폼 제공
+- 댓글, 좋아요, 조회수 등 피드백 반응 확인
+- 마이페이지에서 내 활동과 작성 글을 한 번에 관리
+- Kakao, Google 로그인 버튼과 OAuth 콜백 화면 구성
 
-### ✅ 2) 브랜치 생성
-```bash
-git checkout -b feature/기능이름
-```
+## API Docs
 
-### ✅ 3) 작업 → 커밋
-```bash
-git add .
-git commit -m "Feat: 로그인 UI 추가"
-```
+배포된 API 문서는 Swagger UI에서 바로 확인할 수 있습니다.
 
-### ✅ 4) 원격 저장소로 푸시
-```bash
-git push origin feature/기능이름
-```
+- Production Swagger: [https://gg-web.onrender.com/api-docs/](https://gg-web.onrender.com/api-docs/)
+- Local Swagger: `http://localhost:3000/api-docs`
+- OpenAPI JSON: `http://localhost:3000/api-docs.json`
+- Health Check: `http://localhost:3000/health`
 
-### ✅ 5) PR 생성
-- GitHub에서 PR 생성
-- 리뷰 요청(Reviewers) 지정
-- 승인 받은 뒤 Merge
+## Tech Stack
 
----
+| Layer | Stack |
+| --- | --- |
+| Frontend | React 19, TypeScript, Vite, React Router, Lucide React |
+| Backend | Node.js 20+, Express 5, TypeScript, Zod |
+| API Docs | Swagger UI, zod-to-openapi |
+| Auth | JWT, Kakao OAuth, Google OAuth |
+| Database/Storage | Supabase |
+| Deployment | Vercel Frontend, Render Backend |
 
-## 4. PR(Pull Request) 규칙
-
-### ✅ PR 원칙
-- PR 하나는 **목적 하나(기능 하나)** 를 담는다.
-- PR은 **짧을수록 리뷰가 쉽다.**
-  - 권장: 300줄 이하(가능하면)
-
-### ✅ 승인 규칙
-- PR은 **최소 1명 이상 승인** 후 Merge
-- Merge 전 반드시 **충돌(conflict) 여부 확인**
-- Merge 후 브랜치는 **삭제(Delete branch)** 권장
-
-### ✅ PR 제목 규칙
-PR 제목은 “무슨 작업인지” 한 줄로 명확히 작성
-
-예시:
-- `Login 기능 구현`
-- `지도 화면 UI 추가`
-- `프로필 수정 API 연결`
-
----
-
-## 5. PR 템플릿 사용 규칙
-
-PR을 만들면 자동으로 템플릿이 뜹니다.  
-**작업 내용/테스트 방법은 필수로 작성**합니다.
-
----
-
-## 6. 커밋 메시지 규칙
-
-### ✅ 커밋 메시지 작성 규칙
-1. 제목과 본문을 **빈 줄로 구분**
-2. 제목은 **50글자 이내**
-3. 제목 첫 글자는 **대문자**
-4. 제목 끝에 **마침표 금지**
-5. 제목은 **명령문**, 과거형 금지
-6. 본문 각 줄은 **72글자 이내**
-7. “어떻게”보다 **무엇/왜**를 설명
-
----
-
-## 7. 커밋 메시지 구조
+## Project Structure
 
 ```text
-타입(스코프): 주제(제목)
-
-본문
-
-바닥글
+.
+├── backend
+│   ├── src
+│   │   ├── config
+│   │   ├── controllers
+│   │   ├── middlewares
+│   │   ├── routes
+│   │   ├── schemas
+│   │   ├── services
+│   │   └── index.ts
+│   └── package.json
+├── frontend
+│   ├── src
+│   │   ├── app
+│   │   ├── assets
+│   │   ├── components
+│   │   ├── features
+│   │   ├── lib
+│   │   ├── mocks
+│   │   └── styles
+│   └── package.json
+├── DEPLOYMENT.md
+├── vercel.json
+└── README.md
 ```
 
-- Body는 Header로 부족할 때만 작성
-- Footer는 이슈 참조가 필요할 때만 작성
+## Local Setup
 
----
+### Requirements
 
-## 8. 커밋 타입 정의
+- Node.js `20+`
+- npm
+- Supabase project
+- Kakao/Google OAuth app credentials, if OAuth login is needed locally
 
-| 타입 | 의미 |
-|------|------|
-| Feat | 새로운 기능 추가 |
-| Fix | 버그 수정 |
-| Build | 빌드/의존성 관련 수정 |
-| Chore | 자잘한 수정 |
-| Ci | CI 설정 변경 |
-| Docs | 문서 수정 |
-| Style | 코드 스타일/포맷 변경 |
-| Refactor | 기능 변화 없는 구조 개선 |
-| Test | 테스트 코드 수정 |
-| Perf | 성능 개선 |
+### 1. Backend
 
-### 🟨 (선택) 스코프(scope) 사용 규칙
-> 스코프는 “어떤 영역인지” 표시합니다.
+```bash
+cd backend
+npm install
+npm run dev
+```
 
-예시:
-- `Feat(auth): 로그인 API 요청 기능 추가`
-- `Fix(map): 마커 중복 노출 방지`
-- `Refactor(ui): 모달 컴포넌트 로직 간소화`
+Backend server runs on `http://localhost:3000`.
 
----
+Create `backend/.env` with the required values used by the server. The exact values depend on the Supabase and OAuth projects connected to the service.
 
-## 9. 커밋 예시
+```env
+PORT=3000
+CORS_ORIGIN=http://localhost:5173
+FRONTEND_CALLBACK_URL=http://localhost:5173/auth/callback
 
-### ✅ Header만 작성하는 경우 (추천)
+SUPABASE_URL=...
+SUPABASE_SERVICE_ROLE_KEY=...
+JWT_SECRET=...
+
+KAKAO_CLIENT_ID=...
+KAKAO_CLIENT_SECRET=...
+KAKAO_REDIRECT_URI=http://localhost:3000/login/oauth2/code/kakao
+
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+GOOGLE_REDIRECT_URI=http://localhost:3000/login/oauth2/code/google
+```
+
+### 2. Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Frontend dev server runs on `http://localhost:5173`.
+
+Create `frontend/.env`:
+
+```env
+VITE_BASE_URL=http://localhost:3000
+```
+
+## Scripts
+
+### Backend
+
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Start Express server with `tsx watch` |
+| `npm run build` | Compile TypeScript |
+| `npm run start` | Run compiled server from `dist` |
+| `npm run typecheck` | Type-check backend without emitting files |
+
+### Frontend
+
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Start Vite dev server |
+| `npm run build` | Type-check and build production bundle |
+| `npm run preview` | Preview production build locally |
+
+## Deployment
+
+### Frontend: Vercel
+
+The root `vercel.json` is configured for the Vite frontend.
+
+| Setting | Value |
+| --- | --- |
+| Framework Preset | Vite |
+| Install Command | `cd frontend && npm ci` |
+| Build Command | `cd frontend && npm run build` |
+| Output Directory | `frontend/dist` |
+
+Production frontend environment:
+
+```env
+VITE_BASE_URL=https://gg-web.onrender.com
+```
+
+### Backend: Render
+
+Render backend should expose the Express API and Swagger UI.
+
+```env
+CORS_ORIGIN=https://your-vercel-domain.vercel.app,http://localhost:5173
+FRONTEND_CALLBACK_URL=https://your-vercel-domain.vercel.app/auth/callback
+
+KAKAO_REDIRECT_URI=https://gg-web.onrender.com/login/oauth2/code/kakao
+GOOGLE_REDIRECT_URI=https://gg-web.onrender.com/login/oauth2/code/google
+```
+
+OAuth provider callback URLs:
+
 ```text
-Feat: 로그인 API 요청 기능 추가
+https://gg-web.onrender.com/login/oauth2/code/kakao
+https://gg-web.onrender.com/login/oauth2/code/google
 ```
 
-### ✅ Body 포함 예시
-```text
-Fix: 토큰 응답값 null 처리 로직 수정
+## API Resources
 
-로그인 API에서 토큰이 null로 반환될 때 앱이 강제 종료되는 문제 방지.
-실패 시 에러 메시지를 띄우고 로그인 페이지로 이동하도록 변경함.
-```
+| Resource | Endpoint Prefix |
+| --- | --- |
+| Auth | `/api/auth` |
+| OAuth | `/oauth2`, `/login/oauth2/code` |
+| Users | `/api/users` |
+| Resume Posts | `/api/resume-posts` |
+| Project Posts | `/api/project-posts` |
+| Community Posts | `/api/community-posts` |
+| Comments | `/api/*-posts/:post_id/comments`, `/api/comments` |
+| Storage | `/api/storage` |
 
-### ✅ Footer 포함 예시
-```text
-Feat: 지도 마커 렌더링 기능 추가
+## Team
 
-서버에서 받아온 위도/경도 데이터를 사용하여 지도 위에 마커(핀)을 표시함.
+2026 GC Vibe Hackathon project.
 
-Closes #12
-```
-
----
-
-## 10. 협업 운영 규칙
-
-### ✅ 코어 타임 정하기
-- 팀원 모두 겹치는 시간을 정해서 소통한다.
-- 예시) 주 3회 1시간
-  - `월/수/금 21:00 ~ 22:00`
-
-코어타임에서 하는 것:
-- 오늘 작업 목표 공유 (각자 1분)
-- 막힌 부분 요청 (서로 10분 디버깅)
-- PR 리뷰/머지 처리
-
-### ✅ 작업 공유 최소 단위
-- “오늘 할 일”을 이슈/노션/디스코드에 1줄로 남긴다.
-- 예: `로그인 버튼 클릭 시 API 연결하고 토큰 저장까지`
-
----
-
-## 11. 주석 규칙
-
-### ✅ 주석은 “의도 설명”
-복잡한 로직 위에는 “왜 이 코드가 필요한지” 한글로 작성
-
-✅ 좋은 예시:
-```js
-// 여기서 위도/경도 좌표를 받아서 지도에 마커를 생성함
-```
-
-❌ 나쁜 예시:
-```js
-// marker 생성
-```
-
----
-
-## 12. PR 올리기 전 체크리스트 ✅
-
-PR 생성 전 반드시 확인:
-
-- [ ] `git pull origin main` 반영했는가?
-- [ ] 충돌(conflict)이 없는가?
-- [ ] 프로젝트 실행/빌드가 정상인가?
-- [ ] 불필요한 console.log / print 제거했는가?
-- [ ] 커밋 메시지 규칙을 지켰는가?
-- [ ] PR 설명/테스트 방법을 적었는가?
-
----
-
-## 13. 충돌(conflict) 발생 시 해결 흐름
-
-> 가급적 rebase보다 **merge로 해결**
-
-### ✅ 1) main 최신화
-```bash
-git checkout main
-git pull origin main
-```
-
-### ✅ 2) 내 브랜치로 이동
-```bash
-git checkout feature/기능이름
-```
-
-### ✅ 3) main을 내 브랜치로 merge
-```bash
-git merge main
-```
-
-### ✅ 4) 충돌 해결 후 커밋/푸시
-```bash
-git add .
-git commit -m "Chore: 머지 충돌 해결"
-git push origin feature/기능이름
-```
-
----
-
-## 14. Definition of Done (완료 기준)
-
-작업이 “끝났다”고 말하려면 아래를 만족해야 합니다.
-
-- [ ] 기능이 요구사항대로 동작한다
-- [ ] 에러 상황을 최소 1개 이상 처리했다
-- [ ] 관련 UI/로직이 깨지지 않는다
-- [ ] PR 설명 + 테스트 방법이 있다
-- [ ] 팀원이 봐도 이해 가능한 코드/주석이다
-
----
-
-## 15. 금지 사항 🚫 (실수 방지용)
-
-- main에 직접 push 금지
-- 여러 기능을 한 PR에 섞지 않기
-- 의미 없는 커밋 금지 (`update`, `fix`, `asdf` 등)
-- 남의 브랜치에서 직접 작업하지 않기
-- 승인 없이 Merge 하지 않기
-
----
-
-## 16. (권장) GitHub Repository 설정
-
-- main 브랜치 보호(Branch protection)
-  - ✅ Require pull request before merging
-  - ✅ Require approvals (1명 이상)
-  - ✅ Restrict who can push to main
-  - ✅ Require status checks (선택)
-
----
-
-## 17. 도움이 되는 습관
-
-- 작은 단위로 자주 커밋하기
-- PR 하나 = 목적 하나
-- PR 설명은 “공유 문서”라고 생각하기
+Made for Gachon developers who want better feedback, sharper portfolios, and stronger projects.
