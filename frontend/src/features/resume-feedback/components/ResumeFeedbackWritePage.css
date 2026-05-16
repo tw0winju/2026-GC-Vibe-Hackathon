@@ -204,6 +204,7 @@
 }
 
 .resume-form-section > label,
+.resume-form-label,
 .resume-form-section legend {
   color: #111827;
   font-size: 15px;
@@ -262,6 +263,35 @@
   border: 1px solid #dfe4ef;
   border-radius: 8px;
   background: #ffffff;
+}
+
+.resume-position-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.resume-position-options button {
+  display: inline-flex;
+  min-width: 82px;
+  height: 38px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 14px;
+  border: 1px solid #dfe4ef;
+  border-radius: 8px;
+  color: #243047;
+  background: #ffffff;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.resume-position-options button.is-active {
+  border-color: #a9b0ff;
+  color: #4054f7;
+  background: #f5f6ff;
 }
 
 .resume-file-dropzone {

@@ -7,6 +7,7 @@ import {
   Heart,
   Lightbulb,
   MessageSquare,
+  Search,
   SearchCheck,
   Sparkles,
   UserRoundCheck,
@@ -67,20 +68,30 @@ const tips = [
 function ResumeFeedbackPage() {
   const [selectedCategory, setSelectedCategory] = useState<ResumeFeedbackCategory>("전체");
   const [sort, setSort] = useState<ResumeFeedbackSort>("likes");
+  const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
 
   const filteredPosts = useMemo(() => {
-    const posts =
+    const normalizedQuery = searchQuery.trim().toLowerCase();
+    const postsByCategory =
       selectedCategory === "전체"
         ? [...resumeFeedbackPosts]
         : resumeFeedbackPosts.filter((post) => post.category === selectedCategory);
 
+    const posts = normalizedQuery
+      ? postsByCategory.filter((post) =>
+          [post.title, post.description, post.author, post.category]
+            .join(" ")
+            .toLowerCase()
+            .includes(normalizedQuery),
+        )
+      : postsByCategory;
+
     return posts.sort((a, b) => {
       if (sort === "latest") return a.id - b.id;
-      if (sort === "comments") return b.comments - a.comments;
       return b.likes - a.likes;
     });
-  }, [selectedCategory, sort]);
+  }, [searchQuery, selectedCategory, sort]);
 
   const totalPages = Math.max(1, Math.ceil(filteredPosts.length / PAGE_SIZE));
   const paginatedPosts = filteredPosts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -93,6 +104,11 @@ function ResumeFeedbackPage() {
 
   const handleSortChange = (nextSort: ResumeFeedbackSort) => {
     setSort(nextSort);
+    setPage(1);
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
     setPage(1);
   };
 
@@ -130,6 +146,16 @@ function ResumeFeedbackPage() {
             </div>
           </div>
 
+          <label className="resume-search" htmlFor="resume-feedback-search">
+            <Search size={18} strokeWidth={2.2} />
+            <input
+              id="resume-feedback-search"
+              placeholder="제목, 내용, 작성자 검색"
+              value={searchQuery}
+              onChange={(event) => handleSearchChange(event.target.value)}
+            />
+          </label>
+
           <div className="resume-toolbar">
             <div className="resume-categories" aria-label="카테고리 필터">
               {RESUME_FEEDBACK_CATEGORIES.map((category) => (
@@ -152,7 +178,6 @@ function ResumeFeedbackPage() {
             >
               <option value="likes">좋아요 많은 순</option>
               <option value="latest">최신순</option>
-              <option value="comments">댓글 많은 순</option>
             </select>
           </div>
 
@@ -194,6 +219,12 @@ function ResumeFeedbackPage() {
                 </span>
               </Link>
             ))}
+
+            {paginatedPosts.length === 0 && (
+              <div className="resume-empty" role="row">
+                검색 결과가 없습니다.
+              </div>
+            )}
           </div>
 
           <div className="resume-pagination" aria-label="페이지네이션">

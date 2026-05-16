@@ -4,6 +4,7 @@ import {
   Circle,
   Edit3,
   FileText,
+  Check,
   Upload,
   X,
 } from "lucide-react";
@@ -192,21 +193,20 @@ function ResumeFeedbackWritePage() {
             </section>
 
             <section className="resume-form-section">
-              <label htmlFor="resume-position">2. 직무</label>
-              <select
-                id="resume-position"
-                value={position}
-                onChange={(event) =>
-                  setPosition(event.target.value as "" | Exclude<ResumeFeedbackCategory, "전체">)
-                }
-              >
-                <option value="">직무를 선택하세요</option>
+              <span className="resume-form-label">2. 직무</span>
+              <div className="resume-position-options" aria-label="직무 선택">
                 {positions.map((item) => (
-                  <option key={item} value={item}>
+                  <button
+                    className={position === item ? "is-active" : ""}
+                    key={item}
+                    type="button"
+                    onClick={() => setPosition(item)}
+                  >
+                    {position === item && <Check size={15} strokeWidth={2.4} />}
                     {item}
-                  </option>
+                  </button>
                 ))}
-              </select>
+              </div>
             </section>
 
             <section className="resume-form-section">

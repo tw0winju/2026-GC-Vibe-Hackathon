@@ -1,5 +1,4 @@
 import {
-  Bookmark,
   Download,
   Edit3,
   FileText,
@@ -7,6 +6,9 @@ import {
   MessageSquare,
   MoreHorizontal,
   SearchCheck,
+  Target,
+  FileSearch,
+  Wand2,
   UserRoundCheck,
 } from "lucide-react";
 import { Link, Navigate, useParams } from "react-router-dom";
@@ -110,7 +112,7 @@ function ResumeFeedbackDetailPage() {
 
           <article className="resume-detail-card">
             <div className="resume-detail-tags">
-              <span>IT/개발</span>
+              <span>이력서</span>
               <span>{post.category}</span>
             </div>
 
@@ -130,10 +132,6 @@ function ResumeFeedbackDetailPage() {
             </div>
 
             <div className="resume-detail-tools">
-              <button type="button">
-                <Bookmark size={18} />
-                북마크
-              </button>
               <button type="button" aria-label="더 보기">
                 <MoreHorizontal size={18} />
               </button>
@@ -189,9 +187,63 @@ function ResumeFeedbackDetailPage() {
             </div>
           </section>
         </section>
+
+        <aside className="resume-detail-aside" aria-label="상세 도움말">
+          <section className="resume-detail-side-card">
+            <h2>피드백 포인트</h2>
+            <div className="resume-review-points">
+              <article>
+                <FileSearch size={18} />
+                <div>
+                  <strong>구성</strong>
+                  <span>요약, 경험, 프로젝트 흐름</span>
+                </div>
+              </article>
+              <article>
+                <Target size={18} />
+                <div>
+                  <strong>직무 적합도</strong>
+                  <span>{post.category} 직무와의 연결성</span>
+                </div>
+              </article>
+              <article>
+                <Wand2 size={18} />
+                <div>
+                  <strong>표현</strong>
+                  <span>성과, 역할, 기술 키워드</span>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <section className="resume-detail-side-card">
+            <h2>관련 태그</h2>
+            <div className="resume-related-tags">
+              {getResumeRelatedTags(post.category).map((tag) => (
+                <span key={tag}>{tag}</span>
+              ))}
+            </div>
+          </section>
+        </aside>
       </div>
     </AppLayout>
   );
+}
+
+function getResumeRelatedTags(category: string) {
+  const tagsByCategory: Record<string, string[]> = {
+    "웹 개발": ["웹 개발", "React", "UI 구현", "성능 개선"],
+    "앱 개발": ["앱 개발", "모바일", "배포 경험", "사용자 흐름"],
+    백엔드: ["백엔드", "API 설계", "DB 설계", "성능 개선"],
+    "AI/ML": ["AI/ML", "모델링", "실험 설계", "모델 서빙"],
+    데이터: ["데이터", "SQL", "대시보드", "지표 분석"],
+    인프라: ["인프라", "CI/CD", "클라우드", "운영"],
+    보안: ["보안", "취약점 분석", "리포트", "대응"],
+    네트워크: ["네트워크", "장애 분석", "라우팅", "운영"],
+    기획: ["기획", "문제 정의", "요구사항", "협업"],
+  };
+
+  return tagsByCategory[category] ?? [category, "경험 정리", "직무 적합도"];
 }
 
 export default ResumeFeedbackDetailPage;
