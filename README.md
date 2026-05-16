@@ -26,6 +26,25 @@
 
 ---
 
+<div align="center">
+
+### 🎉 배포 완료 🎉
+
+현재 서비스가 실제로 배포되어 운영 중입니다.
+
+<br/>
+
+🌐 **LIVE SERVICE**  
+👉 https://2026-gc-vibehackathon.vercel.app/
+
+<br/>
+
+<img width="100%" alt="banner" src="https://capsule-render.vercel.app/api?type=waving&color=0:6C63FF,100:4F46E5&height=220&section=header&text=2026%20GC%20Vibe%20Hackathon&fontSize=40&fontColor=ffffff&animation=fadeIn&fontAlignY=38"/>
+
+</div>
+
+---
+
 ## Overview
 
 GachonGrow는 가천대 개발자들이 서로의 결과물을 더 빠르게 개선할 수 있도록 만든 피드백 커뮤니티입니다.
