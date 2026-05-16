@@ -94,6 +94,7 @@ export const getProjectPost = async (postId: number) => {
     .select(
       "id,user_id,content,comment_parent_id,created_at,user:users(id,nickname)",
     )
+    .eq("post_type", "project")
     .eq("post_id", postId)
     .order("created_at", { ascending: true });
 
@@ -136,6 +137,7 @@ export const deleteProjectPost = async (postId: number, userId: number) => {
   const { error } = await supabase
     .from("project_posts")
     .delete()
+    .eq("post_type", "project")
     .eq("id", postId);
 
   if (error) {
