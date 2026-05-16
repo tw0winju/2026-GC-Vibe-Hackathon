@@ -5,10 +5,7 @@ import AccountSettingsPage from "../features/dashboard/components/AccountSetting
 import DashboardPage from "../features/dashboard/components/DashboardPage";
 import LikedPostsPage from "../features/dashboard/components/LikedPostsPage";
 import MyActivityPage from "../features/dashboard/components/MyActivityPage";
-import MyProjectsPage from "../features/dashboard/components/MyProjectsPage";
-import MyResumesPage from "../features/dashboard/components/MyResumesPage";
 import NotificationSettingsPage from "../features/dashboard/components/NotificationSettingsPage";
-import ReceivedFeedbackPage from "../features/dashboard/components/ReceivedFeedbackPage";
 import WrittenFeedbackPage from "../features/dashboard/components/WrittenFeedbackPage";
 import { GuideDetailPage, GuideIndexPage } from "../features/guide/components/GuidePage";
 import Homepage from "../features/home/components/Homepage";
@@ -45,11 +42,8 @@ function AppRouter() {
       <Route path={ROUTES.mypage} element={<DashboardPage />} />
       <Route path={ROUTES.mypageEdit} element={<ReadyPage title="마이페이지 편집" />} />
       <Route path={ROUTES.myActivity} element={<MyActivityPage />} />
-      <Route path={ROUTES.receivedFeedbacks} element={<ReceivedFeedbackPage />} />
       <Route path={ROUTES.writtenFeedbacks} element={<WrittenFeedbackPage />} />
       <Route path={ROUTES.likedPosts} element={<LikedPostsPage />} />
-      <Route path={ROUTES.myProjects} element={<MyProjectsPage />} />
-      <Route path={ROUTES.myResumes} element={<MyResumesPage />} />
       <Route path={ROUTES.accountSettings} element={<AccountSettingsPage />} />
       <Route path={ROUTES.notificationSettings} element={<NotificationSettingsPage />} />
       <Route path={ROUTES.community} element={<ReadyPage title="커뮤니티" />} />

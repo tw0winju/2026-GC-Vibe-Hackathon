@@ -326,23 +326,6 @@
   font-weight: 700;
 }
 
-.dashboard-more-button {
-  display: inline-flex;
-  width: 100%;
-  min-height: 46px;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 18px;
-  border: 1px solid #e5e8f0;
-  border-radius: 8px;
-  color: #3342d8;
-  background: #ffffff;
-  font-size: 15px;
-  font-weight: 850;
-  cursor: pointer;
-}
-
 .dashboard-popular-list {
   gap: 18px;
 }
