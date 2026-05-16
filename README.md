@@ -1,3 +1,5 @@
+<img width="100%" alt="banner" src="https://capsule-render.vercel.app/api?type=waving&color=0:6C63FF,100:4F46E5&height=220&section=header&text=2026%20GC%20Vibe%20Hackathon&fontSize=40&fontColor=ffffff&animation=fadeIn&fontAlignY=38"/>
+
 # GachonGrow
 
 > 가천대학교 IT 인재들이 포트폴리오, 프로젝트, 커뮤니티 피드백을 주고받으며 함께 성장하는 웹 서비스
@@ -38,8 +40,6 @@
 👉 https://2026-gc-vibehackathon.vercel.app/
 
 <br/>
-
-<img width="100%" alt="banner" src="https://capsule-render.vercel.app/api?type=waving&color=0:6C63FF,100:4F46E5&height=220&section=header&text=2026%20GC%20Vibe%20Hackathon&fontSize=40&fontColor=ffffff&animation=fadeIn&fontAlignY=38"/>
 
 </div>
 
