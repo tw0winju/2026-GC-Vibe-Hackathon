@@ -17,71 +17,22 @@ import { Link, Navigate, useParams } from "react-router-dom";
 
 import { ROUTES } from "../../../app/routes";
 import AppLayout from "../../../components/layout/AppLayout";
+import {
+  projectFeedbackComments,
+  projectFeedbackDetailsByPostId,
+  projectFeedbackFallbackDetail,
+} from "../../../mocks/data/feedbackDetails";
+import { projectSidebarGuides } from "../../../mocks/data/feedbackPageContent";
 import { projectFeedbackPosts } from "../../../mocks/data/projectFeedbacks";
 import "./ProjectFeedbackDetailPage.css";
 
 const CURRENT_USER_ID = 101;
 
-const sidebarGuides = [
-  {
-    icon: Rocket,
-    title: "공유 전에",
-    items: ["프로젝트 목표 한 줄로 정리", "데모나 GitHub 링크 준비", "현재 단계와 고민 지점 표시"],
-  },
-  {
-    icon: GitBranch,
-    title: "좋은 요청 포인트",
-    items: ["아키텍처 구조가 적절한지", "핵심 기능 우선순위가 맞는지", "사용자 흐름이 자연스러운지"],
-  },
-  {
-    icon: SearchCheck,
-    title: "받기 좋은 피드백",
-    items: ["기술 선택 근거", "확장성과 유지보수성", "UI/UX와 완성도"],
-  },
-];
-
-const detailByPostId: Record<number, { features: string[]; stacks: string[]; link: string; request: string }> = {
-  1: {
-    features: ["강의실과 건물명 검색", "현재 위치 기준 이동 경로 표시", "자주 찾는 건물 즐겨찾기"],
-    stacks: ["React Native", "Kakao Map", "Firebase"],
-    link: "https://github.com/devfeedback/campus-map",
-    request: "지도 SDK 선택과 이동 경로 UX가 적절한지, MVP 단계에서 기능을 더 줄여야 할지 피드백 받고 싶습니다.",
-  },
-  2: {
-    features: ["관심 기술 기반 스터디 추천", "가능 시간대 필터", "모집 글 작성과 참여 신청"],
-    stacks: ["React", "Spring", "MySQL"],
-    link: "https://github.com/devfeedback/study-match",
-    request: "첫 방문자가 스터디 생성까지 자연스럽게 도달하는지, 매칭 기준을 더 단순화해야 하는지 궁금합니다.",
-  },
+const contentIconByKey = {
+  branch: GitBranch,
+  rocket: Rocket,
+  search: SearchCheck,
 };
-
-const fallbackDetail = {
-  features: ["핵심 기능 설계", "사용자 플로우 구성", "피드백 기반 개선"],
-  stacks: ["React", "TypeScript", "API"],
-  link: "https://github.com/devfeedback/project",
-  request: "프로젝트 방향성과 구현 우선순위가 적절한지 피드백 받고 싶습니다.",
-};
-
-const feedbackComments = [
-  {
-    id: 1,
-    author: "구조리뷰어",
-    role: "백엔드",
-    createdAt: "2시간 전",
-    content:
-      "MVP 범위가 명확해서 좋아요. 다만 지도 검색, 경로 표시, 즐겨찾기를 한 번에 구현하기보다 검색과 경로 표시를 먼저 안정화하면 완성도가 더 높아질 것 같습니다.",
-    helpful: 15,
-  },
-  {
-    id: 2,
-    author: "UX멘토",
-    role: "프로덕트",
-    createdAt: "4시간 전",
-    content:
-      "사용자가 건물명을 정확히 모를 수 있으니 초성 검색이나 카테고리 탐색을 고려해보세요. 경로 결과 화면에는 예상 소요 시간을 함께 보여주면 좋겠습니다.",
-    helpful: 9,
-  },
-];
 
 function ProjectDetailSidebar() {
   return (
@@ -92,7 +43,10 @@ function ProjectDetailSidebar() {
         글 작성하기
       </Link>
       <div className="project-detail-sidebar__guide-list">
-        {sidebarGuides.map(({ icon: Icon, title, items }) => (
+        {projectSidebarGuides.map(({ icon, title, items }) => {
+          const Icon = contentIconByKey[icon];
+
+          return (
           <section className="project-detail-sidebar__guide-card" key={title}>
             <div>
               <Icon size={18} strokeWidth={2.2} />
@@ -104,7 +58,8 @@ function ProjectDetailSidebar() {
               ))}
             </ul>
           </section>
-        ))}
+          );
+        })}
       </div>
     </aside>
   );
@@ -119,7 +74,7 @@ function ProjectFeedbackDetailPage() {
   }
 
   const isAuthor = post.user.user_id === CURRENT_USER_ID;
-  const detail = detailByPostId[post.post_id] ?? fallbackDetail;
+  const detail = projectFeedbackDetailsByPostId[post.post_id] ?? projectFeedbackFallbackDetail;
 
   return (
     <AppLayout>
@@ -152,7 +107,7 @@ function ProjectFeedbackDetailPage() {
               </div>
               <time>{formatProjectDateTime(post.created_at)}</time>
               <span>좋아요 {post.like}</span>
-              <span>피드백 {feedbackComments.length}</span>
+              <span>피드백 {projectFeedbackComments.length}</span>
             </div>
 
             <div className="project-detail-tools">
@@ -214,11 +169,11 @@ function ProjectFeedbackDetailPage() {
 
           <section className="project-comments">
             <div className="project-comments__header">
-              <h2>피드백 {feedbackComments.length}</h2>
+              <h2>피드백 {projectFeedbackComments.length}</h2>
             </div>
 
             <div className="project-comment-list">
-              {feedbackComments.map((comment) => (
+              {projectFeedbackComments.map((comment) => (
                 <article className="project-comment" key={comment.id}>
                   <span className="project-comment__avatar">
                     <UserRoundCheck size={18} />

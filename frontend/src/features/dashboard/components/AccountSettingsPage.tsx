@@ -2,27 +2,18 @@ import { ChevronRight, KeyRound, Link2, Mail, ShieldCheck, Smartphone, UserRound
 import { Link, useLocation } from "react-router-dom";
 
 import AppLayout from "../../../components/layout/AppLayout";
+import { accountSettingsSections } from "../../../mocks/data/dashboard";
 import { dashboardMenuGroups } from "./dashboardMenu";
 import "./SettingsPage.css";
 
-const accountSections = [
-  {
-    title: "기본 정보",
-    items: [
-      { icon: UserRound, label: "프로필 정보", value: "김개발 · 컴퓨터공학과 3학년" },
-      { icon: Mail, label: "이메일", value: "kimgvaebal@univ.ac.kr" },
-      { icon: Smartphone, label: "휴대폰 번호", value: "010-****-2026" },
-    ],
-  },
-  {
-    title: "로그인 및 보안",
-    items: [
-      { icon: KeyRound, label: "비밀번호 변경", value: "최근 변경 32일 전" },
-      { icon: ShieldCheck, label: "2단계 인증", value: "사용 안 함" },
-      { icon: Link2, label: "연결된 소셜 계정", value: "Google, Kakao" },
-    ],
-  },
-];
+const settingIconByKey = {
+  key: KeyRound,
+  link: Link2,
+  mail: Mail,
+  phone: Smartphone,
+  shield: ShieldCheck,
+  user: UserRound,
+};
 
 function AccountSettingsPage() {
   const location = useLocation();
@@ -59,12 +50,12 @@ function AccountSettingsPage() {
             <span>프로필, 로그인, 보안, 연결 계정을 관리하세요.</span>
           </section>
 
-          {accountSections.map((section) => (
+          {accountSettingsSections.map((section) => (
             <section className="settings-card" key={section.title}>
               <h2>{section.title}</h2>
               <div className="settings-list">
                 {section.items.map((item) => {
-                  const Icon = item.icon;
+                  const Icon = settingIconByKey[item.icon];
 
                   return (
                     <button className="settings-row" key={item.label} type="button">

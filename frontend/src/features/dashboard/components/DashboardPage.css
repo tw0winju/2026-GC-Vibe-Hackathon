@@ -291,6 +291,14 @@
   align-items: start;
   padding: 22px 0;
   border-bottom: 1px solid #edf0f6;
+  color: inherit;
+  text-decoration: none;
+}
+
+.dashboard-recent-post:hover h3,
+.dashboard-popular-item:hover h3,
+.dashboard-liked-item:hover h3 {
+  color: #3342d8;
 }
 
 .dashboard-recent-post:first-child {
@@ -336,6 +344,8 @@
   gap: 10px;
   align-items: center;
   min-height: auto;
+  color: inherit;
+  text-decoration: none;
 }
 
 .dashboard-rank {
@@ -400,6 +410,8 @@
   align-items: start;
   padding: 18px 0;
   border-bottom: 1px solid #edf0f6;
+  color: inherit;
+  text-decoration: none;
 }
 
 .dashboard-liked-item:first-child {

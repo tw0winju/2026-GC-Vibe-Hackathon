@@ -439,13 +439,19 @@
 }
 
 .popular-list li {
+  min-width: 0;
+}
+
+.popular-list li a {
   display: grid;
   grid-template-columns: 20px minmax(0, 1fr) auto auto;
   gap: 10px;
   align-items: center;
+  color: inherit;
+  text-decoration: none;
 }
 
-.popular-list li > span {
+.popular-list li a > span {
   display: inline-flex;
   width: 20px;
   height: 20px;
@@ -458,9 +464,13 @@
   font-weight: 850;
 }
 
-.popular-list li:nth-child(n + 4) > span {
+.popular-list li:nth-child(n + 4) a > span {
   color: #64748b;
   background: #edf1f8;
+}
+
+.popular-list li a:hover p {
+  color: #3342d8;
 }
 
 .popular-list p {

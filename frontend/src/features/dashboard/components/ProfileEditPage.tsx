@@ -12,6 +12,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { ROUTES } from "../../../app/routes";
 import AppLayout from "../../../components/layout/AppLayout";
+import { profileEditInitialData } from "../../../mocks/data/dashboard";
 import { dashboardMenuGroups } from "./dashboardMenu";
 import "./DashboardPage.css";
 import "./ProfileEditPage.css";
@@ -30,21 +31,21 @@ const positionOptions = [
 
 const gradeOptions = ["1학년", "2학년", "3학년", "4학년", "졸업생", "기타"];
 
-const initialStacks = ["JavaScript", "TypeScript", "React", "Next.js", "Node.js", "Python", "AWS", "Docker"];
-
 function ProfileEditPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [nickname, setNickname] = useState("김개발");
-  const [position, setPosition] = useState<(typeof positionOptions)[number]>("웹 개발");
-  const [tagline, setTagline] = useState("꾸준히 성장하는 개발자가 되고 싶습니다.");
-  const [school, setSchool] = useState("컴퓨터공학과");
-  const [grade, setGrade] = useState("3학년");
-  const [email, setEmail] = useState("kimgvaebal@univ.ac.kr");
-  const [githubUrl, setGithubUrl] = useState("https://github.com/kimgvaebal");
-  const [blogUrl, setBlogUrl] = useState("https://blog.devkim.com");
-  const [linkedUrl, setLinkedUrl] = useState("https://linkedin.com/in/kimgvaebal");
-  const [techStacks, setTechStacks] = useState(initialStacks);
+  const [nickname, setNickname] = useState(profileEditInitialData.nickname);
+  const [position, setPosition] = useState<(typeof positionOptions)[number]>(
+    profileEditInitialData.position as (typeof positionOptions)[number],
+  );
+  const [tagline, setTagline] = useState(profileEditInitialData.tagline);
+  const [school, setSchool] = useState(profileEditInitialData.school);
+  const [grade, setGrade] = useState(profileEditInitialData.grade);
+  const [email, setEmail] = useState(profileEditInitialData.email);
+  const [githubUrl, setGithubUrl] = useState(profileEditInitialData.githubUrl);
+  const [blogUrl, setBlogUrl] = useState(profileEditInitialData.blogUrl);
+  const [linkedUrl, setLinkedUrl] = useState(profileEditInitialData.linkedUrl);
+  const [techStacks, setTechStacks] = useState(profileEditInitialData.techStacks);
   const [stackInput, setStackInput] = useState("");
 
   const trimmedStackInput = stackInput.trim();

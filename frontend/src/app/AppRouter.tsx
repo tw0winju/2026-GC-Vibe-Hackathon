@@ -5,6 +5,8 @@ import AccountSettingsPage from "../features/dashboard/components/AccountSetting
 import DashboardPage from "../features/dashboard/components/DashboardPage";
 import LikedPostsPage from "../features/dashboard/components/LikedPostsPage";
 import MyActivityPage from "../features/dashboard/components/MyActivityPage";
+import MyProjectsPage from "../features/dashboard/components/MyProjectsPage";
+import MyResumesPage from "../features/dashboard/components/MyResumesPage";
 import NotificationSettingsPage from "../features/dashboard/components/NotificationSettingsPage";
 import ProfileEditPage from "../features/dashboard/components/ProfileEditPage";
 import WrittenFeedbackPage from "../features/dashboard/components/WrittenFeedbackPage";
@@ -50,6 +52,8 @@ function AppRouter() {
       <Route path={ROUTES.myActivity} element={<MyActivityPage />} />
       <Route path={ROUTES.writtenFeedbacks} element={<WrittenFeedbackPage />} />
       <Route path={ROUTES.likedPosts} element={<LikedPostsPage />} />
+      <Route path={ROUTES.myProjects} element={<MyProjectsPage />} />
+      <Route path={ROUTES.myResumes} element={<MyResumesPage />} />
       <Route path={ROUTES.accountSettings} element={<AccountSettingsPage />} />
       <Route path={ROUTES.notificationSettings} element={<NotificationSettingsPage />} />
       <Route path={ROUTES.community} element={<ReadyPage title="커뮤니티" />} />

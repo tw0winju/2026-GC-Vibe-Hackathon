@@ -2,27 +2,18 @@ import { BellRing, ChevronRight, Clock3, MessageCircle, Moon, Smartphone, Volume
 import { Link, useLocation } from "react-router-dom";
 
 import AppLayout from "../../../components/layout/AppLayout";
+import { notificationSettingsGroups } from "../../../mocks/data/dashboard";
 import { dashboardMenuGroups } from "./dashboardMenu";
 import "./SettingsPage.css";
 
-const notificationGroups = [
-  {
-    title: "알림 받기",
-    items: [
-      { icon: BellRing, label: "전체 알림", description: "새 피드백, 댓글, 좋아요 알림을 받습니다.", enabled: true },
-      { icon: MessageCircle, label: "채팅 및 댓글 알림", description: "댓글과 답글이 달리면 알려줍니다.", enabled: true },
-      { icon: Smartphone, label: "푸시 알림", description: "브라우저와 모바일 푸시로 알림을 받습니다.", enabled: false },
-    ],
-  },
-  {
-    title: "방해 금지",
-    items: [
-      { icon: Moon, label: "방해 금지 모드", description: "설정한 시간 동안 알림을 조용히 받습니다.", enabled: false },
-      { icon: Clock3, label: "야간 알림 끄기", description: "오후 10시부터 오전 8시까지 알림을 끕니다.", enabled: true },
-      { icon: Volume2, label: "소리 및 진동", description: "알림 도착 시 소리와 진동을 사용합니다.", enabled: true },
-    ],
-  },
-];
+const notificationIconByKey = {
+  bell: BellRing,
+  clock: Clock3,
+  message: MessageCircle,
+  moon: Moon,
+  phone: Smartphone,
+  volume: Volume2,
+};
 
 function NotificationSettingsPage() {
   const location = useLocation();
@@ -59,12 +50,12 @@ function NotificationSettingsPage() {
             <span>카카오톡처럼 필요한 알림만 켜고, 조용히 받을 시간을 설정하세요.</span>
           </section>
 
-          {notificationGroups.map((group) => (
+          {notificationSettingsGroups.map((group) => (
             <section className="settings-card" key={group.title}>
               <h2>{group.title}</h2>
               <div className="settings-list">
                 {group.items.map((item) => {
-                  const Icon = item.icon;
+                  const Icon = notificationIconByKey[item.icon];
 
                   return (
                     <button className="settings-row" key={item.label} type="button">
