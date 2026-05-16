@@ -270,11 +270,6 @@
   letter-spacing: 0;
 }
 
-.dashboard-popular-list + .dashboard-card-header h2,
-.dashboard-right-column .dashboard-card:first-child .dashboard-card-header h2 {
-  font-size: 28px;
-}
-
 .dashboard-card-header a {
   color: #3342d8;
   font-size: 14px;
@@ -349,27 +344,28 @@
 }
 
 .dashboard-popular-list {
-  gap: 22px;
+  gap: 18px;
 }
 
 .dashboard-popular-item {
   display: grid;
-  grid-template-columns: 42px minmax(0, 1fr) auto;
-  gap: 18px;
+  grid-template-columns: 20px minmax(0, 1fr) auto;
+  gap: 10px;
   align-items: center;
-  min-height: 54px;
+  min-height: auto;
 }
 
 .dashboard-rank {
-  display: grid;
-  width: 42px;
-  height: 42px;
-  place-items: center;
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+  align-items: center;
+  justify-content: center;
   border-radius: 50%;
   color: #ffffff;
-  background: #4c5cf6;
-  font-size: 22px;
-  font-weight: 900;
+  background: #4f5dff;
+  font-size: 12px;
+  font-weight: 850;
   line-height: 1;
 }
 
@@ -385,8 +381,8 @@
 .dashboard-popular-body h3 {
   overflow: hidden;
   color: #1f2937;
-  font-size: 20px;
-  font-weight: 900;
+  font-size: 13px;
+  font-weight: 750;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -394,10 +390,10 @@
 .dashboard-popular-likes {
   display: inline-flex;
   align-items: center;
-  gap: 16px;
+  gap: 10px;
   color: #667085;
-  font-size: 21px;
-  font-weight: 900;
+  font-size: 12px;
+  font-weight: 750;
 }
 
 .dashboard-popular-likes svg {

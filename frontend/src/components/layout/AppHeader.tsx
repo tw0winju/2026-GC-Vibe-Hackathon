@@ -9,6 +9,7 @@ const navItems = [
   { label: "프로젝트 피드백", to: ROUTES.projectFeedbacks },
   { label: "커뮤니티", to: ROUTES.community },
   { label: "가이드", to: ROUTES.guide },
+  { label: "마이페이지", to: ROUTES.mypage },
 ];
 
 function AppHeader() {
