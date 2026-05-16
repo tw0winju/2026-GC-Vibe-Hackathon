@@ -36,7 +36,7 @@ app.get("/health", (_req, res) => {
 // Swagger보다 먼저 라우트 import (registerPath 실행되도록)
 app.use("/api/auth", authRouter);
 app.use("/auth", authRouter);
-app.use("storage", storageRouter);
+app.use("/storage", storageRouter);
 
 // Swagger는 라우트 등록 후
 const openApiDocument = generateOpenApiDocument();
