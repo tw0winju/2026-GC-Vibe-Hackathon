@@ -1,0 +1,18 @@
+export const ROUTES = {
+  root: "/",
+  signup: "/signup",
+  onboarding: "/onboarding",
+  home: "/home",
+  resumeFeedbacks: "/resume-feedbacks",
+  resumeFeedbackWrite: "/resume-feedbacks/write",
+  resumeFeedbackDetail: "/resume-feedbacks/:id",
+  resumeFeedbackEdit: "/resume-feedbacks/:id/edit",
+  projectFeedbacks: "/project-feedbacks",
+  projectFeedbackWrite: "/project-feedbacks/write",
+  projectFeedbackDetail: "/project-feedbacks/:id",
+  projectFeedbackEdit: "/project-feedbacks/:id/edit",
+  mypage: "/mypage",
+  mypageEdit: "/mypage/edit",
+  terms: "/terms",
+  privacy: "/privacy",
+} as const;
