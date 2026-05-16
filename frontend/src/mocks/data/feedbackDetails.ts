@@ -1,34 +1,6 @@
-export const resumeFeedbackComments = [
-  {
-    id: 1,
-    author: "백엔드진자",
-    role: "전문가",
-    createdAt: "3시간 전",
-    content:
-      "프로젝트 경험이 잘 정리되어 있고 기술 스택도 적절합니다. 다만 각 프로젝트에서 본인의 역할과 성과를 조금 더 구체적으로 작성하면 좋을 것 같아요.",
-    helpful: 12,
-  },
-  {
-    id: 2,
-    author: "커리어멘토",
-    role: "멘토",
-    createdAt: "5시간 전",
-    content:
-      "백엔드 직무와 연결되는 경험은 충분합니다. 성능 개선이나 장애 대응처럼 실무에서 강점으로 보일 수 있는 항목을 상단 요약에 한 줄 추가해보세요.",
-    helpful: 8,
-  },
-] as const;
-
 export const resumeFeedbackDetail = {
-  authorName: "김개발",
-  authorInfo: "컴퓨터공학과 · 4학년",
-  createdAt: "2024.05.10 14:30",
   request:
     "안녕하세요! 백엔드 개발자로 취업을 준비하고 있는 4학년 학생입니다. 이력서에 부족한 부분이나 개선할 점이 있다면 피드백 부탁드립니다. 감사합니다!",
-  attachment: {
-    fileName: "김개발_이력서.pdf",
-    fileSize: "245KB",
-  },
 };
 
 export const resumeRelatedTagsByCategory: Record<string, string[]> = {
@@ -67,24 +39,3 @@ export const projectFeedbackFallbackDetail = {
   link: "https://github.com/devfeedback/project",
   request: "프로젝트 방향성과 구현 우선순위가 적절한지 피드백 받고 싶습니다.",
 };
-
-export const projectFeedbackComments = [
-  {
-    id: 1,
-    author: "구조리뷰어",
-    role: "백엔드",
-    createdAt: "2시간 전",
-    content:
-      "MVP 범위가 명확해서 좋아요. 다만 지도 검색, 경로 표시, 즐겨찾기를 한 번에 구현하기보다 검색과 경로 표시를 먼저 안정화하면 완성도가 더 높아질 것 같습니다.",
-    helpful: 15,
-  },
-  {
-    id: 2,
-    author: "UX멘토",
-    role: "프로덕트",
-    createdAt: "4시간 전",
-    content:
-      "사용자가 건물명을 정확히 모를 수 있으니 초성 검색이나 카테고리 탐색을 고려해보세요. 경로 결과 화면에는 예상 소요 시간을 함께 보여주면 좋겠습니다.",
-    helpful: 9,
-  },
-] as const;

@@ -56,7 +56,6 @@ function AppRouter() {
       <Route path={ROUTES.myResumes} element={<MyResumesPage />} />
       <Route path={ROUTES.accountSettings} element={<AccountSettingsPage />} />
       <Route path={ROUTES.notificationSettings} element={<NotificationSettingsPage />} />
-      <Route path={ROUTES.community} element={<ReadyPage title="커뮤니티" />} />
       <Route path={ROUTES.guide} element={<GuideIndexPage />} />
       <Route path={ROUTES.guideDetail} element={<GuideDetailPage />} />
       <Route path={ROUTES.terms} element={<ReadyPage title="이용약관" />} />

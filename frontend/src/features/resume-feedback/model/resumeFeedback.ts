@@ -14,15 +14,15 @@ export type ResumeFeedbackSort = "likes" | "latest";
 
 export type ResumeFeedbackPost = {
   id: number;
+  user_id: number;
   title: string;
-  description: string;
-  category: Exclude<ResumeFeedbackCategory, "전체">;
-  author: string;
-  authorRole: string;
-  createdAt: string;
+  description?: string;
+  file_url?: string;
+  thumbnail?: string;
+  position: Exclude<ResumeFeedbackCategory, "전체">;
   likes: number;
-  comments: number;
-  views: number;
+  created_at?: string;
+  updated_at?: string;
 };
 
 export const RESUME_FEEDBACK_CATEGORIES: ResumeFeedbackCategory[] = [

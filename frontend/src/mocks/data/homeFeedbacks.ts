@@ -7,18 +7,15 @@ export const homeMyFeedbacks: MyFeedbackItem[] = [
     id: post.id,
     type: "RESUME" as const,
     title: post.title,
-    createdAtText: post.createdAt,
-    mentorCount: Math.max(1, Math.min(5, post.comments)),
-    commentCount: post.comments,
-    viewCount: post.views,
+    created_at: post.created_at,
+    likes: post.likes,
   })),
   ...projectFeedbackPosts.slice(0, 3).map((post, index) => ({
-    id: post.post_id,
+    id: post.id,
     type: "PROJECT" as const,
     title: post.title,
-    createdAtText: formatRelativeProjectDate(post.created_at),
-    mentorCount: Math.max(1, Math.min(5, Math.round(post.like / 30))),
-    commentCount: Math.max(3, Math.round(post.like / 6)),
+    created_at: post.created_at,
+    likes: post.likes,
   })),
 ];
 
@@ -30,24 +27,23 @@ export const homePopularFeedbacks: PopularFeedbackItem[] = [
     .map((post) => ({
       id: post.id,
       title: post.title,
-      category: "RESUME" as const,
-      mentorRole: `${post.category} 멘토`,
-      viewCount: post.views,
-      commentCount: post.comments,
+      type: "RESUME" as const,
+      position: post.position,
+      likes: post.likes,
     })),
   ...projectFeedbackPosts
     .slice()
-    .sort((a, b) => b.like - a.like)
+    .sort((a, b) => b.likes - a.likes)
     .slice(0, 2)
     .map((post) => ({
-      id: post.post_id,
+      id: post.id,
       title: post.title,
-      category: "PROJECT" as const,
-      mentorRole: `${post.position} 멘토`,
-      commentCount: Math.max(3, Math.round(post.like / 6)),
+      type: "PROJECT" as const,
+      position: post.position,
+      likes: post.likes,
     })),
 ]
-  .sort((a, b) => (b.commentCount ?? 0) - (a.commentCount ?? 0))
+  .sort((a, b) => (b.likes ?? 0) - (a.likes ?? 0))
   .slice(0, 3);
 
 function formatRelativeProjectDate(value: string) {

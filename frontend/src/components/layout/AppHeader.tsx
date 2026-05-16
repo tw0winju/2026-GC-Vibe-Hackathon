@@ -1,13 +1,13 @@
-import { Bell, ChevronDown, MessageSquareText, UserRound } from "lucide-react";
+import { Bell, ChevronDown, UserRound } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 import { ROUTES } from "../../app/routes";
+import ggLogo from "../../assets/images/home/GG_logo.png";
 
 const navItems = [
   { label: "홈", to: ROUTES.homepage },
   { label: "이력서 피드백", to: ROUTES.resumeFeedbacks },
   { label: "프로젝트 피드백", to: ROUTES.projectFeedbacks },
-  { label: "커뮤니티", to: ROUTES.community },
   { label: "가이드", to: ROUTES.guide },
   { label: "마이페이지", to: ROUTES.mypage },
 ];
@@ -17,10 +17,7 @@ function AppHeader() {
     <header className="app-header">
       <div className="app-header__inner">
         <NavLink className="app-header__brand" to={ROUTES.homepage} aria-label="DevFeedback 홈">
-          <span className="app-header__brand-mark">
-            <MessageSquareText size={17} strokeWidth={2.7} />
-          </span>
-          <span>DevFeedback</span>
+          <img className="app-header__brand-logo" src={ggLogo} alt="G. G" />
         </NavLink>
 
         <nav className="app-header__nav" aria-label="주요 메뉴">

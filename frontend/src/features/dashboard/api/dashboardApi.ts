@@ -27,9 +27,8 @@ export type DashboardPost = {
   type?: DashboardFeedbackType;
   title: string;
   description?: string;
-  createdAtText?: string;
-  commentCount?: number;
-  likeCount?: number;
+  created_at?: string;
+  likes?: number;
 };
 
 export type DashboardPopularFeedback = {
@@ -37,17 +36,16 @@ export type DashboardPopularFeedback = {
   rank?: number;
   type?: DashboardFeedbackType;
   title: string;
-  mentorRole?: string;
-  commentCount?: number;
-  likeCount?: number;
+  position?: string;
+  likes?: number;
 };
 
 export type DashboardLikedPost = {
   id: number;
   type?: DashboardFeedbackType;
   title: string;
-  authorRole?: string;
-  createdAtText?: string;
+  position?: string;
+  created_at?: string;
 };
 
 export type DashboardResponse = {

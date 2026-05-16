@@ -10,20 +10,19 @@ export type ProjectFeedbackCategory =
   | "네트워크"
   | "기획";
 
-export type ProjectFeedbackSort = "latest" | "like";
+export type ProjectFeedbackSort = "latest" | "likes";
 
 export type ProjectFeedbackPost = {
-  post_id: number;
+  id: number;
+  user_id: number;
   title: string;
-  description: string;
-  thumbnail: string;
-  like: number;
+  description?: string;
+  thumbnail?: string;
+  likes: number;
   position: Exclude<ProjectFeedbackCategory, "전체">;
-  user: {
-    user_id: number;
-    nickname: string;
-  };
-  created_at: string;
+  created_at?: string;
+  updated_at?: string;
+  tag?: string[];
 };
 
 export const PROJECT_FEEDBACK_CATEGORIES: ProjectFeedbackCategory[] = [
