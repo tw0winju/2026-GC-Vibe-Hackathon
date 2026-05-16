@@ -1,9 +1,12 @@
-import { supabase } from '../config/supabase.js';
-import { AppError } from '../middlewares/errorHandler.js';
-import type { UpdateUserBody, PaginationQuery } from '../schemas/user.schema.js';
+import { supabase } from "../config/supabase.js";
+import { AppError } from "../middlewares/errorHandler.js";
+import type {
+  UpdateUserBody,
+  PaginationQuery,
+} from "../schemas/user.schema.js";
 
 const USER_PUBLIC_SELECT =
-  'id,nickname,position,introduction,git_url,linked_url,blog_url,stack';
+  "id,nickname,position,introduction,git_url,linked_url,blog_url";
 
 // ── 내부 헬퍼: DB row → API 응답 형태 변환 ────────────────
 function formatUser(row: Record<string, unknown>) {
@@ -15,19 +18,18 @@ function formatUser(row: Record<string, unknown>) {
     git_url: row.git_url ?? null,
     linked_url: row.linked_url ?? null,
     blog_url: row.blog_url ?? null,
-    stack: Array.isArray(row.stack) ? row.stack : [],
   };
 }
 
 // ── GET /users/me ─────────────────────────────────────────
 export const getMe = async (userId: number) => {
   const { data, error } = await supabase
-    .from('users')
+    .from("users")
     .select(USER_PUBLIC_SELECT)
-    .eq('id', userId)
+    .eq("id", userId)
     .single();
 
-  if (error || !data) throw new AppError(404, '유저를 찾을 수 없습니다');
+  if (error || !data) throw new AppError(404, "유저를 찾을 수 없습니다");
   return formatUser(data as Record<string, unknown>);
 };
 
@@ -36,23 +38,23 @@ export const updateMe = async (userId: number, input: UpdateUserBody) => {
   // 닉네임 변경 시 중복 검사
   if (input.nickname) {
     const { data: dup } = await supabase
-      .from('users')
-      .select('id')
-      .eq('nickname', input.nickname)
-      .neq('id', userId)
+      .from("users")
+      .select("id")
+      .eq("nickname", input.nickname)
+      .neq("id", userId)
       .maybeSingle();
 
-    if (dup) throw new AppError(409, '이미 사용 중인 닉네임입니다');
+    if (dup) throw new AppError(409, "이미 사용 중인 닉네임입니다");
   }
 
   const { data, error } = await supabase
-    .from('users')
+    .from("users")
     .update({ ...input, updated_at: new Date().toISOString() })
-    .eq('id', userId)
+    .eq("id", userId)
     .select(USER_PUBLIC_SELECT)
     .single();
 
-  if (error || !data) throw new AppError(500, '프로필 수정에 실패했습니다');
+  if (error || !data) throw new AppError(500, "프로필 수정에 실패했습니다");
   return formatUser(data as Record<string, unknown>);
 };
 
@@ -64,27 +66,42 @@ export const getMyPosts = async (userId: number, query: PaginationQuery) => {
   // resume_posts 와 project_posts 를 합쳐서 반환
   const [resumeRes, projectRes] = await Promise.all([
     supabase
-      .from('resume_posts')
-      .select('id,title,description,thumbnail,like,position,created_at', { count: 'exact' })
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false })
+      .from("resume_posts")
+      .select("id,title,description,thumbnail,likes,position,created_at", {
+        count: "exact",
+      })
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
       .range(from, to),
     supabase
-      .from('project_posts')
-      .select('id,title,description,thumbnail,like,position,created_at', { count: 'exact' })
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false })
+      .from("project_posts")
+      .select("id,title,description,thumbnail,likes,position,created_at", {
+        count: "exact",
+      })
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
       .range(from, to),
   ]);
 
   if (resumeRes.error || projectRes.error) {
-    throw new AppError(500, '내가 쓴 글 조회에 실패했습니다');
+    throw new AppError(500, "내가 쓴 글 조회에 실패했습니다");
   }
 
   const posts = [
-    ...(resumeRes.data ?? []).map((p) => ({ ...p, post_id: p.id, type: '이력서' })),
-    ...(projectRes.data ?? []).map((p) => ({ ...p, post_id: p.id, type: '프로젝트' })),
-  ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    ...(resumeRes.data ?? []).map((p) => ({
+      ...p,
+      post_id: p.id,
+      type: "이력서",
+    })),
+    ...(projectRes.data ?? []).map((p) => ({
+      ...p,
+      post_id: p.id,
+      type: "프로젝트",
+    })),
+  ].sort(
+    (a, b) =>
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+  );
 
   return {
     posts,
@@ -99,16 +116,13 @@ export const getMyComments = async (userId: number, query: PaginationQuery) => {
   const to = from + query.size - 1;
 
   const { data, error, count } = await supabase
-    .from('comments')
-    .select(
-      'id,content,post_id,post_type,created_at,like',
-      { count: 'exact' },
-    )
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false })
+    .from("comments")
+    .select("id,content,post_id,post_type,created_at", { count: "exact" })
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
     .range(from, to);
 
-  if (error) throw new AppError(500, '작성한 댓글 조회에 실패했습니다');
+  if (error) throw new AppError(500, "작성한 댓글 조회에 실패했습니다");
 
   return {
     comments: data ?? [],
@@ -123,16 +137,17 @@ export const getMyLikes = async (userId: number, query: PaginationQuery) => {
   const to = from + query.size - 1;
 
   const { data, error, count } = await supabase
-    .from('project_post_likes')
+    .from("likes")
     .select(
-      'post_id, project_posts(id,title,description,thumbnail,like,position,created_at,user:users(id,nickname))',
-      { count: 'exact' },
+      "post_id, project_posts(id,title,description,thumbnail,likes,position,created_at,user:users(id,nickname))",
+      { count: "exact" },
     )
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false })
+    .eq("user_id", userId)
+    .eq("post_type", "project")
+    .order("created_at", { ascending: false })
     .range(from, to);
 
-  if (error) throw new AppError(500, '좋아요 목록 조회에 실패했습니다');
+  if (error) throw new AppError(500, "좋아요 목록 조회에 실패했습니다");
 
   return {
     posts: (data ?? []).map((row: any) => row.project_posts).filter(Boolean),
@@ -144,11 +159,11 @@ export const getMyLikes = async (userId: number, query: PaginationQuery) => {
 // ── GET /users/:user_id ───────────────────────────────────
 export const getUserById = async (userId: number) => {
   const { data, error } = await supabase
-    .from('users')
+    .from("users")
     .select(USER_PUBLIC_SELECT)
-    .eq('id', userId)
+    .eq("id", userId)
     .single();
 
-  if (error || !data) throw new AppError(404, '유저를 찾을 수 없습니다');
+  if (error || !data) throw new AppError(404, "유저를 찾을 수 없습니다");
   return formatUser(data as Record<string, unknown>);
 };

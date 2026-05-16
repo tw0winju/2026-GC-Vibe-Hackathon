@@ -19,7 +19,7 @@ type ProjectPostInput = {
 };
 
 const PROJECT_POST_SELECT =
-  "id,title,description,file_url,thumbnail,like,position,created_at,user:users(id,nickname)";
+  "id,title,description,file_url,thumbnail,likes,position,created_at,user:users(id,nickname)";
 
 export const listProjectPosts = async (query: ListProjectPostsInput) => {
   const from = (query.page - 1) * query.size;
@@ -66,7 +66,7 @@ export const createProjectPost = async (
       tag: input.tag,
       like: 0,
     })
-    .select("id,title,description,file_url,thumbnail,like,position,created_at")
+    .select("id,title,description,file_url,thumbnail,likes,position,created_at")
     .single();
 
   if (error || !data) {
@@ -80,7 +80,7 @@ export const getProjectPost = async (postId: number) => {
   const { data: post, error } = await supabase
     .from("project_posts")
     .select(
-      "id,title,description,file_url,thumbnail,like,position,tag,created_at,updated_at,user:users(id,nickname,position)",
+      "id,title,description,thumbnail,likes,position,tag,created_at,updated_at,user:users(id,nickname,position)",
     )
     .eq("id", postId)
     .single();
@@ -117,7 +117,7 @@ export const updateProjectPost = async (
     .update(input)
     .eq("id", postId)
     .select(
-      "id,title,description,file_url,thumbnail,like,position,tag,updated_at",
+      "id,title,description,file_url,thumbnail,likes,position,tag,updated_at",
     )
     .single();
 
@@ -132,7 +132,7 @@ export const deleteProjectPost = async (postId: number, userId: number) => {
   await assertProjectPostOwner(postId, userId);
 
   await supabase.from("comments").delete().eq("post_id", postId);
-  await supabase.from("project_post_likes").delete().eq("post_id", postId);
+  await supabase.from("likes").delete().eq("post_type", "project").eq("post_id", postId);
 
   const { error } = await supabase
     .from("project_posts")
@@ -157,8 +157,9 @@ export const likeProjectPost = async (postId: number, userId: number) => {
   }
 
   const { data: likedRow, error: likeReadError } = await supabase
-    .from("project_post_likes")
+    .from("likes")
     .select("id")
+    .eq("post_type", "project")
     .eq("post_id", postId)
     .eq("user_id", userId)
     .maybeSingle();
@@ -173,9 +174,10 @@ export const likeProjectPost = async (postId: number, userId: number) => {
     : Math.max(Number(post.like ?? 0) - 1, 0);
 
   if (liked) {
-    const { error } = await supabase.from("project_post_likes").insert({
+    const { error } = await supabase.from("likes").insert({
       post_id: postId,
       user_id: userId,
+      post_type: "project",
     });
 
     if (error) {
@@ -183,8 +185,9 @@ export const likeProjectPost = async (postId: number, userId: number) => {
     }
   } else {
     const { error } = await supabase
-      .from("project_post_likes")
+      .from("likes")
       .delete()
+      .eq("post_type", "project")
       .eq("post_id", postId)
       .eq("user_id", userId);
 
@@ -195,7 +198,7 @@ export const likeProjectPost = async (postId: number, userId: number) => {
 
   const { data, error } = await supabase
     .from("project_posts")
-    .update({ like: nextLike })
+    .update({ likes: nextLike })
     .eq("id", postId)
     .select("like")
     .single();
@@ -204,7 +207,7 @@ export const likeProjectPost = async (postId: number, userId: number) => {
     throw new AppError(500, "프로젝트 게시글 좋아요 처리에 실패했습니다.");
   }
 
-  return { like: data.like, liked };
+  return { like: data.likes, liked };
 };
 
 async function assertProjectPostOwner(postId: number, userId: number) {

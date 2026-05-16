@@ -11,7 +11,6 @@ export const UserProfileSchema = z
     git_url: z.string().nullable(),
     linked_url: z.string().nullable(),
     blog_url: z.string().nullable(),
-    stack: z.array(z.string()),
   })
   .openapi('UserProfile');
 
@@ -27,7 +26,6 @@ export const UpdateUserSchema = z
     git_url: z.string().url().optional().nullable(),
     linked_url: z.string().url().optional().nullable(),
     blog_url: z.string().url().optional().nullable(),
-    stack: z.array(z.string()).optional(),
   })
   .openapi('UpdateUserRequest');
 
