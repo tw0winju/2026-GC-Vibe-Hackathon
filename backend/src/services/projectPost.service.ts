@@ -94,7 +94,6 @@ export const getProjectPost = async (postId: number) => {
     .select(
       "id,user_id,content,comment_parent_id,created_at,user:users(id,nickname)",
     )
-    .eq("post_type", "project")
     .eq("post_id", postId)
     .order("created_at", { ascending: true });
 
@@ -131,11 +130,7 @@ export const updateProjectPost = async (
 export const deleteProjectPost = async (postId: number, userId: number) => {
   await assertProjectPostOwner(postId, userId);
 
-  await supabase
-    .from("comments")
-    .delete()
-    .eq("post_type", "project")
-    .eq("post_id", postId);
+  await supabase.from("comments").delete().eq("post_id", postId);
   await supabase.from("project_post_likes").delete().eq("post_id", postId);
 
   const { error } = await supabase

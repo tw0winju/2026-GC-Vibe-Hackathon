@@ -11,11 +11,6 @@ import storageRouter from "./routes/storage.route.js";
 
 import { env } from "./config/env.js";
 
-// dotenv.config() 제거 (env.ts에서 이미 호출함)
-
-// 환경변수 로드
-dotenv.config();
-
 // Express 앱 생성
 const app = express();
 const PORT = env.PORT;
@@ -37,6 +32,7 @@ app.get("/health", (_req, res) => {
 // Swagger보다 먼저 라우트 import (registerPath 실행되도록)
 app.use("/api/auth", authRouter);
 app.use("/auth", authRouter);
+app.use("/api/storage", storageRouter);
 app.use("/storage", storageRouter);
 app.use("/api/project-posts", projectPostRouter);
 app.use("/project-posts", projectPostRouter);
