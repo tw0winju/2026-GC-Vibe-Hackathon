@@ -11,17 +11,19 @@ import {
   ThumbsUp,
   UserRound,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
 import { ROUTES } from "../../../app/routes";
 import AppLayout from "../../../components/layout/AppLayout";
 import {
-  dashboardLikedPosts,
-  dashboardPopularFeedbacks,
-  dashboardProfile,
-  dashboardRecentPosts,
-  dashboardStats,
-} from "../../../mocks/data/dashboard";
+  adaptFrontPostType,
+  getMe,
+  getMyLikes,
+  getMyPosts,
+  getProjectPosts,
+  getResumePosts,
+} from "../../../lib/api/devfeedback";
 import {
   type DashboardLikedPost,
   type DashboardPopularFeedback,
@@ -109,13 +111,100 @@ function LikedPost({ post }: { post: DashboardLikedPost }) {
   );
 }
 
+function formatDate(value?: string) {
+  if (!value) {
+    return "";
+  }
+
+  return new Intl.DateTimeFormat("ko-KR", {
+    month: "numeric",
+    day: "numeric",
+  }).format(new Date(value));
+}
+
 function DashboardPage() {
   const location = useLocation();
-  const profile = dashboardProfile;
-  const stats = dashboardStats;
-  const recentPosts = dashboardRecentPosts;
-  const popularFeedbacks = dashboardPopularFeedbacks;
-  const likedPosts = dashboardLikedPosts;
+  const [profile, setProfile] = useState({
+    name: "",
+    bio: "",
+    githubUrl: "",
+    blogUrl: "",
+    techStacks: [] as string[],
+  });
+  const [stats, setStats] = useState({
+    resumePostCount: 0,
+    projectPostCount: 0,
+    likedPostCount: 0,
+    commentCount: 0,
+  });
+  const [recentPosts, setRecentPosts] = useState<DashboardPost[]>([]);
+  const [popularFeedbacks, setPopularFeedbacks] = useState<DashboardPopularFeedback[]>([]);
+  const [likedPosts, setLikedPosts] = useState<DashboardLikedPost[]>([]);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    Promise.all([
+      getMe(),
+      getMyPosts({ page: 1, size: 3 }),
+      getMyLikes({ page: 1, size: 3 }),
+      getResumePosts({ page: 1, size: 3, sort: "like" }),
+      getProjectPosts({ page: 1, size: 2, sort: "like" }),
+    ])
+      .then(([me, myPosts, myLikes, resumePopular, projectPopular]) => {
+        setProfile({
+          name: me.nickname,
+          bio: me.introduction ?? "",
+          githubUrl: me.git_url ?? "",
+          blogUrl: me.blog_url ?? "",
+          techStacks: me.tag ?? [],
+        });
+        setStats({
+          resumePostCount: me.counts.resume_post,
+          projectPostCount: me.counts.project_post,
+          likedPostCount: me.counts.like,
+          commentCount: me.counts.comment,
+        });
+        setRecentPosts(myPosts.posts.map((post) => ({
+          id: post.post_id,
+          type: adaptFrontPostType(post.type),
+          title: post.title,
+          description: post.description,
+          created_at: formatDate(post.created_at),
+          likes: post.likes,
+        })));
+        setLikedPosts(myLikes.posts.map((post) => ({
+          id: post.post_id,
+          type: adaptFrontPostType(post.type),
+          title: post.title,
+          position: post.position,
+          created_at: formatDate(post.created_at),
+        })));
+        setPopularFeedbacks(
+          [
+            ...resumePopular.posts.map((post) => ({
+              id: post.id,
+              type: "RESUME" as const,
+              title: post.title,
+              position: post.position,
+              likes: post.likes,
+            })),
+            ...projectPopular.posts.map((post) => ({
+              id: post.id,
+              type: "PROJECT" as const,
+              title: post.title,
+              position: post.position,
+              likes: post.likes,
+            })),
+          ]
+            .sort((a, b) => (b.likes ?? 0) - (a.likes ?? 0))
+            .slice(0, 5)
+            .map((item, index) => ({ ...item, rank: index + 1 })),
+        );
+      })
+      .catch((error) => {
+        setErrorMessage(error instanceof Error ? error.message : "대시보드 정보를 불러오지 못했습니다.");
+      });
+  }, []);
 
   return (
     <AppLayout>
@@ -145,19 +234,19 @@ function DashboardPage() {
         <div className="dashboard-content">
           <section className="dashboard-profile-card">
             <div className="dashboard-avatar">
-              {profile.avatarUrl ? <img src={profile.avatarUrl} alt="" /> : <UserRound size={62} />}
+              <UserRound size={62} />
             </div>
             <div className="dashboard-profile-main">
               <div className="dashboard-profile-heading">
                 <h1>{profile.name}</h1>
-                <span>{profile.major} {profile.grade}</span>
+                <span>백엔드 미지원: 학교/학년</span>
               </div>
               <p>{profile.bio}</p>
               <div className="dashboard-profile-grid">
                 <ProfileValue icon={Code} text={profile.githubUrl} />
-                <ProfileValue icon={Mail} text={profile.email} />
+                <ProfileValue icon={Mail} text="" />
                 <ProfileValue icon={Bookmark} text={profile.blogUrl} />
-                <ProfileValue icon={MapPin} text={profile.location} />
+                <ProfileValue icon={MapPin} text="" />
               </div>
               <div className="dashboard-tech-stack" aria-label="테크스택">
                 <strong>테크스택</strong>
@@ -183,6 +272,7 @@ function DashboardPage() {
               <Link to={ROUTES.mypage}>전체 보기</Link>
             </div>
             <div className="dashboard-recent-list">
+              {errorMessage && <p>{errorMessage}</p>}
               {recentPosts.map((post) => (
                 <RecentPost post={post} key={post.id} />
               ))}

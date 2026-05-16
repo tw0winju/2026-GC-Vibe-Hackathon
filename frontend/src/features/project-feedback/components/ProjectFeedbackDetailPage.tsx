@@ -1,33 +1,31 @@
+import { FormEvent, useEffect, useState } from "react";
 import {
   Code2,
   Edit3,
-  ExternalLink,
-  FileImage,
   GitBranch,
   Heart,
   Lightbulb,
   MessageSquare,
-  MoreHorizontal,
   Rocket,
   SearchCheck,
   ShieldCheck,
   UserRoundCheck,
 } from "lucide-react";
-import { Link, Navigate, useParams } from "react-router-dom";
+import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 
 import { ROUTES } from "../../../app/routes";
 import AppLayout from "../../../components/layout/AppLayout";
 import {
-  projectFeedbackDetailsByPostId,
-  projectFeedbackFallbackDetail,
-} from "../../../mocks/data/feedbackDetails";
+  createProjectComment,
+  deleteProjectPost,
+  getProjectComments,
+  getProjectPost,
+  toggleProjectLike,
+  type CommentNode,
+  type ProjectPost,
+} from "../../../lib/api/devfeedback";
 import { projectSidebarGuides } from "../../../mocks/data/feedbackPageContent";
-import { getMockComments } from "../../../mocks/data/comments";
-import { projectFeedbackPosts } from "../../../mocks/data/projectFeedbacks";
-import { getMockUserById } from "../../../mocks/data/users";
 import "./ProjectFeedbackDetailPage.css";
-
-const CURRENT_USER_ID = 101;
 
 const contentIconByKey = {
   branch: GitBranch,
@@ -48,17 +46,17 @@ function ProjectDetailSidebar() {
           const Icon = contentIconByKey[icon];
 
           return (
-          <section className="project-detail-sidebar__guide-card" key={title}>
-            <div>
-              <Icon size={18} strokeWidth={2.2} />
-              <h3>{title}</h3>
-            </div>
-            <ul>
-              {items.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </section>
+            <section className="project-detail-sidebar__guide-card" key={title}>
+              <div>
+                <Icon size={18} strokeWidth={2.2} />
+                <h3>{title}</h3>
+              </div>
+              <ul>
+                {items.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </section>
           );
         })}
       </div>
@@ -68,16 +66,64 @@ function ProjectDetailSidebar() {
 
 function ProjectFeedbackDetailPage() {
   const { id } = useParams();
-  const post = projectFeedbackPosts.find((item) => item.id === Number(id));
+  const navigate = useNavigate();
+  const postId = Number(id);
+  const [post, setPost] = useState<ProjectPost | null>(null);
+  const [comments, setComments] = useState<CommentNode[]>([]);
+  const [commentContent, setCommentContent] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  if (!post) {
+  useEffect(() => {
+    if (!postId) return;
+    let mounted = true;
+    setIsLoading(true);
+    setErrorMessage("");
+
+    Promise.all([getProjectPost(postId), getProjectComments(postId)])
+      .then(([postResponse, commentsResponse]) => {
+        if (!mounted) return;
+        setPost(postResponse);
+        setComments(commentsResponse.comments);
+      })
+      .catch((error) => {
+        if (!mounted) return;
+        setErrorMessage(error instanceof Error ? error.message : "게시글을 불러오지 못했습니다.");
+      })
+      .finally(() => {
+        if (mounted) setIsLoading(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [postId]);
+
+  if (!postId) {
     return <Navigate to={ROUTES.projectFeedbacks} replace />;
   }
 
-  const isAuthor = post.user_id === CURRENT_USER_ID;
-  const detail = projectFeedbackDetailsByPostId[post.id] ?? projectFeedbackFallbackDetail;
-  const author = getMockUserById(post.user_id);
-  const comments = getMockComments("PROJECT", post.id);
+  const handleLike = () => {
+    toggleProjectLike(postId).then((response) => {
+      setPost((current) => current ? { ...current, likes: response.likes } : current);
+    });
+  };
+
+  const handleDelete = () => {
+    if (!window.confirm("게시글을 삭제할까요?")) return;
+    deleteProjectPost(postId).then(() => navigate(ROUTES.projectFeedbacks));
+  };
+
+  const handleCommentSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const content = commentContent.trim();
+    if (!content) return;
+
+    createProjectComment(postId, content).then((created) => {
+      setComments((current) => [...current, { ...created, replies: [] }]);
+      setCommentContent("");
+    });
+  };
 
   return (
     <AppLayout>
@@ -85,121 +131,85 @@ function ProjectFeedbackDetailPage() {
         <ProjectDetailSidebar />
 
         <section className="project-detail-content">
-          {isAuthor && (
-            <div className="project-detail-actions" aria-label="작성자 작업">
-              <Link to={`/project-feedbacks/${post.id}/edit`}>수정</Link>
-              <button type="button">삭제</button>
-            </div>
-          )}
+          {isLoading && <article className="project-detail-card">불러오는 중입니다.</article>}
+          {errorMessage && <article className="project-detail-card">{errorMessage}</article>}
 
-          <article className="project-detail-card">
-            <div className="project-detail-tags">
-              <span>프로젝트</span>
-              <span>{post.position}</span>
-            </div>
-
-            <h1>{post.title}</h1>
-
-            <div className="project-detail-meta">
-              <span className="project-detail-avatar">
-                <UserRoundCheck size={18} />
-              </span>
-              <div>
-                <strong>{author?.nickname ?? "사용자"}</strong>
-                <span>{post.position} · 프로젝트 작성자</span>
+          {post && !isLoading && !errorMessage && (
+            <>
+              <div className="project-detail-actions" aria-label="작성자 작업">
+                <Link to={`/project-feedbacks/${post.id}/edit`}>수정</Link>
+                <button type="button" onClick={handleDelete}>삭제</button>
               </div>
-              <time>{formatProjectDateTime(post.created_at)}</time>
-              <span>좋아요 {post.likes}</span>
-              <span>피드백 {comments.length}</span>
-            </div>
 
-            <div className="project-detail-tools">
-              <button type="button">
-                <Heart size={18} />
-                좋아요
-              </button>
-              <button type="button" aria-label="더 보기">
-                <MoreHorizontal size={18} />
-              </button>
-            </div>
-
-            <section className="project-detail-section">
-              <h2>프로젝트 소개</h2>
-              <p>{post.description}</p>
-            </section>
-
-            <section className="project-detail-section">
-              <h2>주요 기능</h2>
-              <ul className="project-feature-list">
-                {detail.features.map((feature) => (
-                  <li key={feature}>{feature}</li>
-                ))}
-              </ul>
-            </section>
-
-            <section className="project-detail-section">
-              <h2>기술 스택</h2>
-              <div className="project-stack-list">
-                {detail.stacks.map((stack) => (
-                  <span key={stack}>{stack}</span>
-                ))}
-              </div>
-            </section>
-
-            <section className="project-detail-section">
-              <h2>추가로 받고 싶은 피드백</h2>
-              <p>{detail.request}</p>
-            </section>
-
-            <section className="project-reference-section">
-              <h2>참고 자료</h2>
-              <div className="project-link-box">
-                <ExternalLink size={18} />
-                <strong>{detail.link}</strong>
-                <a href={detail.link} target="_blank" rel="noreferrer">
-                  열기
-                </a>
-              </div>
-              <div className="project-image-box">
-                <FileImage size={18} />
-                <div>
-                  <strong>프로젝트 화면 및 구조 참고 이미지</strong>
-                  <span>첨부 이미지 미리보기 영역</span>
+              <article className="project-detail-card">
+                <div className="project-detail-tags">
+                  <span>프로젝트</span>
+                  <span>{post.position}</span>
                 </div>
-              </div>
-            </section>
-          </article>
 
-          <section className="project-comments">
-            <div className="project-comments__header">
-              <h2>피드백 {comments.length}</h2>
-            </div>
+                <h1>{post.title}</h1>
 
-            <div className="project-comment-list">
-              {comments.map((comment) => {
-                const commentAuthor = getMockUserById(comment.user_id);
-
-                return (
-                <article className="project-comment" key={comment.id}>
-                  <span className="project-comment__avatar">
+                <div className="project-detail-meta">
+                  <span className="project-detail-avatar">
                     <UserRoundCheck size={18} />
                   </span>
                   <div>
-                    <div className="project-comment__meta">
-                      <strong>{commentAuthor?.nickname ?? "사용자"}</strong>
-                      <time>{comment.created_at}</time>
-                    </div>
-                    <p>{comment.content}</p>
-                    <div className="project-comment__actions">
-                      <button type="button">댓글 달기</button>
-                      <button type="button">신고</button>
-                    </div>
+                    <strong>{post.user?.nickname ?? "사용자"}</strong>
+                    <span>{post.user?.position ?? post.position} · 프로젝트 작성자</span>
                   </div>
-                </article>
-                );
-              })}
-            </div>
-          </section>
+                  <time>{formatProjectDateTime(post.created_at)}</time>
+                  <span>좋아요 {post.likes}</span>
+                  <span>피드백 {comments.length}</span>
+                </div>
+
+                <div className="project-detail-tools">
+                  <button type="button" onClick={handleLike}>
+                    <Heart size={18} />
+                    좋아요
+                  </button>
+                </div>
+
+                <section className="project-detail-section">
+                  <h2>프로젝트 소개</h2>
+                  <p>{post.description}</p>
+                </section>
+
+                {post.tag.length > 0 && (
+                  <section className="project-detail-section">
+                    <h2>기술 스택</h2>
+                    <div className="project-stack-list">
+                      {post.tag.map((stack) => (
+                        <span key={stack}>{stack}</span>
+                      ))}
+                    </div>
+                  </section>
+                )}
+              </article>
+
+              <section className="project-comments">
+                <div className="project-comments__header">
+                  <h2>피드백 {comments.length}</h2>
+                </div>
+
+                <form className="project-comment-list" onSubmit={handleCommentSubmit}>
+                  <textarea
+                    aria-label="댓글 내용"
+                    maxLength={1000}
+                    placeholder="댓글을 입력하세요."
+                    value={commentContent}
+                    onChange={(event) => setCommentContent(event.target.value)}
+                  />
+                  <button disabled={!commentContent.trim()} type="submit">댓글 작성</button>
+                </form>
+
+                <div className="project-comment-list">
+                  {comments.map((comment) => (
+                    <CommentArticle comment={comment} key={comment.comment_id} />
+                  ))}
+                </div>
+              </section>
+            </>
+          )}
         </section>
 
         <aside className="project-detail-aside" aria-label="상세 도움말">
@@ -229,18 +239,29 @@ function ProjectFeedbackDetailPage() {
               </article>
             </div>
           </section>
-
-          <section className="project-detail-side-card">
-            <h2>관련 태그</h2>
-            <div className="project-related-tags">
-              {[post.position, ...detail.stacks].map((tag) => (
-                <span key={tag}>{tag}</span>
-              ))}
-            </div>
-          </section>
         </aside>
       </div>
     </AppLayout>
+  );
+}
+
+function CommentArticle({ comment }: { comment: CommentNode }) {
+  return (
+    <article className="project-comment">
+      <span className="project-comment__avatar">
+        <UserRoundCheck size={18} />
+      </span>
+      <div>
+        <div className="project-comment__meta">
+          <strong>{comment.user.nickname}</strong>
+          <time>{formatProjectDateTime(comment.created_at)}</time>
+        </div>
+        <p>{comment.content}</p>
+        {comment.replies?.map((reply) => (
+          <CommentArticle comment={reply} key={reply.comment_id} />
+        ))}
+      </div>
+    </article>
   );
 }
 

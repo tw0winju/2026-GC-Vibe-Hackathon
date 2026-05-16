@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -16,9 +16,8 @@ import { Link } from "react-router-dom";
 
 import { ROUTES } from "../../../app/routes";
 import AppLayout from "../../../components/layout/AppLayout";
+import { getProjectPosts, type ProjectPost } from "../../../lib/api/devfeedback";
 import { projectSidebarGuides, projectTips } from "../../../mocks/data/feedbackPageContent";
-import { projectFeedbackPosts } from "../../../mocks/data/projectFeedbacks";
-import { getMockUserById } from "../../../mocks/data/users";
 import {
   PROJECT_FEEDBACK_CATEGORIES,
   type ProjectFeedbackCategory,
@@ -41,32 +40,51 @@ function ProjectFeedbackPage() {
   const [sort, setSort] = useState<ProjectFeedbackSort>("likes");
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
+  const [posts, setPosts] = useState<ProjectPost[]>([]);
+  const [popularPosts, setPopularPosts] = useState<ProjectPost[]>([]);
+  const [total, setTotal] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const filteredPosts = useMemo(() => {
-    const normalizedQuery = searchQuery.trim().toLowerCase();
-    const postsByCategory =
-      selectedCategory === "전체"
-        ? [...projectFeedbackPosts]
-        : projectFeedbackPosts.filter((post) => post.position === selectedCategory);
+  useEffect(() => {
+    let mounted = true;
+    setIsLoading(true);
+    setErrorMessage("");
 
-    const posts = normalizedQuery
-      ? postsByCategory.filter((post) =>
-          [post.title, post.description, getMockUserById(post.user_id)?.nickname, post.position]
-            .join(" ")
-            .toLowerCase()
-            .includes(normalizedQuery),
-        )
-      : postsByCategory;
+    getProjectPosts({
+      page,
+      size: PAGE_SIZE,
+      position: selectedCategory === "전체" ? undefined : selectedCategory,
+      sort: sort === "likes" ? "like" : "latest",
+      keyword: searchQuery.trim() || undefined,
+    })
+      .then((response) => {
+        if (!mounted) return;
+        setPosts(response.posts);
+        setTotal(response.total);
+      })
+      .catch((error) => {
+        if (!mounted) return;
+        setPosts([]);
+        setTotal(0);
+        setErrorMessage(error instanceof Error ? error.message : "프로젝트 목록을 불러오지 못했습니다.");
+      })
+      .finally(() => {
+        if (mounted) setIsLoading(false);
+      });
 
-    return posts.sort((a, b) => {
-      if (sort === "latest") return (b.created_at ?? "").localeCompare(a.created_at ?? "");
-      return b.likes - a.likes;
-    });
-  }, [searchQuery, selectedCategory, sort]);
+    return () => {
+      mounted = false;
+    };
+  }, [page, searchQuery, selectedCategory, sort]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredPosts.length / PAGE_SIZE));
-  const paginatedPosts = filteredPosts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-  const popularPosts = [...projectFeedbackPosts].sort((a, b) => b.likes - a.likes).slice(0, 5);
+  useEffect(() => {
+    getProjectPosts({ page: 1, size: 5, sort: "like" })
+      .then((response) => setPopularPosts(response.posts))
+      .catch(() => setPopularPosts([]));
+  }, []);
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   const handleCategoryChange = (category: ProjectFeedbackCategory) => {
     setSelectedCategory(category);
@@ -125,7 +143,7 @@ function ProjectFeedbackPage() {
             <Search size={18} strokeWidth={2.2} />
             <input
               id="project-feedback-search"
-              placeholder="제목, 내용, 작성자 검색"
+              placeholder="제목, 내용 검색"
               value={searchQuery}
               onChange={(event) => handleSearchChange(event.target.value)}
             />
@@ -174,7 +192,10 @@ function ProjectFeedbackPage() {
               <span>좋아요</span>
             </div>
 
-            {paginatedPosts.map((post) => (
+            {isLoading && <div className="project-empty" role="row">불러오는 중입니다.</div>}
+            {errorMessage && <div className="project-empty" role="row">{errorMessage}</div>}
+
+            {!isLoading && !errorMessage && posts.map((post) => (
               <Link className="project-row" key={post.id} to={`/project-feedbacks/${post.id}`} role="row">
                 <div className="project-row__title">
                   <strong>{post.title}</strong>
@@ -186,7 +207,7 @@ function ProjectFeedbackPage() {
                   <span className="project-row__avatar">
                     <UserRoundCheck size={16} strokeWidth={2.3} />
                   </span>
-                  {getMockUserById(post.user_id)?.nickname ?? "사용자"}
+                  {post.user?.nickname ?? "사용자"}
                 </span>
                 <span className="project-row__stats">
                   <Heart size={17} strokeWidth={2.1} />
@@ -195,7 +216,7 @@ function ProjectFeedbackPage() {
               </Link>
             ))}
 
-            {paginatedPosts.length === 0 && (
+            {!isLoading && !errorMessage && posts.length === 0 && (
               <div className="project-empty" role="row">
                 검색 결과가 없습니다.
               </div>

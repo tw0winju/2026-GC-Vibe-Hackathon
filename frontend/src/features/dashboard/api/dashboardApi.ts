@@ -1,5 +1,3 @@
-import { apiRequest } from "../../../lib/api/client";
-
 export type DashboardFeedbackType = "RESUME" | "PROJECT" | string;
 
 export type DashboardProfile = {
@@ -55,7 +53,3 @@ export type DashboardResponse = {
   popularFeedbacks?: DashboardPopularFeedback[];
   likedPosts?: DashboardLikedPost[];
 };
-
-export function getDashboard() {
-  return apiRequest<DashboardResponse>("/api/me/dashboard");
-}

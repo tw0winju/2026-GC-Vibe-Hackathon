@@ -12,16 +12,19 @@ import { Link, useNavigate } from "react-router-dom";
 
 import { ROUTES } from "../../../app/routes";
 import AppLayout from "../../../components/layout/AppLayout";
+import {
+  createResumePost,
+  getUploadUrl,
+  uploadFileToSignedUrl,
+} from "../../../lib/api/devfeedback";
 import { RESUME_FEEDBACK_CATEGORIES, type ResumeFeedbackCategory } from "../model/resumeFeedback";
 import "./ResumeFeedbackWritePage.css";
-
-type Visibility = "public" | "followers";
 
 type ResumePostCreatePayload = {
   title: string;
   description: string;
   file_url: string;
-  thumbnail: string;
+  thumbnail?: string;
   position: Exclude<ResumeFeedbackCategory, "전체">;
 };
 
@@ -97,9 +100,8 @@ function ResumeFeedbackWritePage() {
   const [position, setPosition] = useState<"" | Exclude<ResumeFeedbackCategory, "전체">>("");
   const [description, setDescription] = useState("");
   const [file, setFile] = useState<File | null>(null);
-  const [visibility, setVisibility] = useState<Visibility>("public");
-  const [tags, setTags] = useState<string[]>([]);
-  const [tagInput, setTagInput] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const canSubmit = Boolean(title.trim() && position && description.trim() && file);
   const writingSteps = useMemo<WritingStep[]>(
@@ -136,34 +138,43 @@ function ResumeFeedbackWritePage() {
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
     if (!selectedFile) return;
+    if (selectedFile.type !== "application/pdf") {
+      setErrorMessage("백엔드 명세상 이력서 업로드는 PDF만 지원합니다.");
+      return;
+    }
     setFile(selectedFile);
+    setErrorMessage("");
   };
 
-  const handleTagKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key !== "Enter") return;
-    event.preventDefault();
-
-    const nextTag = tagInput.trim().replace(/^#/, "");
-    if (!nextTag || tags.includes(nextTag) || tags.length >= 5) return;
-
-    setTags((current) => [...current, nextTag]);
-    setTagInput("");
-  };
-
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!canSubmit || !position || !file) return;
 
-    const payload: ResumePostCreatePayload = {
-      title: title.trim(),
-      description: description.trim(),
-      file_url: file.name,
-      thumbnail: "",
-      position,
-    };
+    setIsSubmitting(true);
+    setErrorMessage("");
 
-    console.log("POST /resume-posts payload", payload);
-    navigate(ROUTES.resumeFeedbacks);
+    try {
+      const upload = await getUploadUrl({
+        type: "resume",
+        filename: file.name,
+        mime_type: file.type,
+      });
+      await uploadFileToSignedUrl(upload.upload_url, file);
+
+      const payload: ResumePostCreatePayload = {
+        title: title.trim(),
+        description: description.trim(),
+        file_url: upload.file_path,
+        position,
+      };
+
+      await createResumePost(payload);
+      navigate(ROUTES.resumeFeedbacks);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "이력서 피드백 글 작성에 실패했습니다.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -214,11 +225,11 @@ function ResumeFeedbackWritePage() {
               <label className="resume-file-dropzone" htmlFor="resume-file">
                 <Upload size={30} strokeWidth={2.1} />
                 <strong>이력서 파일을 드래그하거나 클릭하여 첨부하세요</strong>
-                <span>PDF, DOCX 파일만 가능 (최대 10MB)</span>
+                <span>PDF 파일만 가능</span>
               </label>
               <input
                 id="resume-file"
-                accept=".pdf,.doc,.docx"
+                accept="application/pdf,.pdf"
                 className="resume-file-input"
                 type="file"
                 onChange={handleFileChange}
@@ -251,8 +262,9 @@ function ResumeFeedbackWritePage() {
             </section>
 
             <div className="resume-form-actions">
-              <button disabled={!canSubmit} type="submit">
-                작성 완료
+              {errorMessage && <p>{errorMessage}</p>}
+              <button disabled={!canSubmit || isSubmitting} type="submit">
+                {isSubmitting ? "작성 중..." : "작성 완료"}
               </button>
             </div>
           </form>
