@@ -1,15 +1,14 @@
-const DEFAULT_BASE_URL = "http://localhost:3000";
-
-export const BASE_URL = (import.meta.env.VITE_BASE_URL ?? DEFAULT_BASE_URL).replace(
-  /\/$/,
-  "",
-);
+export const BASE_URL = import.meta.env.VITE_BASE_URL?.replace(/\/$/, "") ?? "";
 
 type RequestOptions = RequestInit & {
   auth?: boolean;
 };
 
 export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  if (!BASE_URL) {
+    throw new Error("VITE_BASE_URL이 설정되지 않았습니다. .env 파일을 확인해주세요.");
+  }
+
   const { auth = true, headers, ...requestOptions } = options;
   const accessToken = localStorage.getItem("access_token");
   const bodyIsFormData = requestOptions.body instanceof FormData;
