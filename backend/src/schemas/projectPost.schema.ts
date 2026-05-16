@@ -18,6 +18,7 @@ export const ProjectPostCreateSchema = z.object({
   file_url: z.string().url().optional(),
   thumbnail: z.string().url().optional(),
   position: z.enum(POSITIONS),
+  tag: z.array(z.string()).default([]),
 });
 
 export const ProjectPostUpdateSchema = ProjectPostCreateSchema.partial();
